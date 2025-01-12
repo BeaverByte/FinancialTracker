@@ -1,0 +1,13 @@
+{
+  "name": "test",
+  "scripts": {
+    "frontend:install": "npm install --prefix frontend",
+    "frontend:start": "npm start --prefix frontend",
+    "frontend:build": "npm run build --prefix frontend",
+    "frontend:test": "npm test --prefix frontend",
+    "backend:start": "cd backend && mvnw.cmd spring-boot:run"
+  },
+  "dependencies": {
+    "test": "file:"
+  }
+}

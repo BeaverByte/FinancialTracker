@@ -1,0 +1,25 @@
+.banner {
+  position: relative;
+  top: 0;
+  width: 100%;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f5c6cb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.banner-text {
+  font-size: 16px;
+}
+
+.banner-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #721c24;
+}
