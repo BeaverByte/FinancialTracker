@@ -81,22 +81,9 @@ public class AuthController {
 
     String jwt = jwtUtils.generateJwtToken(authentication);
     
-    // User returned back
-    // UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
-    // List<String> roles = userDetails.getAuthorities().stream()
-    //     .map(item -> item.getAuthority())
-    //     .collect(Collectors.toList());
-    // List<String> roles = roleService.extractRoles(authentication);
-
     JwtResponse jwtResponse = jwtService.createJwtResponse(jwt, authentication);
 
     return ResponseEntity.ok(jwtResponse);
-
-    // return ResponseEntity.ok(new JwtResponse(jwt, 
-    //                      userDetails.getId(), 
-    //                      userDetails.getUsername(), 
-    //                      userDetails.getEmail(), 
-    //                      roles));
   }
 
   @PostMapping("/signup")
