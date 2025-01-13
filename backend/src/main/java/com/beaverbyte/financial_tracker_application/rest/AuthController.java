@@ -21,17 +21,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
+import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
+import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.entity.ERole;
 import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.entity.User;
-import com.beaverbyte.financial_tracker_application.payload.request.LoginRequest;
-import com.beaverbyte.financial_tracker_application.payload.request.SignupRequest;
-import com.beaverbyte.financial_tracker_application.payload.response.JwtResponse;
-import com.beaverbyte.financial_tracker_application.payload.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
+import com.beaverbyte.financial_tracker_application.service.JwtService;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 import com.beaverbyte.financial_tracker_application.service.UserService;
 
@@ -56,6 +57,9 @@ public class AuthController {
   RoleService roleService;
 
   @Autowired
+  JwtService jwtService;
+
+  @Autowired
   PasswordEncoder encoder;
 
   @Autowired
@@ -78,16 +82,21 @@ public class AuthController {
     String jwt = jwtUtils.generateJwtToken(authentication);
     
     // User returned back
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
-    List<String> roles = userDetails.getAuthorities().stream()
-        .map(item -> item.getAuthority())
-        .collect(Collectors.toList());
+    // UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
+    // List<String> roles = userDetails.getAuthorities().stream()
+    //     .map(item -> item.getAuthority())
+    //     .collect(Collectors.toList());
+    // List<String> roles = roleService.extractRoles(authentication);
 
-    return ResponseEntity.ok(new JwtResponse(jwt, 
-                         userDetails.getId(), 
-                         userDetails.getUsername(), 
-                         userDetails.getEmail(), 
-                         roles));
+    JwtResponse jwtResponse = jwtService.createJwtResponse(jwt, authentication);
+
+    return ResponseEntity.ok(jwtResponse);
+
+    // return ResponseEntity.ok(new JwtResponse(jwt, 
+    //                      userDetails.getId(), 
+    //                      userDetails.getUsername(), 
+    //                      userDetails.getEmail(), 
+    //                      roles));
   }
 
   @PostMapping("/signup")

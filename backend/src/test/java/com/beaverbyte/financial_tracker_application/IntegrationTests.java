@@ -27,10 +27,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.entity.ERole;
 import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.entity.User;
-import com.beaverbyte.financial_tracker_application.payload.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
