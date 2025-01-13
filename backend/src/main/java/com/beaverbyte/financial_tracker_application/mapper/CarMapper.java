@@ -9,23 +9,23 @@ import com.beaverbyte.financial_tracker_application.payload.request.SignupReques
 import java.util.Set;
 
 // @Mapper(componentModel = "spring")
-// @Mapper
-// public interface CarMapper {
+@Mapper
+public interface CarMapper {
 
-//     @Mappings({
-//         @Mapping(source = "model", target = "name"),
-//         @Mapping(source = "year", target = "productionYear")
-//     })
+    @Mappings({
+        @Mapping(source = "model", target = "name"),
+        @Mapping(source = "year", target = "productionYear")
+    })
 
-//     CarDto carToCarDto(Car car);
+    CarDto carToCarDto(Car car);
 
-//     @Named("colorToString")
-//     default String colorToString(Color color) {
-//         return color.name();
-//     }
+    @Named("colorToString")
+    default String colorToString(Color color) {
+        return color.name();
+    }
 
-//     @Named("stringToColor")
-//     default Color stringToColor(String color) {
-//         return Color.valueOf(color);
-//     }
-// }
+    @Named("stringToColor")
+    default Color stringToColor(String color) {
+        return Color.valueOf(color);
+    }
+}
