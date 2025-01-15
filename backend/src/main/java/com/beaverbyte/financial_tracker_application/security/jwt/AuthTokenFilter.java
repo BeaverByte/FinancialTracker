@@ -1,5 +1,7 @@
 package com.beaverbyte.financial_tracker_application.security.jwt;
 
+import static io.restassured.RestAssured.authentication;
+
 import java.io.IOException;
 
 import jakarta.servlet.FilterChain;
@@ -18,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.beaverbyte.financial_tracker_application.security.UserDetailsServiceImpl;
+import com.beaverbyte.financial_tracker_application.service.AuthenticationService;
 
 /**
  * Filters token, validating the token. On success, an user is returned, and set as the principal in Security Context.
@@ -29,6 +32,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Autowired
   private UserDetailsServiceImpl userDetailsService;
+
+  @Autowired
+  private AuthenticationService authenticationService;
 
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
@@ -43,12 +49,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         // userDetails retrieved to create authentication object
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        // UsernamePasswordAuthenticationToken authentication =
+        //     new UsernamePasswordAuthenticationToken(
+        //         userDetails,
+        //         null,
+        //         userDetails.getAuthorities());
+        // authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        UsernamePasswordAuthenticationToken authentication = authenticationService.createAuthenticationToken(userDetails, request);
 
         // SecurityContext updates with User and Authentication related details
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -66,12 +74,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
    * @return JWT token if present and validated, otherwise null
    * */ 
   private String parseJwt(HttpServletRequest request) {
-    String headerAuth = request.getHeader("Authorization");
+    // String headerAuth = request.getHeader("Authorization");
 
-    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-      return headerAuth.substring(7);
-    }
+    // if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+    //   return headerAuth.substring(7);
+    // }
 
-    return null;
+    // return null;
+
+    String jwt = jwtUtils.getJwtFromCookies(request);
+    return jwt;
   }
 }

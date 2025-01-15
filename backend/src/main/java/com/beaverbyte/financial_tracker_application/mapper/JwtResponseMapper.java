@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
 
 import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;

@@ -1,16 +1,13 @@
 package com.beaverbyte.financial_tracker_application;
 
-import static io.restassured.RestAssured.authentication;
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -244,7 +241,7 @@ public class IntegrationTests extends AbstractIntegrationTest{
         .collect(Collectors.toCollection(HashSet::new));
         signUpRequest.setRole(signUpRoles);
 
-        Set<Role> roles = roleService.validateAgainstTable(signUpRoles);
+        // Set<Role> roles = roleService.validateAgainstTable(signUpRoles);
 
         Response response = signUp(signUpRequest);
 

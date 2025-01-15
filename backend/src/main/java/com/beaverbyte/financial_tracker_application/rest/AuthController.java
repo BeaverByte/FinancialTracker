@@ -1,18 +1,20 @@
 package com.beaverbyte.financial_tracker_application.rest;
 
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,14 +27,17 @@ import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest
 import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
-import com.beaverbyte.financial_tracker_application.entity.ERole;
+import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
+import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
 import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
+import com.beaverbyte.financial_tracker_application.security.jwt.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.service.JwtService;
+import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 import com.beaverbyte.financial_tracker_application.service.UserService;
 
@@ -65,6 +70,9 @@ public class AuthController {
   @Autowired
   JwtUtils jwtUtils;
 
+  @Autowired
+  RefreshTokenService refreshTokenService;
+
   /**
    * App consumers sign in and have their request authenticated
    * 
@@ -79,11 +87,31 @@ public class AuthController {
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    String jwt = jwtUtils.generateJwtToken(authentication);
+    // String jwt = jwtUtils.generateJwtToken(authentication);
     
-    JwtResponse jwtResponse = jwtService.createJwtResponse(jwt, authentication);
+    // JwtResponse jwtResponse = jwtService.createJwtResponse(jwt, authentication);
 
-    return ResponseEntity.ok(jwtResponse);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+    List<String> roles = userDetails.getAuthorities().stream()
+        .map(item -> item.getAuthority())
+        .collect(Collectors.toList());
+    
+    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+    
+    ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
+
+    // return ResponseEntity.ok(jwtResponse);
+
+    return ResponseEntity.ok()
+              .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+              .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
+              .body(new UserInfoResponse(userDetails.getId(),
+                                         userDetails.getUsername(),
+                                         userDetails.getEmail(),
+                                         roles));
   }
 
   @PostMapping("/signup")
@@ -105,10 +133,48 @@ public class AuthController {
                encoder.encode(signUpRequest.getPassword()));
 
     Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
-
     user.setRoles(roles);
     userRepository.save(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+  }
+
+ @PostMapping("/signout")
+  public ResponseEntity<?> logoutUser() {
+    Object principle = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (principle.toString() != "anonymousUser") {      
+      Long userId = ((UserDetailsImpl) principle).getId();
+      refreshTokenService.deleteByUserId(userId);
+    }
+    
+    ResponseCookie jwtCookie = jwtUtils.getCleanJwtCookie();
+    ResponseCookie jwtRefreshCookie = jwtUtils.getCleanJwtRefreshCookie();
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+        .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
+        .body(new MessageResponse("You've been signed out!"));
+  }
+
+  @PostMapping("/refreshtoken")
+  public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
+    String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
+    
+    if ((refreshToken != null) && (refreshToken.length() > 0)) {
+      return refreshTokenService.findByToken(refreshToken)
+          .map(refreshTokenService::verifyExpiration)
+          .map(RefreshToken::getUser)
+          .map(user -> {
+            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(user);
+            
+            return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(new MessageResponse("Token is refreshed successfully!"));
+          })
+          .orElseThrow(() -> new TokenRefreshException(refreshToken,
+              "Refresh token is not in database!"));
+    }
+    
+    return ResponseEntity.badRequest().body(new MessageResponse("Refresh Token is empty!"));
   }
 }
