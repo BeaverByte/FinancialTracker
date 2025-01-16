@@ -2,7 +2,6 @@ package com.beaverbyte.financial_tracker_application.security;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -34,22 +33,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     return UserDetailsImpl.build(user);
   }
 
-  public UserDetails getUserDetailsPrincipal() {
-    // Check if SecurityContext exists
-    if (SecurityContextHolder.getContext() == null) {
-        throw new IllegalStateException("SecurityContext is not available.");
-    }
-    // Check if Authentication exists
-    if (SecurityContextHolder.getContext().getAuthentication() == null) {
-        throw new IllegalStateException("No authentication data is available in the SecurityContext.");
-    }
-    // Retrieve the principal and check its type
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (!(principal instanceof UserDetails)) {
-        throw new IllegalStateException("Principal is not an instance of UserDetails.");
-    }
+  // public UserDetails getUserDetailsPrincipal() {
+  //   // Check if SecurityContext exists
+  //   if (SecurityContextHolder.getContext() == null) {
+  //       throw new IllegalStateException("SecurityContext is not available.");
+  //   }
+  //   // Check if Authentication exists
+  //   if (SecurityContextHolder.getContext().getAuthentication() == null) {
+  //       throw new IllegalStateException("No authentication data is available in the SecurityContext.");
+  //   }
+  //   // Retrieve the principal and check its type
+  //   Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  //   if (!(principal instanceof UserDetails)) {
+  //       throw new IllegalStateException("Principal is not an instance of UserDetails.");
+  //   }
 
-    return (UserDetails) principal;
-  }
+  //   return (UserDetails) principal;
+  // }
 
 }

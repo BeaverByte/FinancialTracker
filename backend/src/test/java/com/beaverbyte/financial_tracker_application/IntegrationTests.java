@@ -1,16 +1,13 @@
 package com.beaverbyte.financial_tracker_application;
 
-import static io.restassured.RestAssured.authentication;
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -27,10 +24,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.entity.ERole;
 import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.entity.User;
-import com.beaverbyte.financial_tracker_application.payload.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
@@ -244,7 +241,7 @@ public class IntegrationTests extends AbstractIntegrationTest{
         .collect(Collectors.toCollection(HashSet::new));
         signUpRequest.setRole(signUpRoles);
 
-        Set<Role> roles = roleService.validateAgainstTable(signUpRoles);
+        // Set<Role> roles = roleService.validateAgainstTable(signUpRoles);
 
         Response response = signUp(signUpRequest);
 

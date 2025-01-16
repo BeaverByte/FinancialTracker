@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.payload.response;
+package com.beaverbyte.financial_tracker_application.dto.api.response;
 
 import java.util.List;
 

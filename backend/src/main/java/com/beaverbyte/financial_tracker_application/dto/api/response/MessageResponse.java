@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.payload.response;
+package com.beaverbyte.financial_tracker_application.dto.api.response;
 
 public class MessageResponse {
     private String message;

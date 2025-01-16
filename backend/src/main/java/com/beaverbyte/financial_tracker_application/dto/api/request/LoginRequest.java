@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.payload.request;
+package com.beaverbyte.financial_tracker_application.dto.api.request;
 
 import jakarta.validation.constraints.NotBlank;
 
