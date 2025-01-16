@@ -127,13 +127,16 @@ public class AuthController {
           .body(new MessageResponse("Error: Email is already in use!"));
     }
     // Create and validate user
-    User user = new User(signUpRequest.getUsername(), 
-               signUpRequest.getEmail(),
-               encoder.encode(signUpRequest.getPassword()));
+    // User user = new User(signUpRequest.getUsername(), 
+    //            signUpRequest.getEmail(),
+    //            encoder.encode(signUpRequest.getPassword()));
 
-    Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
-    user.setRoles(roles);
-    userRepository.save(user);
+    // Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
+    // user.setRoles(roles);
+    // userRepository.save(user);
+
+    User user = userService.createUser(signUpRequest);
+    userService.save(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }
