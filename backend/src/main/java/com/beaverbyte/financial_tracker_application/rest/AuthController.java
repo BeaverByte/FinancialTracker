@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
-import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
@@ -61,8 +60,8 @@ public class AuthController {
   @Autowired
   RoleService roleService;
 
-  @Autowired
-  JwtService jwtService;
+  // @Autowired
+  // JwtService jwtService;
 
   @Autowired
   PasswordEncoder encoder;

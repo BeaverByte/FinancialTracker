@@ -16,11 +16,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.beaverbyte.financial_tracker_application.security.UserDetailsServiceImpl;
-import com.beaverbyte.financial_tracker_application.service.AuthenticationService;
 
 /**
  * Filters token, validating the token. On success, an user is returned, and set as the principal in Security Context.
@@ -33,30 +31,31 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   @Autowired
   private UserDetailsServiceImpl userDetailsService;
 
-  @Autowired
-  private AuthenticationService authenticationService;
-
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
-    // Get JSON web Token from Auth header and remove 'Bearer' string, the Spring-Boot token prefix
       String jwt = parseJwt(request);
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
         String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
+        System.out.println("Username found: " + username);
+
         // userDetails retrieved to create authentication object
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        // UsernamePasswordAuthenticationToken authentication =
-        //     new UsernamePasswordAuthenticationToken(
-        //         userDetails,
-        //         null,
-        //         userDetails.getAuthorities());
-        // authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-        UsernamePasswordAuthenticationToken authentication = authenticationService.createAuthenticationToken(userDetails, request);
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        System.out.println(authentication.toString());
+
+        // UsernamePasswordAuthenticationToken authentication = authenticationService.createAuthenticationToken(userDetails, request);
 
         // SecurityContext updates with User and Authentication related details
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -83,6 +82,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     // return null;
 
     String jwt = jwtUtils.getJwtFromCookies(request);
+    System.out.println("Jwt parsed out of Cookie in AuthTokenFilter " + jwt);
     return jwt;
   }
 }

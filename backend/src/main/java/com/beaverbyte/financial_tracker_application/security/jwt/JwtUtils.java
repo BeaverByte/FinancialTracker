@@ -1,7 +1,6 @@
 package com.beaverbyte.financial_tracker_application.security.jwt;
 
-import java.security.Key;
-import java.security.PrivateKey;
+import java.security.Signature;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
@@ -123,7 +121,8 @@ public class JwtUtils {
     .verifyWith(key())
     .build()
     .parseSignedClaims(token)
-    .getPayload().getSubject(); 
+    .getPayload()
+    .getSubject(); 
   }
 
   private SecretKey key() {
@@ -149,12 +148,26 @@ public class JwtUtils {
   }
   
   public String generateTokenFromUsername(String username) {   
+    // return Jwts.builder()
+    //     .setSubject(username)
+    //     .setIssuedAt(new Date())
+    //     .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+    //     .signWith(key(), SignatureAlgorithm.HS256)
+    //     .compact();
+
+    System.out.println("Generated Token from Username is " + Jwts.builder()
+    .subject(username)
+    .issuedAt(new Date())
+    .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+    .signWith(key(), Jwts.SIG.HS256)
+    .compact());
+
     return Jwts.builder()
-        .setSubject(username)
-        .setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-        .signWith(key(), SignatureAlgorithm.HS256)
-        .compact();
+    .subject(username)
+    .issuedAt(new Date())
+    .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+    .signWith(key(), Jwts.SIG.HS256)
+    .compact();
   }
     
   private ResponseCookie generateCookie(String name, String value, String path) {

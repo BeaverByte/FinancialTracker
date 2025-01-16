@@ -51,6 +51,7 @@ public class WebSecurityConfig {
   @Bean
   public DaoAuthenticationProvider authenticationProvider() {
       DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
       // Service used here to inject user Details when they're fired
       authProvider.setUserDetailsService(userDetailsService);
       // PasswordEncoder set, otherwise will be plain text
@@ -81,8 +82,8 @@ public class WebSecurityConfig {
               .requestMatchers("/api/test/**").permitAll()
               .anyRequest().authenticated()
         );
-    
-    // http.authenticationProvider(authenticationProvider());
+
+    http.authenticationProvider(authenticationProvider());
 
     // Adding to filter before to ensure Jwt Filter for authenticating users
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
