@@ -35,7 +35,8 @@ public class UserService {
     }
 
     public User createUser(SignupRequest signUpRequest) {
-        User user = UserMapper.toEntity(signUpRequest, encoder);
+        User user = UserMapper.toUser(signUpRequest);
+        user.setPassword(encoder.encode(signUpRequest.getPassword()));
         Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
         user.setRoles(roles);
         return user; 

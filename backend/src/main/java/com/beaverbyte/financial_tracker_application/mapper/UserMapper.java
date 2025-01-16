@@ -6,11 +6,10 @@ import com.beaverbyte.financial_tracker_application.dto.api.request.SignupReques
 import com.beaverbyte.financial_tracker_application.entity.User;
 
 public class UserMapper {
-    public static User toEntity(SignupRequest signUpRequest, PasswordEncoder encoder) {
+    public static User toUser(SignupRequest signUpRequest) {
         return new User(
             signUpRequest.getUsername(),
             signUpRequest.getEmail(),
-            encoder.encode(signUpRequest.getPassword())
         );
     }
 }
