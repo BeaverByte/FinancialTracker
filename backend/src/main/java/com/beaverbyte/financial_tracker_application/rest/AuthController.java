@@ -27,11 +27,11 @@ import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResp
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
 import com.beaverbyte.financial_tracker_application.entity.User;
+import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
-import com.beaverbyte.financial_tracker_application.security.jwt.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 import com.beaverbyte.financial_tracker_application.service.UserService;

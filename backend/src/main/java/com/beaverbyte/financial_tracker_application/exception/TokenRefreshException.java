@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.security.jwt;
+package com.beaverbyte.financial_tracker_application.exception;
 
 public class TokenRefreshException extends RuntimeException {
 

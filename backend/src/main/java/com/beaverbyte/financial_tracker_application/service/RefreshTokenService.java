@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
+import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
-import com.beaverbyte.financial_tracker_application.security.jwt.TokenRefreshException;
 
 @Service
 public class RefreshTokenService {
