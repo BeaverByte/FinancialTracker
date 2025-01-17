@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.rest;
+package com.beaverbyte.financial_tracker_application.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
