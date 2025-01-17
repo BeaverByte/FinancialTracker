@@ -139,7 +139,7 @@ public class AuthController {
   public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
     String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
 
-    if ((refreshToken != null) && (refreshToken.length() > 0)) {
+    if ((refreshToken != null) && (refreshToken.isEmpty())) {
       return refreshTokenService.findByToken(refreshToken)
           .map(refreshTokenService::verifyExpiration)
           .map(RefreshToken::getUser)
