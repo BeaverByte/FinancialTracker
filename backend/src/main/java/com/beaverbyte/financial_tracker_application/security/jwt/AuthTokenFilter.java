@@ -40,8 +40,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
         String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-        System.out.println("Username found: " + username);
-
         // userDetails retrieved to create authentication object
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
@@ -50,8 +48,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             null,
             userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        System.out.println(authentication.toString());
 
         // SecurityContext updates with User and Authentication related details
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -69,8 +65,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
    * @return JWT token if present and validated, otherwise null
    */
   private String parseJwt(HttpServletRequest request) {
-    String jwt = jwtUtils.getJwtFromCookies(request);
-    System.out.println("Jwt parsed out of Cookie in AuthTokenFilter " + jwt);
-    return jwt;
+    return jwtUtils.getJwtFromCookies(request);
   }
 }
