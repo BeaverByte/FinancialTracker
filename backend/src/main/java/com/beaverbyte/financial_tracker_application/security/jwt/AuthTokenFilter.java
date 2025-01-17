@@ -19,7 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
 
 /**
- * Filters token, validating the token. On success, an user is returned, and set as the principal in Security Context.
+ * Filters token, validating the token. On success, an user is returned, and set
+ * as the principal in Security Context.
  * 
  */
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -44,16 +45,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         // userDetails retrieved to create authentication object
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            userDetails,
+            null,
+            userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         System.out.println(authentication.toString());
-
-        // UsernamePasswordAuthenticationToken authentication = authenticationService.createAuthenticationToken(userDetails, request);
 
         // SecurityContext updates with User and Authentication related details
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -66,19 +64,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   }
 
   /**
-   *  Checks request's header for "Authorization" to extract out JWT token
+   * Checks request's header for "Authorization" to extract out JWT token
    * 
    * @return JWT token if present and validated, otherwise null
-   * */ 
+   */
   private String parseJwt(HttpServletRequest request) {
-    // String headerAuth = request.getHeader("Authorization");
-
-    // if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-    //   return headerAuth.substring(7);
-    // }
-
-    // return null;
-
     String jwt = jwtUtils.getJwtFromCookies(request);
     System.out.println("Jwt parsed out of Cookie in AuthTokenFilter " + jwt);
     return jwt;
