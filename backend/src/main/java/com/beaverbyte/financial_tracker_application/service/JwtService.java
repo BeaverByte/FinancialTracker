@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.mapper.JwtResponseMapper;
-import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Service
 public class JwtService {
@@ -19,7 +19,7 @@ public class JwtService {
     }
 
     public JwtResponse createJwtResponse(String jwt, Authentication authentication) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
             .map(item -> item.getAuthority())
             .collect(Collectors.toList());

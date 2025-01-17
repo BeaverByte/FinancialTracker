@@ -1,6 +1,5 @@
 package com.beaverbyte.financial_tracker_application.security.jwt;
 
-import java.security.Signature;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
 import com.beaverbyte.financial_tracker_application.entity.User;
-import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -37,51 +36,7 @@ public class JwtUtils {
   @Value("${JWT_REFRESH_COOKIE_NAME}")
   private String jwtRefreshCookie;
 
-  // // Generates JSON web token from username, date, expiration, secret
-  // public String generateJwtToken(Authentication authentication) {
-
-  //   UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
-  //   return Jwts.builder()
-  //       .subject((userPrincipal.getUsername()))
-  //       .issuedAt(new Date())
-  //       .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-  //       .signWith(key(), SignatureAlgorithm.HS256)
-  //       .compact();
-  // }
-  
-  // // Key is decoded here
-  // private Key key() {
-  //   return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
-  // }
-
-  // // Provide username from JSON Web Token to allow for User Searching elsewhere
-  // public String getUserNameFromJwtToken(String token) {
-  //   return Jwts.parser().setSigningKey(key()).build()
-  //              .parseClaimsJws(token).getBody().getSubject();
-  // }
-
-  // /**
-  //  * Parses authToken for validity
-  //  */
-  // public boolean validateJwtToken(String authToken) {
-  //   try {
-  //     Jwts.parser().setSigningKey(key()).build().parse(authToken);
-  //     return true;
-  //   } catch (MalformedJwtException e) {
-  //     logger.error("Invalid JWT token: {}", e.getMessage());
-  //   } catch (ExpiredJwtException e) {
-  //     logger.error("JWT token is expired: {}", e.getMessage());
-  //   } catch (UnsupportedJwtException e) {
-  //     logger.error("JWT token is unsupported: {}", e.getMessage());
-  //   } catch (IllegalArgumentException e) {
-  //     logger.error("JWT claims string is empty: {}", e.getMessage());
-  //   }
-
-  //   return false;
-  // }
-
-  public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
+  public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
     String jwt = generateTokenFromUsername(userPrincipal.getUsername());   
     return generateCookie(jwtCookie, jwt, "/api");
   }
@@ -114,9 +69,6 @@ public class JwtUtils {
   }
 
   public String getUserNameFromJwtToken(String token) {
-    // return Jwts.parserBuilder().setSigningKey(key()).build()
-    //     .parseClaimsJws(token).getBody().getSubject();
-
     return Jwts.parser()
     .verifyWith(key())
     .build()
@@ -131,7 +83,6 @@ public class JwtUtils {
   
   public boolean validateJwtToken(String authToken) {
     try {
-      // Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
       Jwts.parser().verifyWith(key()).build().parse(authToken);
       return true;
     } catch (MalformedJwtException e) {
@@ -148,20 +99,6 @@ public class JwtUtils {
   }
   
   public String generateTokenFromUsername(String username) {   
-    // return Jwts.builder()
-    //     .setSubject(username)
-    //     .setIssuedAt(new Date())
-    //     .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-    //     .signWith(key(), SignatureAlgorithm.HS256)
-    //     .compact();
-
-    System.out.println("Generated Token from Username is " + Jwts.builder()
-    .subject(username)
-    .issuedAt(new Date())
-    .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-    .signWith(key(), Jwts.SIG.HS256)
-    .compact());
-
     return Jwts.builder()
     .subject(username)
     .issuedAt(new Date())

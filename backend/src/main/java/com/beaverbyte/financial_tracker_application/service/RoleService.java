@@ -12,7 +12,7 @@ import com.beaverbyte.financial_tracker_application.entity.ERole;
 import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.mapper.RoleMapper;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
-import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Service
 public class RoleService {
@@ -27,7 +27,7 @@ public class RoleService {
     }
 
     public List<String> extractRoles(Authentication authentication) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         return roleMapper.mapAuthoritiesToRoles(userDetails.getAuthorities());
     }
 

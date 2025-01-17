@@ -12,7 +12,7 @@ import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 
 /**
- * Returns {@link UserDetailsImpl} using {@link UserRepository}'s query by username. 
+ * Returns {@link CustomUserDetails} using {@link UserRepository}'s query by username. 
  * 
  * <p>
  * Implements {@code UserDetailsService}, overriding its loadUserByUsername method.
@@ -20,7 +20,7 @@ import com.beaverbyte.financial_tracker_application.repository.UserRepository;
  * @see UserDetailsService
  */
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
   @Autowired
   UserRepository userRepository;
 
@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
-    return UserDetailsImpl.build(user);
+    return CustomUserDetails.build(user);
   }
 
   // public UserDetails getUserDetailsPrincipal() {

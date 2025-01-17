@@ -32,7 +32,7 @@ import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
-import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 import com.beaverbyte.financial_tracker_application.security.jwt.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.service.JwtService;
@@ -86,11 +86,7 @@ public class AuthController {
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    // String jwt = jwtUtils.generateJwtToken(authentication);
-    
-    // JwtResponse jwtResponse = jwtService.createJwtResponse(jwt, authentication);
-
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
     ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
@@ -101,8 +97,6 @@ public class AuthController {
     RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
     
     ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
-
-    // return ResponseEntity.ok(jwtResponse);
 
     return ResponseEntity.ok()
               .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -120,13 +114,12 @@ public class AuthController {
           .badRequest()
           .body(new MessageResponse("Error: Username is already taken!"));
     }
-
     if (userService.existsByEmail(signUpRequest.getEmail())) {
       return ResponseEntity
           .badRequest()
           .body(new MessageResponse("Error: Email is already in use!"));
     }
-    // Create and validate user
+
     User user = userService.createUser(signUpRequest);
     userService.save(user);
 
@@ -137,7 +130,7 @@ public class AuthController {
   public ResponseEntity<?> logoutUser() {
     Object principle = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (principle.toString() != "anonymousUser") {      
-      Long userId = ((UserDetailsImpl) principle).getId();
+      Long userId = ((CustomUserDetails) principle).getId();
       refreshTokenService.deleteByUserId(userId);
     }
     

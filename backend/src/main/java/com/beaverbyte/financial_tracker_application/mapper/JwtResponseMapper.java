@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
-import com.beaverbyte.financial_tracker_application.security.UserDetailsImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Mapper(componentModel = "spring")
 public interface JwtResponseMapper {
@@ -19,5 +19,5 @@ public interface JwtResponseMapper {
     @Mapping(source = "userDetails.email", target = "email")
     @Mapping(source = "roles", target = "roles")
 
-    JwtResponse toJwtResponse(String jwt, UserDetailsImpl userDetails, List<String> roles);
+    JwtResponse toJwtResponse(String jwt, CustomUserDetails userDetails, List<String> roles);
 }

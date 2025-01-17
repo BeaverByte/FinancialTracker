@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.beaverbyte.financial_tracker_application.security.UserDetailsServiceImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
 
 /**
  * Filters token, validating the token. On success, an user is returned, and set as the principal in Security Context.
@@ -29,7 +29,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   private JwtUtils jwtUtils;
 
   @Autowired
-  private UserDetailsServiceImpl userDetailsService;
+  private CustomUserDetailsService userDetailsService;
 
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 

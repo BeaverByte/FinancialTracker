@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * </p>
  * @see UserDetails
  */ 
-public class UserDetailsImpl implements UserDetails {
+public class CustomUserDetails implements UserDetails {
   private static final long serialVersionUID = 1L;
 
   private Long id;
@@ -35,7 +35,7 @@ public class UserDetailsImpl implements UserDetails {
   // Authorities are role(s) that a user may have to have more access
   private Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(Long id, String username, String email, String password,
+  public CustomUserDetails(Long id, String username, String email, String password,
       Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
     this.username = username;
@@ -44,12 +44,12 @@ public class UserDetailsImpl implements UserDetails {
     this.authorities = authorities;
   }
 
-  public static UserDetailsImpl build(User user) {
+  public static CustomUserDetails build(User user) {
     List<GrantedAuthority> authorities = user.getRoles().stream()
         .map(role -> new SimpleGrantedAuthority(role.getName().name()))
         .collect(Collectors.toList());
 
-    return new UserDetailsImpl(
+    return new CustomUserDetails(
         user.getId(), 
         user.getUsername(), 
         user.getEmail(),
@@ -106,7 +106,7 @@ public class UserDetailsImpl implements UserDetails {
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-    UserDetailsImpl user = (UserDetailsImpl) o;
+    CustomUserDetails user = (CustomUserDetails) o;
     return Objects.equals(id, user.id);
   }
 }
