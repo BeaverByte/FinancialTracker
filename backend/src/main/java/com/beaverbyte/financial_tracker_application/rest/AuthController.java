@@ -87,7 +87,6 @@ public class AuthController {
         .collect(Collectors.toList());
 
     RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
     ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
 
     return ResponseEntity.ok()
@@ -121,7 +120,7 @@ public class AuthController {
   @PostMapping("/signout")
   public ResponseEntity<?> logoutUser() {
     Object principle = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (principle.toString() != "anonymousUser") {
+    if (principle.toString().equals("anonymousUser")) {
       Long userId = ((CustomUserDetails) principle).getId();
       refreshTokenService.deleteByUserId(userId);
     }

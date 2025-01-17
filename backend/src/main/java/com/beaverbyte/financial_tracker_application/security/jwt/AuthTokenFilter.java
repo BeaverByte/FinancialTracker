@@ -1,7 +1,5 @@
 package com.beaverbyte.financial_tracker_application.security.jwt;
 
-import static io.restassured.RestAssured.authentication;
-
 import java.io.IOException;
 
 import jakarta.servlet.FilterChain;
