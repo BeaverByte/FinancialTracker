@@ -119,9 +119,9 @@ public class AuthController {
 
   @PostMapping("/signout")
   public ResponseEntity<?> logoutUser() {
-    Object principle = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (principle.toString().equals("anonymousUser")) {
-      Long userId = ((CustomUserDetails) principle).getId();
+    Object principalUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (!principalUser.toString().equals("anonymousUser")) {
+      Long userId = ((CustomUserDetails) principalUser).getId();
       refreshTokenService.deleteByUserId(userId);
     }
 
