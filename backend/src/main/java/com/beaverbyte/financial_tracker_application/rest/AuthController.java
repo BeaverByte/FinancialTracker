@@ -1,20 +1,13 @@
 package com.beaverbyte.financial_tracker_application.rest;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,9 +23,7 @@ import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.RefreshTokenResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
-import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
 import com.beaverbyte.financial_tracker_application.entity.User;
-import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
