@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.dto.api.request;
+package com.beaverbyte.financial_tracker_application.dto.request;
 
 import java.util.Set;
 

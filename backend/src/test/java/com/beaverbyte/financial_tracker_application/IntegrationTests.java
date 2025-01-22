@@ -3,7 +3,6 @@ package com.beaverbyte.financial_tracker_application;
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -26,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.entity.ERole;
 import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.entity.User;

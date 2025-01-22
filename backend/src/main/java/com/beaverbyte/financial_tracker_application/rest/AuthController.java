@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
-import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
-import com.beaverbyte.financial_tracker_application.dto.api.response.LoginResponse;
-import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
-import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
-import com.beaverbyte.financial_tracker_application.dto.api.response.RefreshTokenResponse;
-import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
+import com.beaverbyte.financial_tracker_application.dto.response.UserInfoResponse;
+import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
+import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.dto.response.LoginResponse;
+import com.beaverbyte.financial_tracker_application.dto.response.JwtResponse;
+import com.beaverbyte.financial_tracker_application.dto.response.MessageResponse;
+import com.beaverbyte.financial_tracker_application.dto.response.RefreshTokenResponse;
 import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
@@ -118,7 +118,7 @@ public class AuthController {
   }
 
   @PostMapping("/refreshtoken")
-  public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+  public ResponseEntity<MessageResponse> refreshToken(HttpServletRequest request) {
 	RefreshTokenResponse refreshTokenResponse = userService.refreshToken(request);
 
 	return ResponseEntity.ok()

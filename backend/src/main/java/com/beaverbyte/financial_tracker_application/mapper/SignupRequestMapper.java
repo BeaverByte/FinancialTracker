@@ -2,9 +2,12 @@ package com.beaverbyte.financial_tracker_application.mapper;
 
 import java.util.Map;
 
-import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
 
 public class SignupRequestMapper {
+
+	private SignupRequestMapper(){
+	}
 
     public static Map<String, Object> toMap(SignupRequest signupRequest) {
         return Map.of(

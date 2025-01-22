@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
+import com.beaverbyte.financial_tracker_application.dto.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Service
