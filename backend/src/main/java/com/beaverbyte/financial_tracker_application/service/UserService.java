@@ -110,11 +110,8 @@ public class UserService {
 		
 		refreshTokenService.verifyExpiration(refreshToken);
 
-		User user = refreshToken.getUser();
+		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(refreshToken.getUser());
 
-		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(user);
-
-		MessageResponse messageResponse = new MessageResponse("Token is refreshed successfully!");
-		return new RefreshTokenResponse(messageResponse, jwtCookie);
+		return new RefreshTokenResponse(new MessageResponse("Token is refreshed successfully!"), jwtCookie);
 	}
 }
