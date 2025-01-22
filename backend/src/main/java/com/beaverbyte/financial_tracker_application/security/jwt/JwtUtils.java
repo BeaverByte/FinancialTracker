@@ -13,6 +13,7 @@ import org.springframework.web.util.WebUtils;
 
 import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
+import com.beaverbyte.financial_tracker_application.security.UserBase;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -36,15 +37,20 @@ public class JwtUtils {
   @Value("${JWT_REFRESH_COOKIE_NAME}")
   private String jwtRefreshCookie;
 
-  public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
-    String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-    return generateCookie(jwtCookie, jwt, "/api");
-  }
-
-  public ResponseCookie generateJwtCookie(User user) {
+  public ResponseCookie generateJwtCookie(UserBase user) {
     String jwt = generateTokenFromUsername(user.getUsername());
     return generateCookie(jwtCookie, jwt, "/api");
   }
+
+//   public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
+//     String jwt = generateTokenFromUsername(userPrincipal.getUsername());
+//     return generateCookie(jwtCookie, jwt, "/api");
+//   }
+
+//   public ResponseCookie generateJwtCookie(User user) {
+//     String jwt = generateTokenFromUsername(user.getUsername());
+//     return generateCookie(jwtCookie, jwt, "/api");
+//   }
 
   public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
     return generateCookie(jwtRefreshCookie, refreshToken, "/api/auth/refreshtoken");

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * </p>
  * @see UserDetails
  */ 
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails, UserBase {
   private static final long serialVersionUID = 1L;
 
   private Long id;
