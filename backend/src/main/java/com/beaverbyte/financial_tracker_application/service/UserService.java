@@ -1,5 +1,6 @@
 package com.beaverbyte.financial_tracker_application.service;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.response.LoginResponse;
+import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
+import com.beaverbyte.financial_tracker_application.dto.api.response.RefreshTokenResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
 import com.beaverbyte.financial_tracker_application.entity.Role;
@@ -91,41 +94,30 @@ public class UserService {
 			new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 	}
 
-	public ResponseEntity<?> logoutUser() {
-		Object principalUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (!principalUser.toString().equals("anonymousUser")) {
-			Long userId = ((CustomUserDetails) principalUser).getId();
-			refreshTokenService.deleteByUserId(userId);
-		}
-
+	public JwtResponse logoutUser() {
 		ResponseCookie jwtCookie = jwtUtils.getCleanJwtCookie();
 		ResponseCookie jwtRefreshCookie = jwtUtils.getCleanJwtRefreshCookie();
 
-		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-			.header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-			.body(new MessageResponse("You've been signed out!"));
+		return new JwtResponse(new MessageResponse("You've been signed out!"), jwtCookie, jwtRefreshCookie);
 	}
 
-	public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
-		String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
+	public RefreshTokenResponse refreshToken(HttpServletRequest request) {
+		String refreshJwt = jwtUtils.getJwtRefreshFromCookies(request);
 
-		if (refreshToken != null && !refreshToken.isEmpty()) {
-		return refreshTokenService.findByToken(refreshToken)
-			.map(refreshTokenService::verifyExpiration)
-			.map(RefreshToken::getUser)
-			.map(user -> {
-				ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(user);
-
-				return ResponseEntity.ok()
-					.header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-					.body(new MessageResponse("Token is refreshed successfully!"));
-			})
-			.orElseThrow(() -> new TokenRefreshException(refreshToken,
-				"Refresh token is not in database!"));
+		if (refreshJwt == null || refreshJwt.isEmpty()) {
+			throw new TokenRefreshException(refreshJwt, "Refresh token is empty");
 		}
 
-		return ResponseEntity.badRequest().body(new MessageResponse("Refresh Token is empty!"));
-	}
+		RefreshToken refreshToken = refreshTokenService.findByToken(refreshJwt)
+			.orElseThrow(() -> new TokenRefreshException(refreshJwt, "Refresh token is not found in database"));
+		
+		refreshTokenService.verifyExpiration(refreshToken);
 
+		User user = refreshToken.getUser();
+
+		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(user);
+
+		MessageResponse messageResponse = new MessageResponse("Token is refreshed successfully!");
+		return new RefreshTokenResponse(messageResponse, jwtCookie);
+	}
 }

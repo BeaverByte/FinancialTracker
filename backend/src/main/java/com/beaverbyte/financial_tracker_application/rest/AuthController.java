@@ -1,6 +1,7 @@
 package com.beaverbyte.financial_tracker_application.rest;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.response.LoginResponse;
+import com.beaverbyte.financial_tracker_application.dto.api.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
+import com.beaverbyte.financial_tracker_application.dto.api.response.RefreshTokenResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
 import com.beaverbyte.financial_tracker_application.entity.User;
@@ -104,12 +108,34 @@ public class AuthController {
   }
 
   @PostMapping("/signout")
-  public ResponseEntity<?> logoutUser() {
-	return userService.logoutUser();
+  public ResponseEntity<MessageResponse> logoutUser() {
+	Object principalUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+	if (isAnonymous(principalUser)) {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Logout cannot occur without user already logged in"));
+	}
+
+	Long userId = ((CustomUserDetails) principalUser).getId();
+	refreshTokenService.deleteByUserId(userId);
+
+	JwtResponse logoutResponse = userService.logoutUser();
+
+	return ResponseEntity.ok()
+		.header(HttpHeaders.SET_COOKIE, logoutResponse.jwtCookie().toString())
+		.header(HttpHeaders.SET_COOKIE, logoutResponse.jwtRefreshCookie().toString())
+		.body(logoutResponse.messageResponse());
   }
 
   @PostMapping("/refreshtoken")
-  public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
-	return userService.refreshtoken(request);
+  public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+	RefreshTokenResponse refreshTokenResponse = userService.refreshToken(request);
+
+	return ResponseEntity.ok()
+		.header(HttpHeaders.SET_COOKIE, refreshTokenResponse.jwtCookie().toString())
+		.body(refreshTokenResponse.messageResponse());
+  }
+
+  public boolean isAnonymous(Object principalUser) {
+	return principalUser.toString().equals("anonymousUser");
   }
 }
