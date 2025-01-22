@@ -17,6 +17,7 @@ public class GlobalExceptionHandler {
 
 	// Handle HTTP Method Request errors (e.g. if GET is used for a POST method)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	// @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ResponseEntity<ErrorMessage> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
 		ErrorMessage errors = new ErrorMessage(
 			HttpStatus.METHOD_NOT_ALLOWED.value(),
@@ -31,13 +32,12 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();
-		// Iterate over all validation errors
+		// There can be multiple validation errors and messages 
 		ex.getBindingResult().getAllErrors().forEach(error -> {
 			String fieldName = ((FieldError) error).getField();
 			String errorMessage = error.getDefaultMessage();
 			errors.put(fieldName, errorMessage);
 		});
-
 		return ResponseEntity.badRequest().body(errors);
 	}
 }

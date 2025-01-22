@@ -70,13 +70,7 @@ public class UserService {
     public void save(User user) {
         userRepository.save(user);
     }
-	public LoginResponse login(LoginRequest loginRequest) {
-		Authentication authentication = authenticate(loginRequest);
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
+	public LoginResponse login(CustomUserDetails userDetails) {
 		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
 		UserInfoResponse userInfoResponse = userInfoResponseService.createUserInfoResponse(userDetails);
