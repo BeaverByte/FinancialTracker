@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.dto.api.response.LoginResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
@@ -69,7 +70,7 @@ public class UserService {
     public void save(User user) {
         userRepository.save(user);
     }
-	public ResponseEntity<?> login(LoginRequest loginRequest) {
+	public LoginResponse login(LoginRequest loginRequest) {
 		Authentication authentication = authenticate(loginRequest);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -82,10 +83,7 @@ public class UserService {
 		RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 		ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
 
-		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-			.header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-			.body(userInfoResponse);
+		return new LoginResponse(userInfoResponse, jwtRefreshCookie, jwtCookie);
 	}
 
 	public Authentication authenticate(LoginRequest loginRequest) {

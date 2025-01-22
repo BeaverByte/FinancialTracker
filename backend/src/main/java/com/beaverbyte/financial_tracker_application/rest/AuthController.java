@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.beaverbyte.financial_tracker_application.dto.api.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.dto.api.response.LoginResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.dto.api.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
@@ -75,12 +76,16 @@ public class AuthController {
    * @return
    */
   @PostMapping("/signin")
-  public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-	return userService.login(loginRequest);
+  public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	LoginResponse loginResponse = userService.login(loginRequest);
+	return ResponseEntity.ok()
+		.header(HttpHeaders.SET_COOKIE, loginResponse.jwtCookie().toString())
+		.header(HttpHeaders.SET_COOKIE, loginResponse.jwtRefreshCookie().toString())
+		.body(loginResponse.userInfoResponse());
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+  public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
     if (userService.existsByUsername(signUpRequest.getUsername())) {
       return ResponseEntity
           .badRequest()
@@ -89,7 +94,7 @@ public class AuthController {
     if (userService.existsByEmail(signUpRequest.getEmail())) {
       return ResponseEntity
         .badRequest()
-          .body(new MessageResponse("Error: Email is already in use!"));
+        .body(new MessageResponse("Error: Email is already in use!"));
     }
 
     User user = userService.createUser(signUpRequest);
