@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.beaverbyte.financial_tracker_application.entity.User;
+import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 
 /**

@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.utils;
+package com.beaverbyte.financial_tracker_application.util;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.entity;
+package com.beaverbyte.financial_tracker_application.model;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
       @UniqueConstraint(columnNames = "email") 
     }
 )
-public class User implements UserBase{
+public class User implements UserBase {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

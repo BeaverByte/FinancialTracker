@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.beaverbyte.financial_tracker_application.entity.ERole;
-import com.beaverbyte.financial_tracker_application.entity.Role;
 import com.beaverbyte.financial_tracker_application.mapper.RoleMapper;
+import com.beaverbyte.financial_tracker_application.model.ERole;
+import com.beaverbyte.financial_tracker_application.model.Role;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 

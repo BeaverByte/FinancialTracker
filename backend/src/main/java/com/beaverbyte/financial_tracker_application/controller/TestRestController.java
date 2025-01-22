@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.rest;
+package com.beaverbyte.financial_tracker_application.controller;
 
 
 import org.springframework.security.access.prepost.PreAuthorize;

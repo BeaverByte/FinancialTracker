@@ -17,11 +17,11 @@ import com.beaverbyte.financial_tracker_application.dto.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.dto.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.dto.response.RefreshTokenResponse;
 import com.beaverbyte.financial_tracker_application.dto.response.UserInfoResponse;
-import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
-import com.beaverbyte.financial_tracker_application.entity.Role;
-import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.mapper.UserMapper;
+import com.beaverbyte.financial_tracker_application.model.RefreshToken;
+import com.beaverbyte.financial_tracker_application.model.Role;
+import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
@@ -31,9 +31,9 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final RoleService roleService;
-    private final PasswordEncoder encoder;
+	private final UserRepository userRepository;
+	private final RoleService roleService;
+	private final PasswordEncoder encoder;
 	private final JwtUtils jwtUtils;
 	private final AuthenticationManager authenticationManager;
 	private final UserInfoResponseService userInfoResponseService;
@@ -51,25 +51,26 @@ public class UserService {
 		this.refreshTokenService = refreshTokenService;
 	}
 
-	public boolean existsByUsername(String username){
-        return userRepository.existsByUsername(username);
-    }
+	public boolean existsByUsername(String username) {
+		return userRepository.existsByUsername(username);
+	}
 
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
+	public boolean existsByEmail(String email) {
+		return userRepository.existsByEmail(email);
+	}
 
-    public User createUser(SignupRequest signUpRequest) {
-        User user = UserMapper.toUser(signUpRequest);
-        user.setPassword(encoder.encode(signUpRequest.getPassword()));
-        Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
-        user.setRoles(roles);
-        return user; 
-    }
+	public User createUser(SignupRequest signUpRequest) {
+		User user = UserMapper.toUser(signUpRequest);
+		user.setPassword(encoder.encode(signUpRequest.getPassword()));
+		Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
+		user.setRoles(roles);
+		return user;
+	}
 
-    public void save(User user) {
-        userRepository.save(user);
-    }
+	public void save(User user) {
+		userRepository.save(user);
+	}
+
 	public LoginResponse login(CustomUserDetails userDetails) {
 		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
@@ -82,7 +83,7 @@ public class UserService {
 
 	public Authentication authenticate(LoginRequest loginRequest) {
 		return authenticationManager.authenticate(
-			new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 	}
 
 	public JwtResponse logoutUser() {
@@ -100,8 +101,8 @@ public class UserService {
 		}
 
 		RefreshToken refreshToken = refreshTokenService.findByToken(refreshJwt)
-			.orElseThrow(() -> new TokenRefreshException(refreshJwt, "Refresh token is not found in database"));
-		
+				.orElseThrow(() -> new TokenRefreshException(refreshJwt, "Refresh token is not found in database"));
+
 		refreshTokenService.verifyExpiration(refreshToken);
 
 		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(refreshToken.getUser());

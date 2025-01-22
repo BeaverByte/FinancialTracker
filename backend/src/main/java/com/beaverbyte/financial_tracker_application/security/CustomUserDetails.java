@@ -9,7 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.beaverbyte.financial_tracker_application.entity.User;
+import com.beaverbyte.financial_tracker_application.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /** 

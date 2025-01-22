@@ -1,7 +1,9 @@
-package com.beaverbyte.financial_tracker_application.rest;
+package com.beaverbyte.financial_tracker_application.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,15 +15,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.beaverbyte.financial_tracker_application.dto.response.UserInfoResponse;
+import com.beaverbyte.financial_tracker_application.exception.UserAlreadyLoggedOutException;
+import com.beaverbyte.financial_tracker_application.exception.UserLoginException;
+import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.LoginResponse;
 import com.beaverbyte.financial_tracker_application.dto.response.JwtResponse;
 import com.beaverbyte.financial_tracker_application.dto.response.MessageResponse;
 import com.beaverbyte.financial_tracker_application.dto.response.RefreshTokenResponse;
-import com.beaverbyte.financial_tracker_application.entity.User;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthenticationUtils;
 import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
@@ -50,6 +55,10 @@ public class AuthController {
 	 */
 	@PostMapping("/signin")
 	public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+		if (!authenticationUtils.isAnonymous(authenticationUtils.getCurrentAuthentication())) {
+			throw new UserLoginException("User already logged in!");
+		}
+
 		Authentication authentication = userService.authenticate(loginRequest);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -84,10 +93,9 @@ public class AuthController {
 
 	@PostMapping("/signout")
 	public ResponseEntity<MessageResponse> logoutUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Authentication authentication = authenticationUtils.getCurrentAuthentication();
 		if (authenticationUtils.isAnonymous(authentication)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-					new MessageResponse("User must be logged in to perform logout"));
+			throw new UserAlreadyLoggedOutException("Action requires active session");
 		}
 
 		Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();

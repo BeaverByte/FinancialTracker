@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.entity;
+package com.beaverbyte.financial_tracker_application.model;
 
 import jakarta.persistence.*;
 

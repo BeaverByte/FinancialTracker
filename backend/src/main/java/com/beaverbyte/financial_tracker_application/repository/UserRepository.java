@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.beaverbyte.financial_tracker_application.entity.User;
+import com.beaverbyte.financial_tracker_application.model.User;
 
 /**
  * Accesses/persists {@link User} data from database
