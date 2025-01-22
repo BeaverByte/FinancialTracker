@@ -65,13 +65,11 @@ public class JwtUtils {
   }
 
   public ResponseCookie getCleanJwtCookie() {
-    ResponseCookie cookie = ResponseCookie.from(jwtCookie, null).path("/api").build();
-    return cookie;
+    return ResponseCookie.from(jwtCookie, null).path("/api").build();
   }
 
   public ResponseCookie getCleanJwtRefreshCookie() {
-    ResponseCookie cookie = ResponseCookie.from(jwtRefreshCookie, null).path("/api/auth/refreshtoken").build();
-    return cookie;
+    return ResponseCookie.from(jwtRefreshCookie, null).path("/api/auth/refreshtoken").build();
   }
 
   public String getUserNameFromJwtToken(String token) {

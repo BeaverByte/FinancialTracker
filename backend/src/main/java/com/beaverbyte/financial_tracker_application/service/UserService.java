@@ -107,13 +107,12 @@ public class UserService {
 			.header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
 			.header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
 			.body(new MessageResponse("You've been signed out!"));
-
 	}
 
 	public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
 		String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
 
-		if ((refreshToken != null) && (refreshToken.isEmpty())) {
+		if (refreshToken != null && !refreshToken.isEmpty()) {
 		return refreshTokenService.findByToken(refreshToken)
 			.map(refreshTokenService::verifyExpiration)
 			.map(RefreshToken::getUser)
