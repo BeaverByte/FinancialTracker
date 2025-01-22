@@ -11,7 +11,15 @@ public class AuthenticationUtils {
 		return authentication instanceof AnonymousAuthenticationToken;
 	}
 
+	public boolean hasActiveUser() {
+		return !isAnonymous(getCurrentAuthentication());
+	}
+
 	public Authentication getCurrentAuthentication() {
 		return SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	public void setAuthentication(Authentication authentication) {
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 }

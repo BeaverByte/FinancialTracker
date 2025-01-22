@@ -1,19 +1,28 @@
 package com.beaverbyte.financial_tracker_application.exception;
 
-public class ProblemDetail {
-	private String type;
+import java.util.Map;
+
+public class CustomProblemDetail {
 	private String title;
 	private int status;
 	private String detail;
 	private String instance;
+	private Map<String, String> validationErrors;
 
 	// Default constructor
-	public ProblemDetail() {
+	public CustomProblemDetail() {
 	}
 
-	// All-args constructor
-	public ProblemDetail(String type, String title, int status, String detail, String instance) {
-		this.type = type;
+	public CustomProblemDetail(String title, int status, String detail, String instance,
+			Map<String, String> validationErrors) {
+		this.title = title;
+		this.status = status;
+		this.detail = detail;
+		this.instance = instance;
+		this.validationErrors = validationErrors;
+	}
+
+	public CustomProblemDetail(String title, int status, String detail, String instance) {
 		this.title = title;
 		this.status = status;
 		this.detail = detail;
@@ -21,16 +30,11 @@ public class ProblemDetail {
 	}
 
 	// Static factory method
-	public static ProblemDetail forStatusAndDetail(Integer status, String detail) {
-		ProblemDetail problemDetail = new ProblemDetail();
+	public static CustomProblemDetail forStatusAndDetail(Integer status, String detail) {
+		CustomProblemDetail problemDetail = new CustomProblemDetail();
 		problemDetail.setStatus(status != null ? status : 500); // Default to 500 if null
 		problemDetail.setDetail(detail != null ? detail : "An unexpected error occurred.");
 		return problemDetail;
-	}
-
-	// Getters and setters
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public void setTitle(String title) {
@@ -49,10 +53,6 @@ public class ProblemDetail {
 		this.instance = instance;
 	}
 
-	public String getType() {
-		return type;
-	}
-
 	public String getTitle() {
 		return title;
 	}
@@ -67,5 +67,13 @@ public class ProblemDetail {
 
 	public String getInstance() {
 		return instance;
+	}
+
+	public Map<String, String> getValidationErrors() {
+		return validationErrors;
+	}
+
+	public void setValidationErrors(Map<String, String> validationErrors) {
+		this.validationErrors = validationErrors;
 	}
 }

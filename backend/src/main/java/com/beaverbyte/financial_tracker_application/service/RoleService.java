@@ -16,54 +16,52 @@ import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Service
 public class RoleService {
-    @Autowired
-    RoleRepository roleRepository;
 
-    @Autowired
-    RoleMapper roleMapper;
+	private final RoleRepository roleRepository;
+	private final RoleMapper roleMapper;
 
-    public RoleService(RoleMapper roleMapper) {
-        this.roleMapper = roleMapper;
-    }
+	public RoleService(RoleRepository roleRepository, RoleMapper roleMapper) {
+		this.roleRepository = roleRepository;
+		this.roleMapper = roleMapper;
+	}
 
-    public List<String> extractRoles(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return roleMapper.mapAuthoritiesToRoles(userDetails.getAuthorities());
-    }
+	public List<String> extractRoles(Authentication authentication) {
+		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+		return roleMapper.mapAuthoritiesToRoles(userDetails.getAuthorities());
+	}
 
-    public Set<Role> validateAgainstTable(Set<String> roles) {
-        Set<Role> newRoles = new HashSet<>();
+	public Set<Role> validateAgainstTable(Set<String> roles) {
+		Set<Role> newRoles = new HashSet<>();
 
-        if (roles == null) {
-            // No roles entered so default just User
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            newRoles.add(userRole);
-        } else {
-            roles.forEach(role -> {
-                switch (role) {
-                case "admin":
-                Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
-                newRoles.add(adminRole);
+		if (roles == null) {
+			// No roles entered so default just User
+			Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+			newRoles.add(userRole);
+		} else {
+			roles.forEach(role -> {
+				switch (role) {
+					case "admin":
+						Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+								.orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
+						newRoles.add(adminRole);
 
-                break;
-                case "mod":
-                Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                    .orElseThrow(() -> new RuntimeException("Error: Mod Role is not found."));
-                newRoles.add(modRole);
+						break;
+					case "mod":
+						Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+								.orElseThrow(() -> new RuntimeException("Error: Mod Role is not found."));
+						newRoles.add(modRole);
 
-                break;
-                default:
-                Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
-                newRoles.add(userRole);
-                }
-            });
-        }
-        
-        return newRoles;
-    } 
+						break;
+					default:
+						Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+								.orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
+						newRoles.add(userRole);
+				}
+			});
+		}
 
-    
+		return newRoles;
+	}
+
 }

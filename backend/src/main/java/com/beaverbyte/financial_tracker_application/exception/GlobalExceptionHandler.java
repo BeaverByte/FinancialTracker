@@ -6,14 +6,17 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
 	@ExceptionHandler(UserLoginException.class)
 	public ResponseEntity<String> userNotFoundExceptionHandler(UserLoginException ex) {
 		return ResponseEntity.badRequest().body(ex.getMessage());
@@ -34,7 +37,8 @@ public class GlobalExceptionHandler {
 
 	// Handle validation errors from @Valid annotation
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public CustomProblemDetail handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
 		Map<String, String> errors = new HashMap<>();
 		// There can be multiple validation errors and messages
 		ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -42,6 +46,12 @@ public class GlobalExceptionHandler {
 			String errorMessage = error.getDefaultMessage();
 			errors.put(fieldName, errorMessage);
 		});
-		return ResponseEntity.badRequest().body(errors);
+
+		return new CustomProblemDetail(
+				HttpStatus.UNAUTHORIZED.toString(),
+				HttpStatus.UNAUTHORIZED.value(),
+				"Validation(s) failed",
+				request.getDescription(false),
+				errors);
 	}
 }

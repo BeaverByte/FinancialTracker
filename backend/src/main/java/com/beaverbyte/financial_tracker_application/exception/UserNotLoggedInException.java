@@ -1,10 +1,10 @@
 package com.beaverbyte.financial_tracker_application.exception;
 
-public class UserAlreadyLoggedOutException extends RuntimeException {
+public class UserNotLoggedInException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public UserAlreadyLoggedOutException(String message) {
+	public UserNotLoggedInException(String message) {
 		super(message);
 	}
 }

@@ -3,22 +3,18 @@ package com.beaverbyte.financial_tracker_application.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import java.net.URI;
-
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.beaverbyte.financial_tracker_application.dto.response.UserInfoResponse;
-import com.beaverbyte.financial_tracker_application.exception.UserAlreadyLoggedOutException;
+import com.beaverbyte.financial_tracker_application.exception.UserNotLoggedInException;
+import com.beaverbyte.financial_tracker_application.exception.SignupException;
 import com.beaverbyte.financial_tracker_application.exception.UserLoginException;
 import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
@@ -55,12 +51,12 @@ public class AuthController {
 	 */
 	@PostMapping("/signin")
 	public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		if (!authenticationUtils.isAnonymous(authenticationUtils.getCurrentAuthentication())) {
-			throw new UserLoginException("User already logged in!");
+		if (authenticationUtils.hasActiveUser()) {
+			throw new UserLoginException(
+					"User already logged in!" + authenticationUtils.getCurrentAuthentication());
 		}
-
 		Authentication authentication = userService.authenticate(loginRequest);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		authenticationUtils.setAuthentication(authentication);
 
 		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
@@ -75,14 +71,10 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userService.existsByUsername(signUpRequest.getUsername())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: Username is already taken!"));
+			throw new SignupException("Username already in use!");
 		}
 		if (userService.existsByEmail(signUpRequest.getEmail())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: Email is already in use!"));
+			throw new SignupException("Email already in use!");
 		}
 
 		User user = userService.createUser(signUpRequest);
@@ -94,8 +86,8 @@ public class AuthController {
 	@PostMapping("/signout")
 	public ResponseEntity<MessageResponse> logoutUser() {
 		Authentication authentication = authenticationUtils.getCurrentAuthentication();
-		if (authenticationUtils.isAnonymous(authentication)) {
-			throw new UserAlreadyLoggedOutException("Action requires active session");
+		if (!authenticationUtils.hasActiveUser()) {
+			throw new UserNotLoggedInException("Action requires active session");
 		}
 
 		Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
