@@ -17,6 +17,7 @@ import com.beaverbyte.financial_tracker_application.exception.UserNotLoggedInExc
 import com.beaverbyte.financial_tracker_application.exception.SignupException;
 import com.beaverbyte.financial_tracker_application.exception.UserLoginException;
 import com.beaverbyte.financial_tracker_application.model.User;
+import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
 import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.LoginResponse;
@@ -30,7 +31,7 @@ import com.beaverbyte.financial_tracker_application.service.UserService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(ApiEndpoints.AUTH)
 public class AuthController {
 	private final UserService userService;
 	private final RefreshTokenService refreshTokenService;
@@ -49,11 +50,11 @@ public class AuthController {
 	 * @param loginRequest
 	 * @return
 	 */
-	@PostMapping("/signin")
+	@PostMapping(ApiEndpoints.SIGN_IN)
 	public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		if (authenticationUtils.hasActiveUser()) {
 			throw new UserLoginException(
-					"User already logged in!" + authenticationUtils.getCurrentAuthentication());
+					"User already logged in!");
 		}
 		Authentication authentication = userService.authenticate(loginRequest);
 		authenticationUtils.setAuthentication(authentication);
@@ -68,7 +69,7 @@ public class AuthController {
 				.body(loginResponse.userInfoResponse());
 	}
 
-	@PostMapping("/signup")
+	@PostMapping(ApiEndpoints.SIGN_UP)
 	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userService.existsByUsername(signUpRequest.getUsername())) {
 			throw new SignupException("Username already in use!");
@@ -83,7 +84,7 @@ public class AuthController {
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
 
-	@PostMapping("/signout")
+	@PostMapping(ApiEndpoints.SIGN_OUT)
 	public ResponseEntity<MessageResponse> logoutUser() {
 		Authentication authentication = authenticationUtils.getCurrentAuthentication();
 		if (!authenticationUtils.hasActiveUser()) {
@@ -101,7 +102,7 @@ public class AuthController {
 				.body(logoutResponse.messageResponse());
 	}
 
-	@PostMapping("/refreshtoken")
+	@PostMapping(ApiEndpoints.REFRESH_TOKEN)
 	public ResponseEntity<MessageResponse> refreshToken(HttpServletRequest request) {
 		RefreshTokenResponse refreshTokenResponse = userService.refreshToken(request);
 
