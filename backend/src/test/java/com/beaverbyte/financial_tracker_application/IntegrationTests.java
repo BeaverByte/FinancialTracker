@@ -160,8 +160,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 		Response response = sendGETRequestWithHeaders(
 				ApiEndpoints.TEST + ApiEndpoints.MOD,
-				Map.of("Cookie", sessionCookie) // Add the cookie here
-		);
+				Map.of("Cookie", sessionCookie));
 		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
 	}
 
@@ -228,8 +227,12 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 		signUp(signUpRequest);
 
-		Response signInResponse = signIn(signUpRequest.getUsername() + "string to ruin username",
-				signUpRequest.getPassword() + "string to ruin username");
+		String ruiner = "string to ruin credential";
+		String badUsername = signUpRequest.getUsername() + ruiner;
+		String badPassword = signUpRequest.getPassword() + ruiner;
+
+		Response signInResponse = signIn(badUsername, badPassword);
+
 		Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(),
 				"Expecting Unauthorized");
 	}
