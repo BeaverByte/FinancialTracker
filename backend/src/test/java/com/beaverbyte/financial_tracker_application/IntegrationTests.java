@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,18 +32,19 @@ import java.util.stream.Stream;
 import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
 import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
-import com.beaverbyte.financial_tracker_application.mapper.SignupRequestMapper;
 import com.beaverbyte.financial_tracker_application.model.RoleType;
 import com.beaverbyte.financial_tracker_application.model.Role;
 import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
+import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import jakarta.servlet.http.HttpServletResponse;
 
 class IntegrationTests extends AbstractIntegrationTest {
@@ -70,6 +73,15 @@ class IntegrationTests extends AbstractIntegrationTest {
 	@Autowired
 	PasswordEncoder encoder;
 
+	@Autowired
+	JwtUtils jwtUtils;
+
+	@Value("${JWT_COOKIE_NAME}")
+	private String jwtCookieName;
+
+	@Value("${JWT_REFRESH_COOKIE_NAME}")
+	private String jwtRefreshCookieName;
+
 	@BeforeAll
 	static void beforeAll() {
 		postgres.start();
@@ -81,7 +93,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 	}
 
 	@BeforeEach
-	void setUp() {
+	private void setUp() {
 		RestAssured.baseURI = "http://localhost:" + port;
 
 		sanitizeRepos();
@@ -90,7 +102,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 		System.out.println("Database cleared before each test");
 	}
 
-	void sanitizeRepos() {
+	private void sanitizeRepos() {
 		// Sanitizing repos
 
 		refreshTokenRepository.deleteAll();
@@ -102,7 +114,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 		roleRepository.flush();
 	}
 
-	void seedTestContainers() {
+	private void seedTestContainers() {
 		// Seeding TestContainers with roles
 		Role roleUser = new Role(RoleType.ROLE_USER);
 		roleRepository.save(roleUser);
@@ -112,71 +124,69 @@ class IntegrationTests extends AbstractIntegrationTest {
 		roleRepository.save(roleAdmin);
 	}
 
-	Response signUp(SignupRequest signupRequest) {
+	private Response signUp(SignupRequest signupRequest) {
 		return given()
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.and()
-				.body(SignupRequestMapper.toMap(signupRequest))
+				.body(signupRequest)
 				.when()
 				.post(ApiEndpoints.AUTH + ApiEndpoints.SIGN_UP)
 				.then()
 				.extract().response();
 	}
 
-	Response signIn(String username, String password) {
+	private Response signIn(String username, String password) {
 		return given()
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.and()
-				.body(
-						// (Map.of(
-						// "username", username,
-						// "password", password)
-
-						new LoginRequest())
+				.body(new LoginRequest(username, password))
 				.when()
 				.post(ApiEndpoints.AUTH + ApiEndpoints.SIGN_IN)
 				.then()
 				.extract().response();
 	}
 
-	String authenticateUserAndGetToken(String username, String password) throws Exception {
-		Response response = signIn(username, password);
-
-		String accessToken = response.jsonPath().getString("accessToken");
-
-		// Check if token is found
-		if (accessToken == null || accessToken.isEmpty()) {
-			throw new RuntimeException("Access token not found in the response.");
-		}
-
-		return accessToken;
-	}
-
-	Response sendGETHTTPJwtRequest(String path, String token) {
-		return given()
-				.header("Authorization", "Bearer " + token)
-				.when()
-				.get(path)
-				.then()
-				.extract().response();
-	}
-
 	@Test
-	void shouldAllowAuthorizedUserAccessToProtectedRoute() throws Exception {
+	void shouldAllowAuthorizedUserAccessToProtectedRoute() {
 		SignupRequest signUpRequest = createSignupRequest("dumblikebricks",
 				"dumbemail@gmail.com",
 				"dumbpassword",
 				RoleType.ROLE_MODERATOR);
 
-		signUpUser(signUpRequest);
+		signUp(signUpRequest);
 
 		Response signInResponse = signIn(signUpRequest.getUsername(), signUpRequest.getPassword());
+		String sessionCookie = extractSessionCookie(signInResponse, jwtCookieName);
 
-		String token = authenticateUserAndGetToken(signUpRequest.getUsername(), signUpRequest.getPassword());
-		String path = "api/test/user";
-		Response response = sendGETHTTPJwtRequest(path, token);
-
+		Response response = sendGETRequestWithHeaders(
+				ApiEndpoints.TEST + ApiEndpoints.MOD,
+				Map.of("Cookie", sessionCookie) // Add the cookie here
+		);
 		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
+	}
+
+	private String extractSessionCookie(Response response, String cookieName) {
+		// Example: "SESSION=abc123; Path=/; HttpOnly; Secure"
+		String setCookieHeader = response.getHeader("Set-Cookie");
+
+		if (setCookieHeader != null) {
+			// Extract the "SESSION" part (or your specific cookie name)
+			return Arrays.stream(setCookieHeader.split(";"))
+					.filter(cookie -> cookie.startsWith(cookieName + "="))
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("SESSION cookie not found!"));
+		}
+
+		throw new IllegalStateException("Set-Cookie header not present in response!");
+	}
+
+	public Response sendGETRequestWithHeaders(String url, Map<String, String> headers) {
+		RequestSpecification request = RestAssured.given();
+
+		// Add headers to the request
+		headers.forEach(request::header);
+
+		return request.get(url);
 	}
 
 	@Test
@@ -257,10 +267,6 @@ class IntegrationTests extends AbstractIntegrationTest {
 		Assertions.assertEquals(200, response.statusCode(), "Expecting OK");
 	}
 
-	Response signUpUser(SignupRequest signUpRequest) {
-		return signUp(signUpRequest);
-	}
-
 	SignupRequest createSignupRequest(String username, String email, String password, RoleType role) {
 		SignupRequest signUpRequest = new SignupRequest();
 		signUpRequest.setUsername(username);
@@ -295,7 +301,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 				"stupid",
 				RoleType.ROLE_MODERATOR);
 
-		Response response = signUpUser(signUpRequest);
+		Response response = signUp(signUpRequest);
 
 		List<User> users = userRepository.findAll();
 
@@ -311,7 +317,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 				"salmon",
 				RoleType.ROLE_MODERATOR);
 
-		signUpUser(signUpRequest);
+		signUp(signUpRequest);
 
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 				signUpRequest.getUsername(),

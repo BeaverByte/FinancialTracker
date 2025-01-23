@@ -82,7 +82,9 @@ public class UserService {
 
 	public Authentication authenticate(LoginRequest loginRequest) {
 		return authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+				// new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+				// loginRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 	}
 
 	public JwtResponse logoutUser() {

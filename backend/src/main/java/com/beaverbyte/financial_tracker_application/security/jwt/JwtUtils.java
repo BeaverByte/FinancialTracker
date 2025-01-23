@@ -30,34 +30,34 @@ public class JwtUtils {
 	private int jwtExpirationMs;
 
 	@Value("${JWT_COOKIE_NAME}")
-	private String jwtCookie;
+	private String jwtCookieName;
 
 	@Value("${JWT_REFRESH_COOKIE_NAME}")
-	private String jwtRefreshCookie;
+	private String jwtRefreshCookieName;
 
 	public ResponseCookie generateJwtCookie(UserBase user) {
 		String jwt = generateTokenFromUsername(user.getUsername());
-		return generateCookie(jwtCookie, jwt, "/api");
+		return generateCookie(jwtCookieName, jwt, "/api");
 	}
 
 	public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
-		return generateCookie(jwtRefreshCookie, refreshToken, "/api/auth/refreshtoken");
+		return generateCookie(jwtRefreshCookieName, refreshToken, "/api/auth/refreshtoken");
 	}
 
 	public String getJwtFromCookies(HttpServletRequest request) {
-		return getCookieValueByName(request, jwtCookie);
+		return getCookieValueByName(request, jwtCookieName);
 	}
 
 	public String getJwtRefreshFromCookies(HttpServletRequest request) {
-		return getCookieValueByName(request, jwtRefreshCookie);
+		return getCookieValueByName(request, jwtRefreshCookieName);
 	}
 
 	public ResponseCookie getCleanJwtCookie() {
-		return ResponseCookie.from(jwtCookie, null).path("/api").build();
+		return ResponseCookie.from(jwtCookieName, null).path("/api").build();
 	}
 
 	public ResponseCookie getCleanJwtRefreshCookie() {
-		return ResponseCookie.from(jwtRefreshCookie, null).path("/api/auth/refreshtoken").build();
+		return ResponseCookie.from(jwtRefreshCookieName, null).path("/api/auth/refreshtoken").build();
 	}
 
 	public String getUserNameFromJwtToken(String token) {
@@ -115,4 +115,5 @@ public class JwtUtils {
 			return null;
 		}
 	}
+
 }
