@@ -2,6 +2,7 @@ package com.beaverbyte.financial_tracker_application.service;
 
 import java.util.Set;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

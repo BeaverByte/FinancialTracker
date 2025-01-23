@@ -48,6 +48,7 @@ public class RoleService {
 
 	public static final String EXPECTED_INPUT_ADMIN = "admin";
 	public static final String EXPECTED_INPUT_MOD = "mod";
+	public static final String EXPECTED_INPUT_USER = "user";
 
 	private Role validateRoleByName(String role) {
 		switch (role.toLowerCase()) {
@@ -55,8 +56,10 @@ public class RoleService {
 				return getRole(RoleType.ROLE_ADMIN);
 			case EXPECTED_INPUT_MOD:
 				return getRole(RoleType.ROLE_MODERATOR);
+			case EXPECTED_INPUT_USER:
+				return getRole(RoleType.ROLE_USER);
 			default:
-				return defaultUser();
+				throw new RoleNotFoundException("Error: '" + role + "' input is not a valid Role.");
 		}
 	}
 

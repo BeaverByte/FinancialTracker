@@ -235,17 +235,15 @@ class IntegrationTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	void shouldPreventUserSignInWithInvalidRole() {
+	void shouldPreventUserSignUpWithInvalidRole() {
 		SignupRequest signUpRequest = new SignupRequest("dumblikebricks",
 				"dumbemail@gmail.com",
 				createBadRole("Yuck"),
 				"dumbpassword");
 
-		signUp(signUpRequest);
+		Response response = signUp(signUpRequest);
 
-		Response signInResponse = signIn(signUpRequest.getUsername() + "string to ruin username",
-				signUpRequest.getPassword() + "string to ruin username");
-		Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(),
+		Assertions.assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.statusCode(),
 				"Expecting Unauthorized");
 	}
 
