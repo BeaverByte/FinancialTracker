@@ -2,11 +2,15 @@ package com.beaverbyte.financial_tracker_application.exception;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class CustomProblemDetail {
 	private String title;
 	private int status;
 	private String detail;
 	private String instance;
+
+	@JsonInclude(JsonInclude.Include.NON_NULL) // Exclude when null
 	private Map<String, String> validationErrors;
 
 	// Default constructor

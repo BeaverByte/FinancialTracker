@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
+import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
 import com.beaverbyte.financial_tracker_application.mapper.SignupRequestMapper;
 import com.beaverbyte.financial_tracker_application.model.RoleType;
@@ -110,24 +114,27 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	Response signUp(SignupRequest signupRequest) {
 		return given()
-				.header("Content-type", "application/json")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.and()
 				.body(SignupRequestMapper.toMap(signupRequest))
 				.when()
-				.post("/api/auth/signup")
+				.post(ApiEndpoints.AUTH + ApiEndpoints.SIGN_UP)
 				.then()
 				.extract().response();
 	}
 
 	Response signIn(String username, String password) {
 		return given()
-				.header("Content-type", "application/json")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.and()
-				.body(Map.of(
-						"username", username,
-						"password", password))
+				.body(
+						// (Map.of(
+						// "username", username,
+						// "password", password)
+
+						new LoginRequest())
 				.when()
-				.post("/api/auth/signin")
+				.post(ApiEndpoints.AUTH + ApiEndpoints.SIGN_IN)
 				.then()
 				.extract().response();
 	}

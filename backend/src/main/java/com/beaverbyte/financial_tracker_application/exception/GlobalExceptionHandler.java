@@ -18,12 +18,18 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UserLoginException.class)
-	public ResponseEntity<String> userNotFoundExceptionHandler(UserLoginException ex) {
-		return ResponseEntity.badRequest().body(ex.getMessage());
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public CustomProblemDetail userNotFoundExceptionHandler(UserLoginException ex, WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getDescription(false));
 	}
 
 	// Handle HTTP Method Request errors (e.g. if GET is used for a POST method)
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
 	// @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
 	public ResponseEntity<ErrorMessage> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
 		ErrorMessage errors = new ErrorMessage(
