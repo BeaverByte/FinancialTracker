@@ -1,8 +1,9 @@
 package com.beaverbyte.financial_tracker_application.service;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -30,66 +31,32 @@ public class RoleService {
 		return roleMapper.mapAuthoritiesToRoles(userDetails.getAuthorities());
 	}
 
-	// public Set<Role> validateAgainstTable(Set<String> roles) {
-	// Set<Role> newRoles = new HashSet<>();
-
-	// if (roles == null) {
-	// // No roles entered so default just User
-	// Role userRole = roleRepository.findByName(RoleType.ROLE_USER)
-	// .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-	// newRoles.add(userRole);
-	// } else {
-	// roles.forEach(role -> {
-	// switch (role) {
-	// case "admin":
-	// Role adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN)
-	// .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
-	// newRoles.add(adminRole);
-
-	// break;
-	// case "mod":
-	// Role modRole = roleRepository.findByName(RoleType.ROLE_MODERATOR)
-	// .orElseThrow(() -> new RuntimeException("Error: Mod Role is not found."));
-	// newRoles.add(modRole);
-
-	// break;
-	// default:
-	// Role userRole = roleRepository.findByName(RoleType.ROLE_USER)
-	// .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
-	// newRoles.add(userRole);
-	// }
-	// });
-	// }
-
-	// return newRoles;
-	// }
-
 	public Set<Role> validateAgainstTable(Set<String> roles) {
-		Set<Role> newRoles = new HashSet<>();
-
 		if (roles == null || roles.isEmpty()) {
-			// Default to User if no roles are provided
-			newRoles.add(getRole(RoleType.ROLE_USER));
-		} else {
-			roles.forEach(role -> {
-				Role roleEntity = getRoleEntityByName(role);
-				if (roleEntity != null) {
-					newRoles.add(roleEntity);
-				}
-			});
+			return Set.of(defaultUser());
 		}
 
-		return newRoles;
+		return roles.stream()
+				.map(this::validateRoleByName)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
 	}
 
-	private Role getRoleEntityByName(String role) {
+	private Role defaultUser() {
+		return getRole(RoleType.ROLE_USER);
+	}
+
+	public static final String EXPECTED_INPUT_ADMIN = "admin";
+	public static final String EXPECTED_INPUT_MOD = "mod";
+
+	private Role validateRoleByName(String role) {
 		switch (role.toLowerCase()) {
-			case "admin":
+			case EXPECTED_INPUT_ADMIN:
 				return getRole(RoleType.ROLE_ADMIN);
-			case "mod":
+			case EXPECTED_INPUT_MOD:
 				return getRole(RoleType.ROLE_MODERATOR);
 			default:
-				return getRole(RoleType.ROLE_USER); // Default to USER if unrecognized role
+				return defaultUser();
 		}
 	}
 

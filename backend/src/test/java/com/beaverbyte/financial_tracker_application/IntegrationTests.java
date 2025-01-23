@@ -235,6 +235,21 @@ class IntegrationTests extends AbstractIntegrationTest {
 	}
 
 	@Test
+	void shouldPreventUserSignInWithInvalidRole() {
+		SignupRequest signUpRequest = new SignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				createBadRole("Yuck"),
+				"dumbpassword");
+
+		signUp(signUpRequest);
+
+		Response signInResponse = signIn(signUpRequest.getUsername() + "string to ruin username",
+				signUpRequest.getPassword() + "string to ruin username");
+		Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(),
+				"Expecting Unauthorized");
+	}
+
+	@Test
 	void shouldHaveCorrectRolesInDatabase() {
 		List<Role> roles = roleRepository.findAll();
 		int expectedRoles = 3;
@@ -291,6 +306,11 @@ class IntegrationTests extends AbstractIntegrationTest {
 			default:
 				throw new IllegalArgumentException("Invalid role input: " + role);
 		}
+	}
+
+	Set<String> createBadRole(String input) {
+		return Stream.of(input)
+				.collect(Collectors.toSet());
 	}
 
 	@Test
