@@ -27,7 +27,7 @@ import com.beaverbyte.financial_tracker_application.security.jwt.AuthTokenFilter
 public class WebSecurityConfig { 
   // Spring Security needs User details to perform auth
   @Autowired
-  UserDetailsServiceImpl userDetailsService;
+  CustomUserDetailsService userDetailsService;
 
   // Handles unauthorized requests
   @Autowired

@@ -10,13 +10,18 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,274 +29,301 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.beaverbyte.financial_tracker_application.dto.api.request.SignupRequest;
-import com.beaverbyte.financial_tracker_application.entity.ERole;
-import com.beaverbyte.financial_tracker_application.entity.Role;
-import com.beaverbyte.financial_tracker_application.entity.User;
+import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
+import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
+import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.model.RoleType;
+import com.beaverbyte.financial_tracker_application.model.Role;
+import com.beaverbyte.financial_tracker_application.model.User;
+import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
+import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class IntegrationTests extends AbstractIntegrationTest{
+class IntegrationTests extends AbstractIntegrationTest {
 
-    @LocalServerPort
-    private Integer port;
+	@LocalServerPort
+	private Integer port;
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+	@Autowired
+	AuthenticationManager authenticationManager;
 
-    @Autowired
-    TestRestTemplate restTemplate;
+	@Autowired
+	TestRestTemplate restTemplate;
 
-    @Autowired
-    UserRepository userRepository;
+	@Autowired
+	UserRepository userRepository;
 
-    @Autowired
-    RoleRepository roleRepository;
-    
-    @Autowired
-    RoleService roleService;
+	@Autowired
+	RoleRepository roleRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
+	@Autowired
+	RefreshTokenRepository refreshTokenRepository;
 
-    @BeforeAll
-    static void beforeAll() {
-        postgres.start();
-    }
-    @AfterAll
-    static void afterAll() {
-        postgres.stop();
-    }
+	@Autowired
+	RoleService roleService;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.baseURI = "http://localhost:" + port;
+	@Autowired
+	PasswordEncoder encoder;
 
-        sanitizeRepos();
-        seedTestContainers();
+	@Autowired
+	JwtUtils jwtUtils;
 
-        System.out.println("Database cleared before each test");
-    }
+	@Value("${JWT_COOKIE_NAME}")
+	private String jwtCookieName;
 
-    void sanitizeRepos(){
-        // Sanitizing repos
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
+	@Value("${JWT_REFRESH_COOKIE_NAME}")
+	private String jwtRefreshCookieName;
 
-        userRepository.flush();
-        roleRepository.flush();
-    }
+	@BeforeAll
+	static void beforeAll() {
+		postgres.start();
+	}
 
-    void seedTestContainers() {
-        // Seeding TestContainers with roles 
-        Role roleUser = new Role(ERole.ROLE_USER);
-        roleRepository.save(roleUser);
-        Role roleMod = new Role(ERole.ROLE_MODERATOR);
-        roleRepository.save(roleMod);
-        Role roleAdmin = new Role(ERole.ROLE_ADMIN);
-        roleRepository.save(roleAdmin);
-    }
+	@AfterAll
+	static void afterAll() {
+		postgres.stop();
+	}
 
-    Response signUp(SignupRequest signupRequest) {
-        return given()
-            .header("Content-type", "application/json")
-            .and()
-            .body(Map.of(
-                "username", signupRequest.getUsername(),
-                "email", signupRequest.getEmail(),
-                "password", signupRequest.getPassword(),
-                "role", signupRequest.getRole()
-            ))
-            .when()
-            .post("/api/auth/signup")
-            .then()
-            .extract().response();
-    }
+	@BeforeEach
+	private void setUp() {
+		RestAssured.baseURI = "http://localhost:" + port;
 
-    Response signIn(String username, String password) {
-        return given()
-            .header("Content-type", "application/json")
-            .and()
-            .body(Map.of(
-                "username", username,
-                "password", password
-            ))
-            .when()
-            .post("/api/auth/signin")
-            .then()
-            .extract().response();
-    }
+		sanitizeRepos();
+		seedTestContainers();
 
-    String authenticateUserAndGetToken(String username, String password) throws Exception {
-        Response response = signIn(username, password);
-        
-        String accessToken = response.jsonPath().getString("accessToken");
+		System.out.println("Database cleared before each test");
+	}
 
-        //  Check if token is found
-        if (accessToken == null || accessToken.isEmpty()) {
-            throw new RuntimeException("Access token not found in the response.");
-        }
+	private void sanitizeRepos() {
+		// Sanitizing repos
 
-        return accessToken;
-    }
-    Response sendGETHTTPJwtRequest(String path, String token) {
-        Response response = given()
-        .header("Authorization", "Bearer " + token)
-        .when()
-        .get(path)
-        .then()
-        .extract().response();
+		refreshTokenRepository.deleteAll();
+		userRepository.deleteAll();
+		roleRepository.deleteAll();
 
-        return response;
-    }
+		refreshTokenRepository.flush();
+		userRepository.flush();
+		roleRepository.flush();
+	}
 
-    @Test
-    void shouldAllowAuthorizedUserAccessToProtectedRoute() throws Exception{
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+	private void seedTestContainers() {
+		// Seeding TestContainers with roles
+		Role roleUser = new Role(RoleType.ROLE_USER);
+		roleRepository.save(roleUser);
+		Role roleMod = new Role(RoleType.ROLE_MODERATOR);
+		roleRepository.save(roleMod);
+		Role roleAdmin = new Role(RoleType.ROLE_ADMIN);
+		roleRepository.save(roleAdmin);
+	}
 
-        signUpUser(signUpRequest);
+	private Response signUp(SignupRequest signupRequest) {
+		return given()
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.and()
+				.body(signupRequest)
+				.when()
+				.post(ApiEndpoints.AUTH + ApiEndpoints.SIGN_UP)
+				.then()
+				.extract().response();
+	}
 
-        String token = authenticateUserAndGetToken(signUpRequest.getUsername(),signUpRequest.getPassword());
-        String path = "api/test/user";
-        Response response = sendGETHTTPJwtRequest(path, token);
+	private Response signIn(String username, String password) {
+		return given()
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.and()
+				.body(new LoginRequest(username, password))
+				.when()
+				.post(ApiEndpoints.AUTH + ApiEndpoints.SIGN_IN)
+				.then()
+				.extract().response();
+	}
 
-        Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
-    }
+	@Test
+	void shouldAllowAuthorizedUserAccessToProtectedRoute() {
+		SignupRequest signUpRequest = createSignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
 
-    @Test
-    void shouldHaveZeroUsersInDatabaseAtStart(){
-        long users = userRepository.count();
-        assertEquals(0, users);
-    }
+		signUp(signUpRequest);
 
-    @Test
-    void shouldHavePublicLinkAccessible(){
-        given()
-        .contentType(ContentType.JSON)
-        .when()
-        .get("/api/test/all")
-        .then()
-        .statusCode(200);
-    }
+		Response signInResponse = signIn(signUpRequest.getUsername(), signUpRequest.getPassword());
+		String sessionCookie = extractSessionCookie(signInResponse, jwtCookieName);
 
-    @Test 
-    void shouldAllowUserSignInWithCorrectDetails(){
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+		Response response = sendGETRequestWithHeaders(
+				ApiEndpoints.TEST + ApiEndpoints.MOD,
+				Map.of("Cookie", sessionCookie) // Add the cookie here
+		);
+		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
+	}
 
-        signUp(signUpRequest);
+	private String extractSessionCookie(Response response, String cookieName) {
+		// Example: "SESSION=abc123; Path=/; HttpOnly; Secure"
+		String setCookieHeader = response.getHeader("Set-Cookie");
 
-        Response signInResponse = signIn(signUpRequest.getUsername(), signUpRequest.getPassword());
-        Assertions.assertEquals(200, signInResponse.statusCode(), "Expecting OK");
-    }
-    @Test 
-    void shouldPreventUserSignInWithIncorrectDetails(){
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+		if (setCookieHeader != null) {
+			// Extract the "SESSION" part (or your specific cookie name)
+			return Arrays.stream(setCookieHeader.split(";"))
+					.filter(cookie -> cookie.startsWith(cookieName + "="))
+					.findFirst()
+					.orElseThrow(() -> new IllegalStateException("SESSION cookie not found!"));
+		}
 
-        signUp(signUpRequest);
+		throw new IllegalStateException("Set-Cookie header not present in response!");
+	}
 
-        Response signInResponse = signIn(signUpRequest.getUsername() + "string to ruin username", signUpRequest.getPassword() + "string to ruin username");
-        Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(), "Expecting Unauthorized");
-    }
-    @Test
-    void shouldHaveCorrectRolesInDatabase() {
-        List<Role> roles = roleRepository.findAll();
-        int expectedRoles = 3;
+	public Response sendGETRequestWithHeaders(String url, Map<String, String> headers) {
+		RequestSpecification request = RestAssured.given();
 
-        Assertions.assertNotNull(roleRepository);
-        assertEquals(expectedRoles, roles.size());
-        assertTrue(roles.stream().anyMatch(role -> role.getName().equals(ERole.ROLE_USER)));
-        assertTrue(roles.stream().anyMatch(role -> role.getName().equals(ERole.ROLE_MODERATOR)));
-        assertTrue(roles.stream().anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN)));
-    }
+		// Add headers to the request
+		headers.forEach(request::header);
 
-    @Test
-    void shouldHaveRoleRepositoryInjected() {
-        Assertions.assertNotNull(roleRepository, "RoleRepository should be injected.");
-    }
+		return request.get(url);
+	}
 
-    @Test
-    void shouldAllowUserSignUp() {
-        SignupRequest signUpRequest = new SignupRequest();
-        signUpRequest.setUsername("dumbusername");
-        signUpRequest.setEmail("dumbemailg@gmail.com");
-        signUpRequest.setPassword("dumbpassword");
+	@Test
+	void shouldHaveZeroUsersInDatabaseAtStart() {
+		long users = userRepository.count();
+		assertEquals(0, users);
+	}
 
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        signUpRequest.setRole(signUpRoles);
+	@Test
+	void shouldHavePublicLinkAccessible() {
+		given()
+				.contentType(ContentType.JSON)
+				.when()
+				.get("/api/test/all")
+				.then()
+				.statusCode(200);
+	}
 
-        // Set<Role> roles = roleService.validateAgainstTable(signUpRoles);
+	@Test
+	void shouldAllowUserSignInWithCorrectDetails() {
+		SignupRequest signUpRequest = createSignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
 
-        Response response = signUp(signUpRequest);
+		signUp(signUpRequest);
 
-        // Assertions.assertEquals("Assert incorrect for String error", response.getBody().asPrettyString());
+		Response signInResponse = signIn(signUpRequest.getUsername(), signUpRequest.getPassword());
+		Assertions.assertEquals(200, signInResponse.statusCode(), "Expecting OK");
+	}
 
-        Assertions.assertEquals(200, response.statusCode(), "Expecting OK");
-    }
+	@Test
+	void shouldPreventUserSignInWithIncorrectDetails() {
+		SignupRequest signUpRequest = createSignupRequest(
+				"stupid",
+				"stupid@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
 
-    Response signUpUser(SignupRequest signUpRequest) {
-        return signUp(signUpRequest);
-    }
+		signUp(signUpRequest);
 
-    SignupRequest createSignUpRequest(String username, String email, String password, Set<String> roles) {
-        SignupRequest signUpRequest = new SignupRequest();
-        signUpRequest.setUsername(username);
-        signUpRequest.setEmail(email);
-        signUpRequest.setPassword(password);
-        signUpRequest.setRole(roles);
+		Response signInResponse = signIn(signUpRequest.getUsername() + "string to ruin username",
+				signUpRequest.getPassword() + "string to ruin username");
+		Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(),
+				"Expecting Unauthorized");
+	}
 
-        return signUpRequest;
-    }
+	@Test
+	void shouldHaveCorrectRolesInDatabase() {
+		List<Role> roles = roleRepository.findAll();
+		int expectedRoles = 3;
 
-    @Test
-    void shouldHaveUserInDatabaseAfterSignUp() {
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+		Assertions.assertNotNull(roleRepository);
+		assertEquals(expectedRoles, roles.size());
+		assertTrue(roles.stream().anyMatch(role -> role.getName().equals(RoleType.ROLE_USER)));
+		assertTrue(roles.stream().anyMatch(role -> role.getName().equals(RoleType.ROLE_MODERATOR)));
+		assertTrue(roles.stream().anyMatch(role -> role.getName().equals(RoleType.ROLE_ADMIN)));
+	}
 
-        Response response = signUpUser(signUpRequest);
+	@Test
+	void shouldHaveRoleRepositoryInjected() {
+		Assertions.assertNotNull(roleRepository, "RoleRepository should be injected.");
+	}
 
-        List<User> users = userRepository.findAll();
+	@Test
+	void shouldAllowUserSignUp() {
+		SignupRequest signUpRequest = new SignupRequest();
+		signUpRequest.setUsername("dumbusername");
+		signUpRequest.setEmail("dumbemailg@gmail.com");
+		signUpRequest.setPassword("dumbpassword");
 
-        // Assertions.assertEquals("Assert incorrect for String error", response.getBody().asPrettyString());
-        Assertions.assertEquals(200, response.statusCode(), "Expecting OK for response");
-        // Assertions.assertEquals(200, response.getBody(), "Expecting yuck");
-        assertTrue(users.stream().anyMatch(user -> user.getUsername().contains("dumblikebricks")));
-    }
-    @Test
-    void shouldHaveTokenHandledByAuthenticationManager() {
-        UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken("validuser", "validpassword");
-        
-        try {
-            authenticationManager.authenticate(authenticationToken);
-            System.out.println("Authentication successful.");
-        } catch (Exception e) {
-            System.out.println("Authentication failed.");
-        }
-    }
+		Set<String> signUpRoles = Stream.of("user", "mod")
+				.collect(Collectors.toCollection(HashSet::new));
+		signUpRequest.setRole(signUpRoles);
+
+		Response response = signUp(signUpRequest);
+
+		Assertions.assertEquals(200, response.statusCode(), "Expecting OK");
+	}
+
+	SignupRequest createSignupRequest(String username, String email, String password, RoleType role) {
+		SignupRequest signUpRequest = new SignupRequest();
+		signUpRequest.setUsername(username);
+		signUpRequest.setEmail(email);
+		signUpRequest.setPassword(password);
+		signUpRequest.setRole(getRolesForInput(role));
+
+		return signUpRequest;
+	}
+
+	Set<String> getRolesForInput(RoleType role) {
+		switch (role) {
+			case ROLE_USER:
+				return Stream.of("user")
+						.collect(Collectors.toSet());
+			case ROLE_MODERATOR:
+				return Stream.of("user", "mod")
+						.collect(Collectors.toSet());
+			case ROLE_ADMIN:
+				return Stream.of("admin")
+						.collect(Collectors.toSet());
+			default:
+				throw new IllegalArgumentException("Invalid role input: " + role);
+		}
+	}
+
+	@Test
+	void shouldHaveUserInDatabaseAfterSignUp() {
+		SignupRequest signUpRequest = createSignupRequest(
+				"stupid",
+				"stupid@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
+
+		Response response = signUp(signUpRequest);
+
+		List<User> users = userRepository.findAll();
+
+		Assertions.assertEquals(200, response.statusCode(), "Expecting OK for response");
+		assertTrue(users.stream().anyMatch(user -> user.getUsername().contains(signUpRequest.getUsername())));
+	}
+
+	@Test
+	void shouldHaveTokenHandledByAuthenticationManager() {
+		SignupRequest signUpRequest = createSignupRequest(
+				"salmon",
+				"salmon@gmail.com",
+				"salmon",
+				RoleType.ROLE_MODERATOR);
+
+		signUp(signUpRequest);
+
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+				signUpRequest.getUsername(),
+				signUpRequest.getPassword());
+
+		Authentication authentication = authenticationManager.authenticate(authenticationToken);
+		assertTrue(authentication.isAuthenticated());
+	}
 }

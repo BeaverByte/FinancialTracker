@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.beaverbyte.financial_tracker_application.entity.RefreshToken;
+import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
+import com.beaverbyte.financial_tracker_application.model.RefreshToken;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
-import com.beaverbyte.financial_tracker_application.security.jwt.TokenRefreshException;
 
 @Service
 public class RefreshTokenService {
@@ -41,14 +41,16 @@ public class RefreshTokenService {
   }
 
   public RefreshToken verifyExpiration(RefreshToken token) {
-    if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+    if (isExpired(token)) {
       refreshTokenRepository.delete(token);
       throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new signin request");
     }
 
     return token;
   }
-
+  public boolean isExpired(RefreshToken token) {
+	return token.getExpiryDate().compareTo(Instant.now()) < 0;
+  }
   @Transactional
   public int deleteByUserId(Long userId) {
     return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());

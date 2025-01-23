@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.beaverbyte.financial_tracker_application.entity.Transaction;
+import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
 
 /**
