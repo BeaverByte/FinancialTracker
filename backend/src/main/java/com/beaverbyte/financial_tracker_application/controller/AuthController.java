@@ -61,11 +61,8 @@ public class AuthController {
 		authenticationUtils.setAuthentication(authentication);
 		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-		if (authenticationUtils.hasActiveUser()) {
-			throw new UserLoginException("User already logged in!");
-		}
-		if (userService.refreshTokenExistsforUser(userDetails.getId())) {
-			log.info("Refresh Token exists for given user, deleting token");
+		if (userService.refreshTokenExistsForUser(userDetails.getId())) {
+			log.info("Refresh Token exists for given user ID, deleting token");
 			refreshTokenService.deleteByUserId(userDetails.getId());
 		}
 

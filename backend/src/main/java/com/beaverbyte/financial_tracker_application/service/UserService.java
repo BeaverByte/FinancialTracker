@@ -116,7 +116,7 @@ public class UserService {
 		return new RefreshTokenResponse(new MessageResponse("Refresh Token is refreshed successfully!"), jwtCookie);
 	}
 
-	public boolean refreshTokenExistsforUser(Long userId) {
+	public boolean refreshTokenExistsForUser(Long userId) {
 		return userRepository.findById(userId)
 				.map(user -> {
 					boolean userExists = refreshTokenService.findByUser(user).isPresent();
