@@ -11,48 +11,56 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.model.RefreshToken;
+import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 
 @Service
 public class RefreshTokenService {
-  @Value("${JWT_REFRESH_EXPIRATION_MS}")
-  private Long refreshTokenDurationMs;
+	@Value("${JWT_REFRESH_EXPIRATION_MS}")
+	private Long refreshTokenDurationMs;
 
-  @Autowired
-  private RefreshTokenRepository refreshTokenRepository;
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-  public Optional<RefreshToken> findByToken(String token) {
-    return refreshTokenRepository.findByToken(token);
-  }
+	public Optional<RefreshToken> findByToken(String token) {
+		return refreshTokenRepository.findByToken(token);
+	}
 
-  public RefreshToken createRefreshToken(Long userId) {
-    RefreshToken refreshToken = new RefreshToken();
+	public Optional<RefreshToken> findByUser(User user) {
+		return refreshTokenRepository.findByUser(user);
+	}
 
-    refreshToken.setUser(userRepository.findById(userId).get());
-    refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-    refreshToken.setToken(UUID.randomUUID().toString());
+	public RefreshToken createRefreshToken(Long userId) {
+		RefreshToken refreshToken = new RefreshToken();
 
-    refreshToken = refreshTokenRepository.save(refreshToken);
-    return refreshToken;
-  }
+		refreshToken.setUser(userRepository.findById(userId).get());
+		refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+		refreshToken.setToken(UUID.randomUUID().toString());
 
-  public RefreshToken verifyExpiration(RefreshToken token) {
-    if (isExpired(token)) {
-      refreshTokenRepository.delete(token);
-      throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new signin request");
-    }
+		refreshToken = refreshTokenRepository.save(refreshToken);
+		return refreshToken;
+	}
 
-    return token;
-  }
-  public boolean isExpired(RefreshToken token) {
-	return token.getExpiryDate().compareTo(Instant.now()) < 0;
-  }
-  @Transactional
-  public int deleteByUserId(Long userId) {
-    return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
-  }
+	public RefreshToken verifyExpiration(RefreshToken token) {
+		if (isExpired(token)) {
+			refreshTokenRepository.delete(token);
+			throw new TokenRefreshException(token.getToken(),
+					"Refresh token was expired. Please make a new signin request");
+		}
+
+		return token;
+	}
+
+	public boolean isExpired(RefreshToken token) {
+		return token.getExpiryDate().compareTo(Instant.now()) < 0;
+	}
+
+	@Transactional
+	public int deleteByUserId(Long userId) {
+		return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+	}
 }

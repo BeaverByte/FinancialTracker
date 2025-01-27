@@ -1,6 +1,10 @@
 package com.beaverbyte.financial_tracker_application.service;
 
+import java.util.Optional;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseCookie;
@@ -30,6 +34,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class UserService {
+
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	private final UserRepository userRepository;
 	private final RoleService roleService;
@@ -83,8 +89,6 @@ public class UserService {
 
 	public Authentication authenticate(LoginRequest loginRequest) {
 		return authenticationManager.authenticate(
-				// new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-				// loginRequest.getPassword()));
 				new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 	}
 
@@ -110,5 +114,20 @@ public class UserService {
 		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(refreshToken.getUser());
 
 		return new RefreshTokenResponse(new MessageResponse("Refresh Token is refreshed successfully!"), jwtCookie);
+	}
+
+	public boolean refreshTokenExistsforUser(Long userId) {
+		return userRepository.findById(userId)
+				.map(user -> {
+					boolean userExists = refreshTokenService.findByUser(user).isPresent();
+					if (!userExists) {
+						log.debug("No refresh token found for user with ID: {}", userId);
+					}
+					return userExists;
+				})
+				.orElseGet(() -> {
+					log.debug("User not found with ID: {}", userId);
+					return false;
+				});
 	}
 }

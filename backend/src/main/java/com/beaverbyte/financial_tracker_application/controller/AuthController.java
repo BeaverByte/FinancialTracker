@@ -3,6 +3,8 @@ package com.beaverbyte.financial_tracker_application.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,9 @@ import com.beaverbyte.financial_tracker_application.service.UserService;
 @RestController
 @RequestMapping(ApiEndpoints.AUTH)
 public class AuthController {
+
+	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
 	private final UserService userService;
 	private final RefreshTokenService refreshTokenService;
 	private final AuthenticationUtils authenticationUtils;
@@ -52,14 +57,17 @@ public class AuthController {
 	 */
 	@PostMapping(ApiEndpoints.SIGN_IN)
 	public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		if (authenticationUtils.hasActiveUser()) {
-			throw new UserLoginException(
-					"User already logged in!");
-		}
 		Authentication authentication = userService.authenticate(loginRequest);
 		authenticationUtils.setAuthentication(authentication);
-
 		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+		if (authenticationUtils.hasActiveUser()) {
+			throw new UserLoginException("User already logged in!");
+		}
+		if (userService.refreshTokenExistsforUser(userDetails.getId())) {
+			log.info("Refresh Token exists for given user, deleting token");
+			refreshTokenService.deleteByUserId(userDetails.getId());
+		}
 
 		LoginResponse loginResponse = userService.login(userDetails);
 
