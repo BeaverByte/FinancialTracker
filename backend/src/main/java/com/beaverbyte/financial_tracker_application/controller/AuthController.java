@@ -59,7 +59,7 @@ public class AuthController {
 	public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		Authentication authentication = userService.authenticate(loginRequest);
 		authenticationUtils.setAuthentication(authentication);
-		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+		CustomUserDetails userDetails = AuthenticationUtils.getCustomUserDetails(authentication);
 
 		if (userService.refreshTokenExistsForUser(userDetails.getId())) {
 			log.info("Refresh Token exists for given user ID, deleting token");
@@ -77,9 +77,11 @@ public class AuthController {
 	@PostMapping(ApiEndpoints.SIGN_UP)
 	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userService.existsByUsername(signUpRequest.getUsername())) {
+			log.info("Username in signup already used");
 			throw new SignupException("Username already in use!");
 		}
 		if (userService.existsByEmail(signUpRequest.getEmail())) {
+			log.info("Email in signup already used");
 			throw new SignupException("Email already in use!");
 		}
 
@@ -91,12 +93,12 @@ public class AuthController {
 
 	@PostMapping(ApiEndpoints.SIGN_OUT)
 	public ResponseEntity<MessageResponse> logoutUser() {
-		Authentication authentication = authenticationUtils.getCurrentAuthentication();
 		if (!authenticationUtils.hasActiveUser()) {
 			throw new UserNotLoggedInException("Action requires active session");
 		}
 
-		Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+		Authentication authentication = authenticationUtils.getCurrentAuthentication();
+		Long userId = AuthenticationUtils.getCustomUserDetails(authentication).getId();
 		refreshTokenService.deleteByUserId(userId);
 
 		JwtResponse logoutResponse = userService.logoutUser();

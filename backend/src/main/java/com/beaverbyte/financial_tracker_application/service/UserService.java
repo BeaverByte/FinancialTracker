@@ -70,10 +70,13 @@ public class UserService {
 		user.setPassword(encoder.encode(signUpRequest.getPassword()));
 		Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
 		user.setRoles(roles);
+
+		log.info("User created");
 		return user;
 	}
 
 	public void save(User user) {
+		log.info("User, {}, saved in database", user.getUsername());
 		userRepository.save(user);
 	}
 

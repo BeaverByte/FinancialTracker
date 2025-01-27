@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 
 @Service
 public class RefreshTokenService {
+	private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
+
 	@Value("${JWT_REFRESH_EXPIRATION_MS}")
 	private Long refreshTokenDurationMs;
 
@@ -61,6 +65,7 @@ public class RefreshTokenService {
 
 	@Transactional
 	public int deleteByUserId(Long userId) {
+		log.info("Deleting Refresh Token from database");
 		return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
 	}
 }
