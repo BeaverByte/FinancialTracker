@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthEntryPointJwt;
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthTokenFilter;
+import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 
 /**
  * Configures security regarding authentication, http requests, etc.
@@ -27,10 +28,13 @@ import com.beaverbyte.financial_tracker_application.security.jwt.AuthTokenFilter
 public class WebSecurityConfig {
 	final CustomUserDetailsService userDetailsService;
 	final AuthEntryPointJwt unauthorizedHandler;
+	final JwtUtils jwtUtils;
 
-	WebSecurityConfig(CustomUserDetailsService userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+	public WebSecurityConfig(CustomUserDetailsService userDetailsService, AuthEntryPointJwt unauthorizedHandler,
+			JwtUtils jwtUtils) {
 		this.userDetailsService = userDetailsService;
 		this.unauthorizedHandler = unauthorizedHandler;
+		this.jwtUtils = jwtUtils;
 	}
 
 	/**
@@ -38,7 +42,7 @@ public class WebSecurityConfig {
 	 */
 	@Bean
 	public AuthTokenFilter authenticationJwtTokenFilter() {
-		return new AuthTokenFilter();
+		return new AuthTokenFilter(jwtUtils, userDetailsService);
 	}
 
 	/**

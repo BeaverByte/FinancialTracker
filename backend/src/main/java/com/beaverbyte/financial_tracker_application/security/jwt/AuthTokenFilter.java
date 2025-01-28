@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
@@ -24,12 +25,15 @@ import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsSe
  * 
  */
 public class AuthTokenFilter extends OncePerRequestFilter {
-	@Autowired
-	private JwtUtils jwtUtils;
-	@Autowired
-	private CustomUserDetailsService userDetailsService;
+	private final JwtUtils jwtUtils;
+	private final CustomUserDetailsService userDetailsService;
 
 	private static final Logger log = LoggerFactory.getLogger(AuthTokenFilter.class);
+
+	public AuthTokenFilter(JwtUtils jwtUtils, CustomUserDetailsService userDetailsService) {
+		this.jwtUtils = jwtUtils;
+		this.userDetailsService = userDetailsService;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
