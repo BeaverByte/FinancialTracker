@@ -1,5 +1,7 @@
 package com.beaverbyte.financial_tracker_application.security;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
+import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthEntryPointJwt;
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthTokenFilter;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
@@ -95,6 +101,21 @@ public class WebSecurityConfig {
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
+	}
+
+	@Bean
+	public CorsFilter corsFilter() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		// Specify the allowed origin, e.g., your frontend URL
+		configuration.setAllowedOrigins(List.of(ApiEndpoints.FRONTEND_URL)); // Frontend URL here
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuration.setExposedHeaders(List.of("Authorization")); // Optional: expose specific headers
+		configuration.setAllowCredentials(true); // Allow credentials (cookies)
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration); // Apply to all endpoints
+		return new CorsFilter(source);
 	}
 
 }

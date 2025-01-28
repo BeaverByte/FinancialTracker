@@ -30,4 +30,6 @@ public class ApiEndpoints {
 
 	public static final String ADMIN = "/admin";
 	public static final String TEST_ADMIN_URL = TEST + ADMIN;
+
+	public static final String FRONTEND_URL = "http://localhost:5173";
 }
