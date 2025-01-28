@@ -20,74 +20,74 @@ import com.beaverbyte.financial_tracker_application.security.jwt.AuthTokenFilter
 /**
  * Configures security regarding authentication, http requests, etc.
  * In {@link #filterChain} the {@link #authenticationProvider} authenticates.
- *  
+ * 
  */
-@Configuration 
+@Configuration
 @EnableMethodSecurity // AOP Security on methods
-public class WebSecurityConfig { 
-  // Spring Security needs User details to perform auth
-  @Autowired
-  CustomUserDetailsService userDetailsService;
+public class WebSecurityConfig {
+	final CustomUserDetailsService userDetailsService;
+	final AuthEntryPointJwt unauthorizedHandler;
 
-  // Handles unauthorized requests
-  @Autowired
-  private AuthEntryPointJwt unauthorizedHandler;
+	WebSecurityConfig(CustomUserDetailsService userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+		this.userDetailsService = userDetailsService;
+		this.unauthorizedHandler = unauthorizedHandler;
+	}
 
-  /**
-   * Factory method to create new {@link AuthTokenFilter}
-   */
-  @Bean
-  public AuthTokenFilter authenticationJwtTokenFilter() {
-    return new AuthTokenFilter();
-  }
+	/**
+	 * Factory method to create new {@link AuthTokenFilter}
+	 */
+	@Bean
+	public AuthTokenFilter authenticationJwtTokenFilter() {
+		return new AuthTokenFilter();
+	}
 
-  /**
-   * An AuthenticationManager delegates to this with an authenticate() method.
-   * 
-   * Validates user provided username (with {@link #userDetailsService}) and password against hashed password in database using set
-   * {@link #passwordEncoder}. Adds to SecurityContext upon success. 
-   *  
-   */
-  @Bean
-  public DaoAuthenticationProvider authenticationProvider() {
-      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+	/**
+	 * An AuthenticationManager delegates to this with an authenticate() method.
+	 * 
+	 * Validates user provided username (with {@link #userDetailsService}) and
+	 * password against hashed password in database using set
+	 * {@link #passwordEncoder}. Adds to SecurityContext upon success.
+	 * 
+	 */
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider() {
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 
-      // Service used here to inject user Details when they're fired
-      authProvider.setUserDetailsService(userDetailsService);
-      // PasswordEncoder set, otherwise will be plain text
-      authProvider.setPasswordEncoder(passwordEncoder()); 
-   
-      return authProvider;
-  }
-  
-  // Delegates to one or more AuthenticationProvider implementations for authentication
-  @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-    return authConfig.getAuthenticationManager();
-  }
+		// Service used here to inject user Details when they're fired
+		authProvider.setUserDetailsService(userDetailsService);
+		// PasswordEncoder set, otherwise will be plain text
+		authProvider.setPasswordEncoder(passwordEncoder());
 
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-  
-  // Security that applies to HTTP requests
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> 
-          auth.requestMatchers("/api/auth/**").permitAll()
-              .requestMatchers("/api/test/**").permitAll()
-              .anyRequest().authenticated()
-        );
+		return authProvider;
+	}
 
-    http.authenticationProvider(authenticationProvider());
+	// Delegates to one or more AuthenticationProvider implementations for
+	// authentication
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
+	}
 
-    // Adding to filter before to ensure Jwt Filter for authenticating users
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    
-    return http.build();
-  }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	// Security that applies to HTTP requests
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.csrf(csrf -> csrf.disable())
+				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers("/api/test/**").permitAll()
+						.anyRequest().authenticated());
+
+		http.authenticationProvider(authenticationProvider());
+
+		// Adding to filter before to ensure Jwt Filter for authenticating users
+		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
+	}
 }

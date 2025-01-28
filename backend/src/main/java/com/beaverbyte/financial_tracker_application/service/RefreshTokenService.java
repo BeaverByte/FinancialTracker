@@ -1,6 +1,7 @@
 package com.beaverbyte.financial_tracker_application.service;
 
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,6 +67,9 @@ public class RefreshTokenService {
 	@Transactional
 	public int deleteByUserId(Long userId) {
 		log.info("Deleting Refresh Token from database");
-		return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+
+		return userRepository.findById(userId)
+				.map(refreshTokenRepository::deleteByUser)
+				.orElseThrow(() -> new NoSuchElementException("User not found with ID"));
 	}
 }

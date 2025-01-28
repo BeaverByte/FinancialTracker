@@ -13,45 +13,44 @@ import com.beaverbyte.financial_tracker_application.repository.TransactionReposi
  */
 @Service
 public class TransactionService {
-    
-    private final TransactionRepository transactionRepository;
 
-    // Bean will inject available data access object dependency
-    public TransactionService(TransactionRepository transactionDAO) {
-            this.transactionRepository = transactionDAO;
-    }
+	private final TransactionRepository transactionRepository;
 
-    public List<Transaction> findAll() {
-        return transactionRepository.findAll();
-    }
+	public TransactionService(TransactionRepository transactionDAO) {
+		this.transactionRepository = transactionDAO;
+	}
 
-    public Transaction findById(long id) {
-        Optional<Transaction> searchedTransaction = transactionRepository.findById(id);
+	public List<Transaction> findAll() {
+		return transactionRepository.findAll();
+	}
 
-        Transaction transaction = null;
+	public Transaction findById(long id) {
+		Optional<Transaction> searchedTransaction = transactionRepository.findById(id);
 
-        if (searchedTransaction.isPresent()) {
-            transaction = searchedTransaction.get();
-        } else {
-            throw new RuntimeException("Transaction ID not found - " + id);
-        }
+		Transaction transaction = null;
 
-        return transaction;
-    }
+		if (searchedTransaction.isPresent()) {
+			transaction = searchedTransaction.get();
+		} else {
+			throw new RuntimeException("Transaction ID not found - " + id);
+		}
 
-    public boolean existsById(long id) {
-        Optional<Transaction> searchedTransaction = transactionRepository.findById(id);
-        if (searchedTransaction.isPresent()) {
-            return true;
-        }
-            return false;
-    }
+		return transaction;
+	}
 
-    public Transaction save(Transaction transaction) {
-        return transactionRepository.save(transaction);
-    }
+	public boolean existsById(long id) {
+		Optional<Transaction> searchedTransaction = transactionRepository.findById(id);
+		if (searchedTransaction.isPresent()) {
+			return true;
+		}
+		return false;
+	}
 
-    public void deleteById(long id) {
-        transactionRepository.deleteById(id);
-    }
+	public Transaction save(Transaction transaction) {
+		return transactionRepository.save(transaction);
+	}
+
+	public void deleteById(long id) {
+		transactionRepository.deleteById(id);
+	}
 }

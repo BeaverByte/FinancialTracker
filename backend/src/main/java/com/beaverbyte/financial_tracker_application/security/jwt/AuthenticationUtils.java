@@ -9,11 +9,11 @@ import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Component
 public class AuthenticationUtils {
-	public boolean isAnonymous(Authentication authentication) {
+	public static boolean isAnonymous(Authentication authentication) {
 		return authentication instanceof AnonymousAuthenticationToken;
 	}
 
-	public boolean hasActiveUser() {
+	public static boolean hasActiveUser() {
 		return !isAnonymous(getCurrentAuthentication());
 	}
 
@@ -23,11 +23,11 @@ public class AuthenticationUtils {
 	 * @return the Authentication object representing the current user's
 	 *         authentication details
 	 */
-	public Authentication getCurrentAuthentication() {
+	public static Authentication getCurrentAuthentication() {
 		return SecurityContextHolder.getContext().getAuthentication();
 	}
 
-	public void setAuthentication(Authentication authentication) {
+	public static void setAuthentication(Authentication authentication) {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 

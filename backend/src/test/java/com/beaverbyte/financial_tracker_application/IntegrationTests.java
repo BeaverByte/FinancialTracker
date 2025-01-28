@@ -2,6 +2,7 @@ package com.beaverbyte.financial_tracker_application;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
@@ -19,6 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
@@ -38,6 +41,9 @@ import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
+import com.beaverbyte.financial_tracker_application.security.jwt.AuthenticationUtils;
 import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 
@@ -75,6 +81,9 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	@Autowired
 	JwtUtils jwtUtils;
+
+	@Autowired
+	CustomUserDetailsService customUserDetailsService;
 
 	@Value("${JWT_COOKIE_NAME}")
 	private String jwtCookieName;
@@ -269,14 +278,10 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	@Test
 	void shouldAllowUserSignUp() {
-		SignupRequest signUpRequest = new SignupRequest();
-		signUpRequest.setUsername("dumbusername");
-		signUpRequest.setEmail("dumbemailg@gmail.com");
-		signUpRequest.setPassword("dumbpassword");
-
-		Set<String> signUpRoles = Stream.of("user", "mod")
-				.collect(Collectors.toCollection(HashSet::new));
-		signUpRequest.setRole(signUpRoles);
+		SignupRequest signUpRequest = createSignupRequest("dumbusername",
+				"dubmemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
 
 		Response response = signUp(signUpRequest);
 
@@ -346,5 +351,47 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 		Authentication authentication = authenticationManager.authenticate(authenticationToken);
 		assertTrue(authentication.isAuthenticated());
+	}
+
+	@Test
+	void shouldAllowMultipleUsersInSecurityContext() {
+		SignupRequest signUpRequestForUser1 = createSignupRequest(
+				"user1",
+				"stupid@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
+
+		SignupRequest signUpRequestForUser2 = createSignupRequest(
+				"user2",
+				"stupider@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
+
+		signUp(signUpRequestForUser1);
+		signUp(signUpRequestForUser2);
+
+		UserDetails user1 = customUserDetailsService.loadUserByUsername(signUpRequestForUser1.getUsername());
+		UserDetails user2 = customUserDetailsService.loadUserByUsername(signUpRequestForUser2.getUsername());
+
+		Authentication auth1 = new UsernamePasswordAuthenticationToken(user1, user1.getPassword(),
+				user1.getAuthorities());
+
+		AuthenticationUtils.setAuthentication(auth1);
+
+		// Assert that SecurityContextHolder has user1
+		Authentication currentAuth = AuthenticationUtils.getCurrentAuthentication();
+		assertEquals("Expected user1 to be authenticated", "user1", currentAuth.getName());
+
+		// Second user logging in
+		Authentication auth2 = new UsernamePasswordAuthenticationToken(user2, user2.getPassword(),
+				user2.getAuthorities());
+
+		AuthenticationUtils.setAuthentication(auth2);
+		currentAuth = AuthenticationUtils.getCurrentAuthentication();
+
+		assertEquals("Expected user2 to be authenticated", "user2", currentAuth.getName());
+
+		// User1 is no longer in the context
+		assertNotEquals("user1 should no longer be in Context", "user1", currentAuth.getName());
 	}
 }
