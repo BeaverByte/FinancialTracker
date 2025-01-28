@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.model.RefreshToken;
+import com.beaverbyte.financial_tracker_application.model.RefreshToken.RefreshTokenBuilder;
 import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
@@ -22,7 +23,7 @@ import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 public class RefreshTokenService {
 	private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
 
-	@Value("${JWT_REFRESH_EXPIRATION_MS}")
+	@Value("")
 	private Long refreshTokenDurationMs;
 
 	@Autowired
@@ -40,11 +41,20 @@ public class RefreshTokenService {
 	}
 
 	public RefreshToken createRefreshToken(Long userId) {
-		RefreshToken refreshToken = new RefreshToken();
+		// RefreshToken refreshToken = new RefreshToken();
 
-		refreshToken.setUser(userRepository.findById(userId).get());
-		refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-		refreshToken.setToken(UUID.randomUUID().toString());
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new NoSuchElementException("User not found with ID"));
+
+		RefreshToken refreshToken = RefreshToken.builder()
+				.user(user)
+				.expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
+				.token(UUID.randomUUID().toString())
+				.build();
+
+		// refreshToken.setUser(user);
+		// refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+		// refreshToken.setToken(UUID.randomUUID().toString());
 
 		refreshToken = refreshTokenRepository.save(refreshToken);
 		return refreshToken;

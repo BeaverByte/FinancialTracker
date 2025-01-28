@@ -26,6 +26,17 @@ public class RefreshToken {
 	@Column(nullable = false)
 	private Instant expiryDate;
 
+	protected RefreshToken() {
+		// Needed by JPA for Builder
+	}
+
+	public RefreshToken(long id, User user, String token, Instant expiryDate) {
+		this.id = id;
+		this.user = user;
+		this.token = token;
+		this.expiryDate = expiryDate;
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -56,5 +67,35 @@ public class RefreshToken {
 
 	public void setExpiryDate(Instant expiryDate) {
 		this.expiryDate = expiryDate;
+	}
+
+	public static class RefreshTokenBuilder {
+		private User user;
+		private String token;
+		private Instant expiryDate;
+
+		public RefreshTokenBuilder user(User user) {
+			this.user = user;
+			return this;
+		}
+
+		public RefreshTokenBuilder token(String token) {
+			this.token = token;
+			return this;
+		}
+
+		public RefreshTokenBuilder expiryDate(Instant expiryDate) {
+			this.expiryDate = expiryDate;
+			return this;
+		}
+
+		// id is set by JPA when persisted
+		public RefreshToken build() {
+			return new RefreshToken(0, user, token, expiryDate);
+		}
+	}
+
+	public static RefreshTokenBuilder builder() {
+		return new RefreshTokenBuilder();
 	}
 }
