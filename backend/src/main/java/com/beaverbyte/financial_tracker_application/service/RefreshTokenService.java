@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.beaverbyte.financial_tracker_application.exception.TokenRefreshException;
 import com.beaverbyte.financial_tracker_application.model.RefreshToken;
-import com.beaverbyte.financial_tracker_application.model.RefreshToken.RefreshTokenBuilder;
 import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
@@ -23,7 +22,7 @@ import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 public class RefreshTokenService {
 	private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
 
-	@Value("")
+	@Value("${JWT_REFRESH_EXPIRATION_MS}")
 	private Long refreshTokenDurationMs;
 
 	@Autowired
