@@ -24,21 +24,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api")
 public class TransactionRestController {
 
-	// Service used to handle DB interactions
 	private TransactionService transactionService;
 
-	// Dependency injection in constructor
 	public TransactionRestController(TransactionService transactionService) {
 		this.transactionService = transactionService;
 	}
 
-	// expose "/transactions" endpoint that returns all transactions
 	@GetMapping("/transactions")
 	public ResponseEntity<List<Transaction>> findAll() {
 		return ResponseEntity.status(HttpStatus.OK).body(transactionService.findAll());
 	}
 
-	// get transaction through id
 	@GetMapping("/transactions/{id}")
 	public ResponseEntity<Transaction> getTransaction(@PathVariable int id) {
 		if (!transactionService.existsById(id)) {
@@ -48,7 +44,6 @@ public class TransactionRestController {
 		return ResponseEntity.status(HttpStatus.OK).body(transaction);
 	}
 
-	// Add new transaction
 	@PostMapping("/transactions")
 	public ResponseEntity<Transaction> addTransaction(@RequestBody Transaction transaction) {
 		try {
@@ -62,7 +57,6 @@ public class TransactionRestController {
 		}
 	}
 
-	// Update Transaction
 	@PutMapping("/transactions/{id}")
 	public ResponseEntity<Transaction> updateTransaction(@PathVariable int id, @RequestBody Transaction transaction) {
 		try {
@@ -77,7 +71,6 @@ public class TransactionRestController {
 		}
 	}
 
-	// Delete Transaction
 	@DeleteMapping("/transactions/{id}")
 	public ResponseEntity<HttpStatus> deleteTransaction(@PathVariable long id) {
 		try {
