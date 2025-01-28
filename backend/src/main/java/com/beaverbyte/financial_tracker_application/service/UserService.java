@@ -20,14 +20,12 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final RoleService roleService;
-	private final RefreshTokenService refreshTokenService;
 	private final AuthenticationService authenticationService;
 
-	public UserService(UserRepository userRepository, RoleService roleService, RefreshTokenService refreshTokenService,
+	public UserService(UserRepository userRepository, RoleService roleService,
 			AuthenticationService authenticationService) {
 		this.userRepository = userRepository;
 		this.roleService = roleService;
-		this.refreshTokenService = refreshTokenService;
 		this.authenticationService = authenticationService;
 	}
 
