@@ -40,8 +40,6 @@ public class RefreshTokenService {
 	}
 
 	public RefreshToken createRefreshToken(Long userId) {
-		// RefreshToken refreshToken = new RefreshToken();
-
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new NoSuchElementException("User not found with ID"));
 
@@ -50,10 +48,6 @@ public class RefreshTokenService {
 				.expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
 				.token(UUID.randomUUID().toString())
 				.build();
-
-		// refreshToken.setUser(user);
-		// refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-		// refreshToken.setToken(UUID.randomUUID().toString());
 
 		refreshToken = refreshTokenRepository.save(refreshToken);
 		return refreshToken;
