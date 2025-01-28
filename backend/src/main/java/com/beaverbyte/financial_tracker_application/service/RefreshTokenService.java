@@ -72,4 +72,19 @@ public class RefreshTokenService {
 				.map(refreshTokenRepository::deleteByUser)
 				.orElseThrow(() -> new NoSuchElementException("User not found with ID"));
 	}
+
+	public boolean existsByUserId(Long userId) {
+		return userRepository.findById(userId)
+				.map(user -> {
+					boolean userExists = findByUser(user).isPresent();
+					if (!userExists) {
+						log.debug("No refresh token found for user with ID: {}", userId);
+					}
+					return userExists;
+				})
+				.orElseGet(() -> {
+					log.debug("User not found with ID: {}", userId);
+					return false;
+				});
+	}
 }

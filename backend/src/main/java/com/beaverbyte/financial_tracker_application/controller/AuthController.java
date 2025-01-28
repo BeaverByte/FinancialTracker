@@ -61,7 +61,7 @@ public class AuthController {
 		AuthenticationUtils.setAuthentication(authentication);
 		CustomUserDetails userDetails = AuthenticationUtils.getCustomUserDetails(authentication);
 
-		if (userService.refreshTokenExistsForUser(userDetails.getId())) {
+		if (refreshTokenService.existsByUserId(userDetails.getId())) {
 			log.info("Refresh Token exists for given user ID, deleting token");
 			refreshTokenService.deleteByUserId(userDetails.getId());
 		}
@@ -101,7 +101,7 @@ public class AuthController {
 		Authentication authentication = AuthenticationUtils.getCurrentAuthentication();
 		CustomUserDetails userDetails = AuthenticationUtils.getCustomUserDetails(authentication);
 
-		if (userService.refreshTokenExistsForUser(userDetails.getId())) {
+		if (refreshTokenService.existsByUserId(userDetails.getId())) {
 			log.info("Refresh Token exists for given user ID, deleting token");
 			refreshTokenService.deleteByUserId(userDetails.getId());
 		}
