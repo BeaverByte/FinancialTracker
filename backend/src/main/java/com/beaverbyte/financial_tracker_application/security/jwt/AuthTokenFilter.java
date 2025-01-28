@@ -64,6 +64,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 	 * @return JWT token if present and validated, otherwise null
 	 */
 	private String parseJwt(HttpServletRequest request) {
-		return jwtUtils.getJwtFromCookies(request);
+		return jwtUtils.getJwtValueFromCookies(request);
 	}
 }

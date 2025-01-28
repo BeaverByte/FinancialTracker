@@ -62,13 +62,14 @@ public class AuthenticationService {
 	}
 
 	public LoginResponse login(CustomUserDetails userDetails) {
-		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+		ResponseCookie accessCookie = jwtUtils.generateJwtCookie(userDetails);
 
 		UserInfoResponse userInfoResponse = userInfoResponseService.createUserInfoResponse(userDetails);
-		RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-		ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
 
-		return new LoginResponse(userInfoResponse, jwtRefreshCookie, jwtCookie);
+		RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+		ResponseCookie refreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
+
+		return new LoginResponse(userInfoResponse, refreshCookie, accessCookie);
 	}
 
 	public JwtResponse logoutUser() {
@@ -79,19 +80,20 @@ public class AuthenticationService {
 	}
 
 	public RefreshTokenResponse refreshToken(HttpServletRequest request) {
-		String refreshJwt = jwtUtils.getJwtRefreshFromCookies(request);
+		String refreshJwtValue = jwtUtils.getJwtRefreshValueFromCookies(request);
 
-		if (refreshJwt == null || refreshJwt.isEmpty()) {
-			throw new TokenRefreshException(refreshJwt, "Refresh token is empty");
+		if (refreshJwtValue == null || refreshJwtValue.isEmpty()) {
+			throw new TokenRefreshException(refreshJwtValue, "Refresh token is empty");
 		}
 
-		RefreshToken refreshToken = refreshTokenService.findByToken(refreshJwt)
-				.orElseThrow(() -> new TokenRefreshException(refreshJwt, "Refresh token is not found in database"));
+		RefreshToken refreshToken = refreshTokenService.findByToken(refreshJwtValue)
+				.orElseThrow(
+						() -> new TokenRefreshException(refreshJwtValue, "Refresh token is not found in database"));
 
-		refreshTokenService.verifyExpiration(refreshToken);
+		refreshTokenService.validateAndDeleteExpiredToken(refreshToken);
 
-		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(refreshToken.getUser());
+		ResponseCookie accessToken = jwtUtils.generateJwtCookie(refreshToken.getUser());
 
-		return new RefreshTokenResponse(new MessageResponse("Refresh Token is refreshed successfully!"), jwtCookie);
+		return new RefreshTokenResponse(new MessageResponse("Access Token is refreshed successfully!"), accessToken);
 	}
 }

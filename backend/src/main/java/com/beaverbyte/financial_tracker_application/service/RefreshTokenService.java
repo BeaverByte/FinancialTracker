@@ -53,7 +53,7 @@ public class RefreshTokenService {
 		return refreshToken;
 	}
 
-	public RefreshToken verifyExpiration(RefreshToken token) {
+	public RefreshToken validateAndDeleteExpiredToken(RefreshToken token) {
 		if (isExpired(token)) {
 			refreshTokenRepository.delete(token);
 			throw new TokenRefreshException(token.getToken(),
