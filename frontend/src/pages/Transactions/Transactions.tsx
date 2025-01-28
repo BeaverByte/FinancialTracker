@@ -4,10 +4,6 @@ import Table from "../../components/Table/Table.tsx";
 import { Form } from "../../components/Form/Form.tsx";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
-import {
-  useGetTransactionByIdQuery,
-  useGetTransactionByNameQuery,
-} from "../../services/transactions.ts";
 
 export type Transaction = {
   id: number;
@@ -41,22 +37,11 @@ const transactionSchema = z.object({
 // Describe "transactions" as array of objects
 const transactionsSchema = z.array(transactionSchema);
 
-// TODO: Hardcoded user and pass, need to update to be dynamic
-const username = "beaver";
-const password = "test123";
-
-// Create the Basic Auth string and encode it to Base64
-const authString = `${username}:${password}`;
-const encodedAuth = btoa(authString); // btoa() encodes the string to Base64
-
 const TRANSACTIONS_API = "http://localhost:8080/api";
 
 export default function Transactions() {
-  //   const { resetQuestionnaire } = UseQuestions();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [error, setError] = useState(null);
-
-  const { data, isLoading } = useGetTransactionByIdQuery(4);
 
   useEffect(() => {
     // Fetch Transactions from API
@@ -64,8 +49,10 @@ export default function Transactions() {
       try {
         const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
           method: "GET",
+          // mode: "no-cors",
+          credentials: "include",
           headers: {
-            authorization: `Basic ${encodedAuth}`,
+            // authorization: `Basic ${encodedAuth}`,
             "content-type": "application/json",
           },
         });
@@ -88,7 +75,7 @@ export default function Transactions() {
       const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
         method: "POST",
         headers: {
-          authorization: `Basic ${encodedAuth}`,
+          // authorization: `Basic ${encodedAuth}`,
           "content-type": "application/json",
         },
         // body: JSON.stringify(newTransaction),
@@ -103,7 +90,6 @@ export default function Transactions() {
         ...prevTransactions,
         createdTransaction,
       ]);
-      // Reset NewTransaction
     } catch (err) {
       setError("Error adding transaction");
     }
@@ -116,7 +102,7 @@ export default function Transactions() {
       const response = await fetch(`${TRANSACTIONS_API}/transactions/${id}`, {
         method: "PUT",
         headers: {
-          authorization: `Basic ${encodedAuth}`,
+          // authorization: `Basic ${encodedAuth}`,
           "content-type": "application/json",
         },
         // body: JSON.stringify(),
@@ -138,7 +124,7 @@ export default function Transactions() {
       const response = await fetch(`${TRANSACTIONS_API}/transactions/${id}`, {
         method: "DELETE",
         headers: {
-          authorization: `Basic ${encodedAuth}`,
+          // authorization: `Basic ${encodedAuth}`,
           "content-type": "application/json",
         },
       });
@@ -150,10 +136,6 @@ export default function Transactions() {
     } catch (error) {
       console.error("Error deleting transaction:", error);
     }
-  };
-
-  const findById = (array, id) => {
-    return array.find((item) => item.id === id);
   };
 
   return (

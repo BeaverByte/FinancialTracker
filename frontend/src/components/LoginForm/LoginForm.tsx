@@ -1,10 +1,7 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { loginUser } from "../../services/auth";
-import { setCredentials } from "../../redux/slices/authSlice";
 
 const LoginForm = () => {
-  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +10,9 @@ const LoginForm = () => {
     e.preventDefault();
 
     try {
-      const { user, token } = await loginUser(username, password);
-
-      // Dispatch the setCredentials action with the user and token to authSlice
-      dispatch(setCredentials({ user, token }));
+      const { user } = await loginUser(username, password);
+      console.log(user);
+      // TODO Login user
     } catch (err) {
       setError("Login failed. Please check your credentials.");
     }

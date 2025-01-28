@@ -31,8 +31,8 @@ import com.beaverbyte.financial_tracker_application.service.AuthenticationServic
 import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.UserService;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping(ApiEndpoints.AUTH)
 public class AuthController {
 
