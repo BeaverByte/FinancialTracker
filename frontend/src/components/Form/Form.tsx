@@ -17,14 +17,12 @@ function Form({ onSubmit }) {
     resolver: zodResolver(validationSchema),
   });
 
-  // Update form's date property with today's value
   const setDateToToday = () => {
     const today = new Date().toISOString().split("T")[0];
     setValue("date", today);
   };
 
   return (
-    /* handleSubmit will validate inputs before onSubmit */
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label>
