@@ -20,7 +20,6 @@ function Form({ onSubmit }) {
   // Update form's date property with today's value
   const setDateToToday = () => {
     const today = new Date().toISOString().split("T")[0];
-    console.log("Updating date to " + today);
     setValue("date", today);
   };
 
@@ -29,7 +28,7 @@ function Form({ onSubmit }) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label>
-          Date
+          <span>Date</span>
           <input {...register("date")} type="date" />
         </label>
         {
@@ -41,7 +40,7 @@ function Form({ onSubmit }) {
       </div>
       <div>
         <label>
-          Merchant
+          <span>Merchant</span>
           <input
             {...register("merchant", {
               required: "Merchant is required",
@@ -53,25 +52,25 @@ function Form({ onSubmit }) {
       </div>
       <div>
         <label>
-          Account
+          <span>Account</span>
           <input type="text" />
         </label>
       </div>
       <div>
         <label>
-          Category
+          <span>Category</span>
           <input type="text" />
         </label>
       </div>
       <div>
         <label>
-          Amount
+          <span>Amount</span>
           <input type="number" />
         </label>
       </div>
       <div>
         <label>
-          Note
+          <span>Note</span>
           <input type="text" />
         </label>
       </div>
