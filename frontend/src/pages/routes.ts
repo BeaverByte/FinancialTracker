@@ -3,9 +3,9 @@
  * @constant
  */
 export const ROUTES = {
+  ROOT: "/",
   NEWTRANSACTION: "/transactions/new",
   TRANSACTIONS: "/transactions",
-  ROOT: "/",
   FINDTRANSACTION: "/effectivedate",
-  LOGIN: "auth/login",
+  LOGIN: "/auth/login",
 };

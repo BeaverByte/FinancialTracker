@@ -7,10 +7,6 @@ import Transactions from "./pages/Transactions/Transactions";
 import Layout from "./components/Layout";
 import LoginForm from "./components/LoginForm/LoginForm";
 
-/**
- * The main React component that holds and presents all other components
- * @component
- */
 function App() {
   return (
     <BrowserRouter>

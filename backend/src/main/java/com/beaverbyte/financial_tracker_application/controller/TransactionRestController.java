@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.PutMapping;
  * Controller that handles requests (HTTP, etc.)
  */
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+// @CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api")
 public class TransactionRestController {

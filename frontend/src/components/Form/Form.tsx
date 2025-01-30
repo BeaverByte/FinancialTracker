@@ -29,15 +29,6 @@ const validationSchema = z
     path: ["confirmPassword"],
   });
 
-/**
- * Form component to add a transaction
- *
- * @param {Object} props - The component props
- * @param {Object} props.formData - The current form data
- * @param {Function} props.onSubmit -  Handles form submission
- * @param {Function} props.setFormData - Updates form data setter
- * @returns {JSX.Element} Rendered Form component
- */
 function Form({ onSubmit }) {
   const {
     register,

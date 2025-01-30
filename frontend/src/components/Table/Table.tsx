@@ -38,30 +38,29 @@ export default function Table({
           <TableHeader headers={headers} />
         </thead>
         <tbody>
-          {data &&
-            data.map((transaction: Transaction) => (
-              <tr key={transaction.id}>
-                <td>{transaction.date}</td>
-                <td>{transaction.merchant}</td>
-                <td>{transaction.account}</td>
-                <td>{transaction.category}</td>
-                <td>{transaction.amount}</td>
-                <td>
-                  {transaction.note}
-                  {transaction.id}
-                </td>
-                <td>
-                  <button onClick={() => onDeleteTransaction(transaction.id)}>
-                    Delete
-                  </button>
-                </td>
-                <td>
-                  <button onClick={() => onChangeTransaction(transaction.id)}>
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
+          {data?.map((transaction: Transaction) => (
+            <tr key={transaction.id}>
+              <td>{transaction.date}</td>
+              <td>{transaction.merchant}</td>
+              <td>{transaction.account}</td>
+              <td>{transaction.category}</td>
+              <td>{transaction.amount}</td>
+              <td>
+                {transaction.note}
+                {transaction.id}
+              </td>
+              <td>
+                <button onClick={() => onDeleteTransaction(transaction.id)}>
+                  Delete
+                </button>
+              </td>
+              <td>
+                <button onClick={() => onChangeTransaction(transaction.id)}>
+                  Edit
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

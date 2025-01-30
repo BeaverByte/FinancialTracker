@@ -4,6 +4,7 @@ import Table from "../../components/Table/Table.tsx";
 import { Form } from "../../components/Form/Form.tsx";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
+import { fetchTransactions } from "../../services/transactions.ts";
 
 export type Transaction = {
   id: number;
@@ -44,38 +45,25 @@ export default function Transactions() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch Transactions from API
-    const fetchTransactions = async () => {
+    const fetchTransactionsData = async () => {
       try {
-        const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
-          method: "GET",
-          // mode: "no-cors",
-          credentials: "include",
-          headers: {
-            // authorization: `Basic ${encodedAuth}`,
-            "content-type": "application/json",
-          },
-        });
-        const result = await response.json();
-        setTransactions(result); // Store the fetched data in the state
-        console.log(data);
+        const transactions = await fetchTransactions();
+        setTransactions(transactions);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error in fetching transactions:", error);
       }
     };
 
-    fetchTransactions();
+    fetchTransactionsData();
   }, []);
 
-  // Handle adding a new transaction
-  const handleAddTransaction = async (e) => {
+  const handleAddTransaction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Adding transaction");
     try {
       const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
         method: "POST",
         headers: {
-          // authorization: `Basic ${encodedAuth}`,
           "content-type": "application/json",
         },
         // body: JSON.stringify(newTransaction),
@@ -95,14 +83,12 @@ export default function Transactions() {
     }
   };
 
-  const handleUpdateTransaction = async (id) => {
-    // Implement the update logic here (e.g., open a modal or form to edit the transaction)
+  const handleUpdateTransaction = async (id: number) => {
     console.log("Updating transaction " + id);
     try {
       const response = await fetch(`${TRANSACTIONS_API}/transactions/${id}`, {
         method: "PUT",
         headers: {
-          // authorization: `Basic ${encodedAuth}`,
           "content-type": "application/json",
         },
         // body: JSON.stringify(),
@@ -110,26 +96,24 @@ export default function Transactions() {
 
       if (!response.ok) throw new Error("Failed to update transaction");
 
-      // Optionally, refetch the transactions or update state
+      // Refetch the transactions or update state
       // fetchTransactions();
     } catch (error) {
       console.error("Error updating transaction:", error);
     }
   };
 
-  const handleDeleteTransaction = async (id) => {
-    // Implement the delete logic here
+  const handleDeleteTransaction = async (id: number) => {
     try {
       console.log("Deleting id " + id);
       const response = await fetch(`${TRANSACTIONS_API}/transactions/${id}`, {
         method: "DELETE",
         headers: {
-          // authorization: `Basic ${encodedAuth}`,
           "content-type": "application/json",
         },
+        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to delete transaction");
-      // Remove the deleted transaction from the state without refetching all data
       setTransactions((prevData) =>
         prevData.filter((transaction) => transaction.id !== id)
       );
@@ -153,23 +137,3 @@ export default function Transactions() {
     </div>
   );
 }
-
-const getTransactions = async () => {
-  try {
-    const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
-      method: "GET",
-      headers: {
-        authorization: `Basic ${encodedAuth}`,
-        "content-type": "application/json",
-      },
-    });
-    const result = await response.json();
-
-    // Return the result if everything is fine
-    return { success: true, result };
-  } catch (error) {
-    // Handle the error and return a response with success: false
-    console.error("Error fetching transactions:", error);
-    return { success: false, error };
-  }
-};
