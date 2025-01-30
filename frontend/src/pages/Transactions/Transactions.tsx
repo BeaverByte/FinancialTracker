@@ -2,8 +2,6 @@ import Banner from "../../components/Banner/Banner.tsx";
 import { useEffect, useState } from "react";
 import Table from "../../components/Table/Table.tsx";
 import { Form } from "../../components/Form/Form.tsx";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { z } from "zod";
 import { fetchTransactions } from "../../services/transactions.ts";
 
 export type Transaction = {
@@ -25,19 +23,6 @@ const initialTransaction = {
   note: "",
 };
 
-// Schema to validate incoming data against for transactions
-const transactionSchema = z.object({
-  date: z.date(),
-  merchant: z.string(),
-  account: z.string(),
-  category: z.string(),
-  amount: z.number(),
-  note: z.string(),
-});
-
-// Describe "transactions" as array of objects
-const transactionsSchema = z.array(transactionSchema);
-
 const TRANSACTIONS_API = "http://localhost:8080/api";
 
 export default function Transactions() {
@@ -50,27 +35,28 @@ export default function Transactions() {
         const transactions = await fetchTransactions();
         setTransactions(transactions);
       } catch (error) {
-        console.error("Error in fetching transactions:", error);
+        setError("Error fetching transactions:" + error);
       }
     };
 
     fetchTransactionsData();
   }, []);
 
-  const handleAddTransaction = async (e) => {
-    e.preventDefault();
-    console.log("Adding transaction");
+  const handleAddTransaction = async (data) => {
+    console.log("Adding transaction", data);
     try {
       const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
-        // body: JSON.stringify(newTransaction),
+        body: JSON.stringify(data),
       });
 
+      const body = await response.text();
+
       if (!response.ok) {
-        throw new Error(`Error adding response due to ${response}`);
+        throw new Error(`Could not add transaction due to ${body}`);
       }
 
       const createdTransaction = await response.json();
@@ -79,7 +65,7 @@ export default function Transactions() {
         createdTransaction,
       ]);
     } catch (error) {
-      setError("Error adding transaction" + error);
+      setError(`${error}`);
     }
   };
 

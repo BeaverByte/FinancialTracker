@@ -1,21 +1,27 @@
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  validationSchema,
-  ValidationSchema,
-} from "../../schemas/transactionSchema";
+  formSchema,
+  formSchemaType,
+} from "../../types/schemas/transactionSchema";
 
 function Form({ onSubmit }) {
   const {
     register,
     handleSubmit,
-    watch,
-    control,
     setValue,
     formState: { errors },
-  } = useForm<ValidationSchema>({
-    resolver: zodResolver(validationSchema),
+  } = useForm<formSchemaType>({
+    resolver: zodResolver(formSchema),
   });
+
+  const onSubmitForm = (data: formSchemaType) => {
+    const result = formSchema.safeParse(data);
+    if (!result.success) {
+      console.log("Zod Error: " + result.error);
+    }
+    onSubmit(data);
+  };
 
   const setDateToToday = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -23,17 +29,16 @@ function Form({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmitForm)}>
       <div>
         <label>
           <span>Date</span>
-          <input {...register("date")} type="date" />
+          {/* <input {...register("date")} type="date" /> */}
+          <input {...register("date")} />
         </label>
-        {
-          <button type="button" onClick={setDateToToday}>
-            Set to Today
-          </button>
-        }
+        <button type="button" onClick={setDateToToday}>
+          Set to Today
+        </button>
         {errors.date && <p>{errors.date?.message}</p>}
       </div>
       <div>

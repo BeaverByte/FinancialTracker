@@ -13,8 +13,8 @@ const defaultHeaders = [
 type TableProps = {
   data: Transaction[];
   headers?: Headers;
-  onChangeTransaction?: void;
-  onDeleteTransaction?: void;
+  onChangeTransaction: (id: number) => Promise<void>;
+  onDeleteTransaction: (id: number) => Promise<void>;
 };
 
 type Headers = string[];
@@ -30,7 +30,7 @@ export default function Table({
   headers,
   onChangeTransaction,
   onDeleteTransaction,
-}: TableProps): JSX.Element {
+}: Readonly<TableProps>): JSX.Element {
   return (
     <div>
       <table>
