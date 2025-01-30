@@ -42,7 +42,7 @@ const TRANSACTIONS_API = "http://localhost:8080/api";
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTransactionsData = async () => {
@@ -57,7 +57,7 @@ export default function Transactions() {
     fetchTransactionsData();
   }, []);
 
-  const handleAddTransaction = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddTransaction = async (e) => {
     e.preventDefault();
     console.log("Adding transaction");
     try {
@@ -78,8 +78,8 @@ export default function Transactions() {
         ...prevTransactions,
         createdTransaction,
       ]);
-    } catch (err) {
-      setError("Error adding transaction");
+    } catch (error) {
+      setError("Error adding transaction" + error);
     }
   };
 
@@ -96,8 +96,8 @@ export default function Transactions() {
 
       if (!response.ok) throw new Error("Failed to update transaction");
 
-      // Refetch the transactions or update state
-      // fetchTransactions();
+      // TODO update this to instead just update visual without refetch
+      fetchTransactions();
     } catch (error) {
       console.error("Error updating transaction:", error);
     }
