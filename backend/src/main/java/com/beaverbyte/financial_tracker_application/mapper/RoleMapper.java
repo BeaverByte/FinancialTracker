@@ -8,9 +8,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RoleMapper {
-    default List<String> mapAuthoritiesToRoles(Collection<? extends GrantedAuthority> authorities) {
-        return authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-    }
+	default List<String> mapAuthoritiesToRoles(Collection<? extends GrantedAuthority> authorities) {
+		return authorities.stream()
+				.map(GrantedAuthority::getAuthority)
+				.toList();
+	}
 }
