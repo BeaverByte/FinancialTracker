@@ -19,7 +19,12 @@ function Form({ onSubmit }) {
     const result = formSchema.safeParse(data);
     if (!result.success) {
       console.log("Zod Error: " + result.error);
+    } else {
+      console.log(
+        "No Zod error, confirming for logging purposes" + result.error
+      );
     }
+    console.log("Submitting Form with data: " + data);
     onSubmit(data);
   };
 
@@ -30,56 +35,38 @@ function Form({ onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmitForm)}>
-      <div>
-        <label>
-          <span>Date</span>
-          {/* <input {...register("date")} type="date" /> */}
-          <input {...register("date")} />
-        </label>
-        <button type="button" onClick={setDateToToday}>
-          Set to Today
-        </button>
-        {errors.date && <p>{errors.date?.message}</p>}
-      </div>
-      <div>
-        <label>
-          <span>Merchant</span>
-          <input
-            {...register("merchant", {
-              required: "Merchant is required",
-            })}
-            type="text"
-          />
-        </label>
-        {errors.merchant && <p>{errors.merchant?.message}</p>}
-      </div>
-      <div>
-        <label>
-          <span>Account</span>
-          <input type="text" />
-        </label>
-      </div>
-      <div>
-        <label>
-          <span>Category</span>
-          <input type="text" />
-        </label>
-      </div>
-      <div>
-        <label>
-          <span>Amount</span>
-          <input type="number" />
-        </label>
-      </div>
-      <div>
-        <label>
-          <span>Note</span>
-          <input type="text" />
-        </label>
-      </div>
+      <InputField name={"date"} register={register} errors={errors} />
+      <button type="button" onClick={setDateToToday}>
+        Set to Today
+      </button>
+      <InputField name={"merchant"} register={register} errors={errors} />
+      <InputField name={"account"} register={register} errors={errors} />
+      <InputField name={"category"} register={register} errors={errors} />
+      <InputField name={"amount"} register={register} errors={errors} />
+      <InputField name={"note"} register={register} errors={errors} />
       <button type="submit">Add Transaction</button>
     </form>
   );
+}
+
+function InputField({ name, register, errors }) {
+  return (
+    <div>
+      <label>
+        {capitalizeFirstLetter(name)}
+        <input {...register(name)} />
+      </label>
+      <InputFieldErrorMessage name={name} errors={errors} />
+    </div>
+  );
+}
+
+function capitalizeFirstLetter(word: string) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+function InputFieldErrorMessage({ name, errors }) {
+  return errors[name]?.message ?? null;
 }
 
 export { Form };

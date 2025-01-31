@@ -1,4 +1,4 @@
-const TRANSACTIONS_API = "http://localhost:8080/api";
+// const TRANSACTIONS_API = "http://localhost:8080/api";
 
 const fetchData = async (url: string, options = {}) => {
   try {
@@ -16,8 +16,7 @@ const fetchData = async (url: string, options = {}) => {
   }
 };
 
-export const fetchTransactions = async () => {
-  const url = `${TRANSACTIONS_API}/transactions`;
+export const fetchTransactions = async (url: string) => {
   return fetchData(url, {
     method: "GET",
     headers: {

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Table from "../../components/Table/Table.tsx";
 import { Form } from "../../components/Form/Form.tsx";
 import { fetchTransactions } from "../../services/transactions.ts";
+import { formSchemaType } from "../../types/schemas/transactionSchema.ts";
+import { TRANSACTIONS_ROUTES } from "../../utility/API_ROUTES.ts";
 
 export type Transaction = {
   id: number;
@@ -32,7 +34,9 @@ export default function Transactions() {
   useEffect(() => {
     const fetchTransactionsData = async () => {
       try {
-        const transactions = await fetchTransactions();
+        const transactions = await fetchTransactions(
+          TRANSACTIONS_ROUTES.GET_TRANSACTIONS
+        );
         setTransactions(transactions);
       } catch (error) {
         setError("Error fetching transactions:" + error);
@@ -42,14 +46,14 @@ export default function Transactions() {
     fetchTransactionsData();
   }, []);
 
-  const handleAddTransaction = async (data) => {
-    console.log("Adding transaction", data);
+  const handleAddTransaction = async (data: formSchemaType) => {
     try {
       const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
+        // credentials: "include",
         body: JSON.stringify(data),
       });
 
