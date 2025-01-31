@@ -4,11 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:frontend": "vite",
+    "dev": "vite",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:backend": "cd ../backend && mvnw.cmd spring-boot:run",
-    "frontend": "npm run dev:frontend",
-    "backend": "npm run dev:backend",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
