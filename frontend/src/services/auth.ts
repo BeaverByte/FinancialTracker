@@ -1,5 +1,5 @@
 // HTTP Request to login and authenticate an user
-export const loginUser = async (username, password) => {
+export const loginUser = async (username: string, password: string) => {
   try {
     const response = await fetch("http://localhost:8080/api/auth/signin", {
       method: "POST",

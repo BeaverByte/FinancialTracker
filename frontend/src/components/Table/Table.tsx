@@ -1,4 +1,5 @@
 import { Transaction } from "../../pages/Transactions/Transactions";
+import { formSchemaType } from "../../types/schemas/transactionSchema";
 
 const defaultHeaders = [
   "Date",
@@ -13,7 +14,7 @@ const defaultHeaders = [
 type TableProps = {
   data: Transaction[];
   headers?: Headers;
-  onChangeTransaction: (id: number) => Promise<void>;
+  onChangeTransaction: (data: formSchemaType, id: number) => Promise<void>;
   onDeleteTransaction: (id: number) => Promise<void>;
 };
 
@@ -32,7 +33,8 @@ export default function Table({
   onDeleteTransaction,
 }: Readonly<TableProps>): JSX.Element {
   return (
-    <div>
+    <div style={{ overflowX: "auto", maxHeight: "500px", overflowY: "auto" }}>
+      {/* TODO will need to replace overflow with actual pagination */}
       <table>
         <thead>
           <TableHeader headers={headers} />

@@ -1,5 +1,3 @@
-// const TRANSACTIONS_API = "http://localhost:8080/api";
-
 import { formSchemaType } from "../types/schemas/transactionSchema";
 
 const fetchData = async (url: string, options = {}) => {
@@ -39,5 +37,30 @@ export const postTransaction = async (url: string, data: formSchemaType) => {
     },
     credentials: "include",
     body: JSON.stringify(data),
+  });
+};
+
+export const putTransaction = async (
+  url: string,
+  data: formSchemaType,
+  id: number
+) => {
+  return fetchData(`${url}/${id}`, {
+    method: "PUT",
+    headers: {
+      "content-type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteTransaction = async (url: string, id: number) => {
+  return fetchData(`${url}/${id}`, {
+    method: "DELETE",
+    headers: {
+      "content-type": "application/json",
+    },
+    credentials: "include",
   });
 };

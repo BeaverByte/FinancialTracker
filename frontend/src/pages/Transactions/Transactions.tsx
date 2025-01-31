@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import Table from "../../components/Table/Table.tsx";
 import { Form } from "../../components/Form/Form.tsx";
 import {
+  deleteTransaction,
   fetchTransactions,
   postTransaction,
+  putTransaction,
 } from "../../services/transactions.ts";
 import { formSchemaType } from "../../types/schemas/transactionSchema.ts";
 import { TRANSACTIONS_ROUTES } from "../../utility/API_ROUTES.ts";
@@ -64,37 +66,27 @@ export default function Transactions() {
     }
   };
 
-  const handleUpdateTransaction = async (id: number) => {
+  const handleUpdateTransaction = async (data: formSchemaType, id: number) => {
     console.log("Updating transaction " + id);
     try {
-      const response = await fetch(`${TRANSACTIONS_API}/transactions/${id}`, {
-        method: "PUT",
-        headers: {
-          "content-type": "application/json",
-        },
-        // body: JSON.stringify(),
-      });
-
-      if (!response.ok) throw new Error("Failed to update transaction");
+      const response = await putTransaction(
+        TRANSACTIONS_ROUTES.PUT_TRANSACTION,
+        data,
+        id
+      );
 
       // TODO update this to instead just update visual without refetch
-      fetchTransactions();
     } catch (error) {
-      console.error("Error updating transaction:", error);
+      setError(`${error}`);
     }
   };
 
   const handleDeleteTransaction = async (id: number) => {
     try {
       console.log("Deleting id " + id);
-      const response = await fetch(`${TRANSACTIONS_API}/transactions/${id}`, {
-        method: "DELETE",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to delete transaction");
+
+      await deleteTransaction(TRANSACTIONS_ROUTES.DELETE_TRANSACTION, id);
+
       setTransactions((prevData) =>
         prevData.filter((transaction) => transaction.id !== id)
       );
