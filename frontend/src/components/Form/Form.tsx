@@ -24,7 +24,7 @@ function Form({ onSubmit }) {
         "No Zod error, confirming for logging purposes" + result.error
       );
     }
-    console.log("Submitting Form with data: " + data);
+    console.log("Submitting Form with data");
     onSubmit(data);
   };
 
