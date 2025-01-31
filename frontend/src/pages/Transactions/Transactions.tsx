@@ -69,12 +69,11 @@ export default function Transactions() {
   const handleUpdateTransaction = async (data: formSchemaType, id: number) => {
     console.log("Updating transaction " + id);
     try {
-      const response = await putTransaction(
-        TRANSACTIONS_ROUTES.PUT_TRANSACTION,
-        data,
-        id
-      );
-
+      // const response = await putTransaction(
+      //   TRANSACTIONS_ROUTES.PUT_TRANSACTION,
+      //   data,
+      //   id
+      // );
       // TODO update this to instead just update visual without refetch
     } catch (error) {
       setError(`${error}`);

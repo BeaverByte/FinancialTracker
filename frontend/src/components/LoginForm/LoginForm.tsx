@@ -11,8 +11,7 @@ const LoginForm = () => {
 
     try {
       const { user } = await loginUser(username, password);
-      console.log(user);
-      // TODO Login user
+      console.log(user + "has logged in");
     } catch (err) {
       setError("Login failed. Please check your credentials.");
     }
