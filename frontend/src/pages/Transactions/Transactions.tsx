@@ -2,7 +2,10 @@ import Banner from "../../components/Banner/Banner.tsx";
 import { useEffect, useState } from "react";
 import Table from "../../components/Table/Table.tsx";
 import { Form } from "../../components/Form/Form.tsx";
-import { fetchTransactions } from "../../services/transactions.ts";
+import {
+  fetchTransactions,
+  postTransaction,
+} from "../../services/transactions.ts";
 import { formSchemaType } from "../../types/schemas/transactionSchema.ts";
 import { TRANSACTIONS_ROUTES } from "../../utility/API_ROUTES.ts";
 
@@ -34,12 +37,13 @@ export default function Transactions() {
   useEffect(() => {
     const fetchTransactionsData = async () => {
       try {
+        console.log("Getting transactions...");
         const transactions = await fetchTransactions(
           TRANSACTIONS_ROUTES.GET_TRANSACTIONS
         );
         setTransactions(transactions);
       } catch (error) {
-        setError("Error fetching transactions:" + error);
+        setError(`${error}`);
       }
     };
 
@@ -48,26 +52,13 @@ export default function Transactions() {
 
   const handleAddTransaction = async (data: formSchemaType) => {
     try {
-      const response = await fetch(`${TRANSACTIONS_API}/transactions`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        // credentials: "include",
-        body: JSON.stringify(data),
-      });
+      const transaction = await postTransaction(
+        TRANSACTIONS_ROUTES.POST_TRANSACTION,
+        data
+      );
 
-      const body = await response.text();
-
-      if (!response.ok) {
-        throw new Error(`Could not add transaction due to ${body}`);
-      }
-
-      const createdTransaction = await response.json();
-      setTransactions((prevTransactions) => [
-        ...prevTransactions,
-        createdTransaction,
-      ]);
+      setTransactions((prevTransactions) => [...prevTransactions, transaction]);
+      console.log("Transactions State updated");
     } catch (error) {
       setError(`${error}`);
     }
