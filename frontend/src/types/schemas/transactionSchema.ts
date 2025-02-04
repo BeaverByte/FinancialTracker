@@ -1,7 +1,7 @@
 import { z, ZodType } from "zod";
 
 export type Transaction = {
-  id?: number;
+  id: number;
   date: string;
   merchant: string;
   account: string;

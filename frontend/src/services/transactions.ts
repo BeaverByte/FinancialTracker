@@ -1,36 +1,37 @@
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { FormSchemaType } from "../types/schemas/transactionSchema";
+import { TRANSACTIONS_ROUTES } from "../utility/API_ROUTES";
 
-const fetchData = async (url: string, options = {}) => {
-  try {
-    const response = await fetch(url, options);
+const QUERY_KEY_TRANSACTIONS = "transactions";
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        `Request failed with status ${response.status} and error: ${data.message}`
-      );
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
-  }
-};
-
-export const fetchTransactions = async (url: string) => {
-  return fetchData(url, {
+const getTransactions = async () => {
+  const response = await fetch(TRANSACTIONS_ROUTES.GET_TRANSACTIONS, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
   });
+
+  if (!response.ok) throw new Error("Failed to get transactions");
+
+  return response.json();
 };
 
-export const postTransaction = async (url: string, data: FormSchemaType) => {
-  return fetchData(url, {
+export function UseGetTransactions() {
+  return useQuery({
+    queryKey: [QUERY_KEY_TRANSACTIONS],
+    queryFn: getTransactions,
+  });
+}
+
+export const addTransaction = async (data: FormSchemaType) => {
+  const response = await fetch(TRANSACTIONS_ROUTES.POST_TRANSACTION, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -38,29 +39,69 @@ export const postTransaction = async (url: string, data: FormSchemaType) => {
     credentials: "include",
     body: JSON.stringify(data),
   });
+
+  if (!response.ok) throw new Error("Failed to add transaction");
+  return response.json();
 };
 
-export const putTransaction = async (
-  url: string,
-  data: FormSchemaType,
-  id: number
-) => {
-  return fetchData(`${url}/${id}`, {
+export function UseAddTransaction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: addTransaction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] }); // ✅ Refetch transactions
+    },
+  });
+}
+
+export const updateTransaction = async ({ id, updates }) => {
+  const response = await fetch(`${TRANSACTIONS_ROUTES.PUT_TRANSACTION}/${id}`, {
     method: "PUT",
     headers: {
       "content-type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify(data),
+    body: JSON.stringify(updates),
   });
+
+  if (!response.ok) throw new Error("Failed to update transaction");
+  return response.json();
 };
 
-export const deleteTransaction = async (url: string, id: number) => {
-  return fetchData(`${url}/${id}`, {
-    method: "DELETE",
-    headers: {
-      "content-type": "application/json",
+export function UseUpdateTransaction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTransaction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
     },
-    credentials: "include",
   });
+}
+
+export const deleteTransaction = async (id: number) => {
+  const response = await fetch(
+    `${TRANSACTIONS_ROUTES.DELETE_TRANSACTION}/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) throw new Error("Failed to delete transaction");
 };
+
+export function UseDeleteTransaction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteTransaction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+    },
+  });
+}

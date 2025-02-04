@@ -1,6 +1,6 @@
 // TransactionForm.tsx
 
-import { Form } from "../Form/Form";
+import { Form } from "../Form/AddTransactionForm";
 
 function TransactionForm({ onSubmit, setFormData, formData }) {
   return (

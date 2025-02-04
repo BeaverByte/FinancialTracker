@@ -1,7 +1,9 @@
 import {
-  FormSchemaType,
-  Transaction,
-} from "../../types/schemas/transactionSchema";
+  UseDeleteTransaction,
+  UseUpdateTransaction,
+} from "../../services/transactions";
+import { Transaction } from "../../types/schemas/transactionSchema";
+import DropdownMenu from "../DropdownMenu/DropdownMenu";
 
 const defaultHeaders = [
   "Date",
@@ -15,24 +17,26 @@ const defaultHeaders = [
 type TableProps = {
   data: Transaction[];
   headers?: Headers;
-  onChangeTransaction: (data: FormSchemaType, id: number) => Promise<void>;
-  onDeleteTransaction: (id: number) => Promise<void>;
 };
 
 type Headers = string[];
 
-/**
- *
- * @param data Data that will fill table, an object corresponding to a row
- * @param [headers] Optional - Headers row that describe respective columns. If not provided, default Headers will inject
- * @returns { JSX.Element }
- */
 export default function Table({
   data,
   headers,
-  onChangeTransaction,
-  onDeleteTransaction,
 }: Readonly<TableProps>): JSX.Element {
+  const editMutation = UseUpdateTransaction();
+  const deleteMutation = UseDeleteTransaction();
+
+  function handleEditClick(id: number) {
+    // TODO Open Modal for editing transaction
+    console.log("Editing transaction with id ");
+  }
+  function handleDeleteClick(id: number) {
+    console.log("DELETE transaction with id " + id);
+    deleteMutation.mutate(id);
+  }
+
   return (
     <div style={{ overflowX: "auto", maxHeight: "500px", overflowY: "auto" }}>
       {/* TODO will need to replace overflow with actual pagination */}
@@ -43,6 +47,16 @@ export default function Table({
         <tbody>
           {data?.map((transaction: Transaction) => (
             <tr key={transaction.id}>
+              <td>
+                <button onClick={() => handleEditClick(transaction.id)}>
+                  Edit
+                </button>
+                <DropdownMenu>
+                  <button onClick={() => handleDeleteClick(transaction.id)}>
+                    Delete
+                  </button>
+                </DropdownMenu>
+              </td>
               <td>{transaction.date}</td>
               <td>{transaction.merchant}</td>
               <td>{transaction.account}</td>
@@ -51,16 +65,6 @@ export default function Table({
               <td>
                 {transaction.note}
                 {transaction.id}
-              </td>
-              <td>
-                <button onClick={() => onDeleteTransaction(transaction.id)}>
-                  Delete
-                </button>
-              </td>
-              <td>
-                <button onClick={() => onChangeTransaction(transaction.id)}>
-                  Edit
-                </button>
               </td>
             </tr>
           ))}
@@ -71,14 +75,12 @@ export default function Table({
 }
 
 function TableHeader({ headers = defaultHeaders }) {
-  const headersExist = headers && headers.length > 0;
-
-  // Render a row per header
-  const renderHeaderColumns = () => {
-    return headers.map((header, index) => <th key={index}>{header}</th>);
-  };
-
   return (
-    <tr>{headersExist ? renderHeaderColumns() : <th>No data provided</th>}</tr>
+    <tr>
+      <th>Actions</th>
+      {headers.map((header, index) => (
+        <th key={index}>{header}</th>
+      ))}
+    </tr>
   );
 }

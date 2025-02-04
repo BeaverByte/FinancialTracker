@@ -9,12 +9,14 @@ import {
   FormSchema,
   FormSchemaType,
 } from "../../types/schemas/transactionSchema";
+import { UseAddTransaction } from "../../services/transactions";
 
-type FormPropsType = {
-  onSubmit: (data: FormSchemaType) => Promise<void>;
-};
-
-function Form({ onSubmit }: Readonly<FormPropsType>) {
+// type FormPropsType = {
+//   onSubmit: (data: FormSchemaType) => Promise<void>;
+// };
+// Inside Form Params
+// { onSubmit }: Readonly<FormPropsType>
+function AddTransactionForm() {
   const {
     register,
     handleSubmit,
@@ -24,17 +26,23 @@ function Form({ onSubmit }: Readonly<FormPropsType>) {
     resolver: zodResolver(FormSchema),
   });
 
-  const onSubmitForm = (data: FormSchemaType) => {
-    const result = FormSchema.safeParse(data);
+  const transactions = UseAddTransaction();
+
+  // React Hook Form library has a in built handler
+  const onSubmit = (data: FormSchemaType) => {
+    const postTransaction = data;
+
+    const result = FormSchema.safeParse(postTransaction);
+
     if (!result.success) {
       console.log("Zod Error: " + result.error);
-    } else {
-      console.log(
-        "No Zod error, confirming for logging purposes" + result.error
-      );
     }
-    console.log("Submitting Form with data");
-    onSubmit(data);
+    console.log(
+      "No Zod Error, submitting FormData transaction: " +
+        JSON.stringify(postTransaction)
+    );
+
+    transactions.mutate(postTransaction);
   };
 
   const setDateToToday = () => {
@@ -43,7 +51,7 @@ function Form({ onSubmit }: Readonly<FormPropsType>) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <InputField name={"date"} register={register} errors={errors} />
       <button type="button" onClick={setDateToToday}>
         Set to Today
@@ -84,4 +92,4 @@ function InputFieldErrorMessage({ name, errors }: FieldValues) {
   return errors[name]?.message ?? null;
 }
 
-export { Form };
+export { AddTransactionForm };
