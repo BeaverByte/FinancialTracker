@@ -1,6 +1,18 @@
-import { z } from "zod";
+import { z, ZodType } from "zod";
 
-export const formSchema = z.object({
+export type Transaction = {
+  id?: number;
+  date: string;
+  merchant: string;
+  account: string;
+  category: string;
+  amount: number | string;
+  note: string;
+};
+
+export type TransactionFormData = Omit<Transaction, "id">;
+
+export const FormSchema: ZodType<TransactionFormData> = z.object({
   date: z
     .string()
     .date("Date not recognized")
@@ -23,7 +35,7 @@ export const formSchema = z.object({
   note: z.string(),
 });
 
-export type formSchemaType = z.infer<typeof formSchema>;
+export type FormSchemaType = z.infer<typeof formSchema>;
 
 function removeNonNumericExceptDecimals(word: string) {
   return word.replace(/[^0-9.-]+/g, "");

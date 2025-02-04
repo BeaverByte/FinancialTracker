@@ -1,5 +1,7 @@
-import { Transaction } from "../../pages/Transactions/Transactions";
-import { formSchemaType } from "../../types/schemas/transactionSchema";
+import {
+  FormSchemaType,
+  Transaction,
+} from "../../types/schemas/transactionSchema";
 
 const defaultHeaders = [
   "Date",
@@ -10,11 +12,10 @@ const defaultHeaders = [
   "Note",
 ];
 
-// Provide type safety for Table Props
 type TableProps = {
   data: Transaction[];
   headers?: Headers;
-  onChangeTransaction: (data: formSchemaType, id: number) => Promise<void>;
+  onChangeTransaction: (data: FormSchemaType, id: number) => Promise<void>;
   onDeleteTransaction: (id: number) => Promise<void>;
 };
 

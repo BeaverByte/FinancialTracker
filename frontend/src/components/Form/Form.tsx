@@ -1,22 +1,31 @@
-import { useForm } from "react-hook-form";
+import {
+  useForm,
+  UseFormRegister,
+  FieldErrors,
+  FieldValues,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  formSchema,
-  formSchemaType,
+  FormSchema,
+  FormSchemaType,
 } from "../../types/schemas/transactionSchema";
 
-function Form({ onSubmit }) {
+type FormPropsType = {
+  onSubmit: (data: FormSchemaType) => Promise<void>;
+};
+
+function Form({ onSubmit }: Readonly<FormPropsType>) {
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<formSchemaType>({
-    resolver: zodResolver(formSchema),
+  } = useForm<FormSchemaType>({
+    resolver: zodResolver(FormSchema),
   });
 
-  const onSubmitForm = (data: formSchemaType) => {
-    const result = formSchema.safeParse(data);
+  const onSubmitForm = (data: FormSchemaType) => {
+    const result = FormSchema.safeParse(data);
     if (!result.success) {
       console.log("Zod Error: " + result.error);
     } else {
@@ -49,7 +58,13 @@ function Form({ onSubmit }) {
   );
 }
 
-function InputField({ name, register, errors }) {
+type InputFieldPropsType = {
+  name: string;
+  register: UseFormRegister<FieldValues>;
+  errors: FieldErrors<FieldValues>;
+};
+
+function InputField({ name, register, errors }: Readonly<InputFieldPropsType>) {
   return (
     <div>
       <label>
@@ -65,7 +80,7 @@ function capitalizeFirstLetter(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-function InputFieldErrorMessage({ name, errors }) {
+function InputFieldErrorMessage({ name, errors }: FieldValues) {
   return errors[name]?.message ?? null;
 }
 

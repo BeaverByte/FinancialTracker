@@ -1,4 +1,4 @@
-import { formSchemaType } from "../types/schemas/transactionSchema";
+import { FormSchemaType } from "../types/schemas/transactionSchema";
 
 const fetchData = async (url: string, options = {}) => {
   try {
@@ -29,7 +29,7 @@ export const fetchTransactions = async (url: string) => {
   });
 };
 
-export const postTransaction = async (url: string, data: formSchemaType) => {
+export const postTransaction = async (url: string, data: FormSchemaType) => {
   return fetchData(url, {
     method: "POST",
     headers: {
@@ -42,7 +42,7 @@ export const postTransaction = async (url: string, data: formSchemaType) => {
 
 export const putTransaction = async (
   url: string,
-  data: formSchemaType,
+  data: FormSchemaType,
   id: number
 ) => {
   return fetchData(`${url}/${id}`, {

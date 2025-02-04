@@ -8,18 +8,11 @@ import {
   postTransaction,
   putTransaction,
 } from "../../services/transactions.ts";
-import { formSchemaType } from "../../types/schemas/transactionSchema.ts";
+import {
+  FormSchemaType,
+  Transaction,
+} from "../../types/schemas/transactionSchema.ts";
 import { TRANSACTIONS_ROUTES } from "../../utility/API_ROUTES.ts";
-
-export type Transaction = {
-  id: number;
-  date: string;
-  merchant: string;
-  account: string;
-  category: string;
-  amount: number;
-  note: string;
-};
 
 const initialTransaction = {
   date: "",
@@ -29,8 +22,6 @@ const initialTransaction = {
   amount: "",
   note: "",
 };
-
-const TRANSACTIONS_API = "http://localhost:8080/api";
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -52,7 +43,7 @@ export default function Transactions() {
     fetchTransactionsData();
   }, []);
 
-  const handleAddTransaction = async (data: formSchemaType) => {
+  const handleAddTransaction = async (data: FormSchemaType) => {
     try {
       const transaction = await postTransaction(
         TRANSACTIONS_ROUTES.POST_TRANSACTION,
@@ -66,7 +57,7 @@ export default function Transactions() {
     }
   };
 
-  const handleUpdateTransaction = async (data: formSchemaType, id: number) => {
+  const handleUpdateTransaction = async (data: FormSchemaType, id: number) => {
     console.log("Updating transaction " + id);
     try {
       // const response = await putTransaction(
