@@ -1,9 +1,4 @@
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormSchemaType } from "../types/schemas/transactionSchema";
 import { TRANSACTIONS_ROUTES } from "../utility/API_ROUTES";
 
@@ -49,8 +44,36 @@ export function UseAddTransaction() {
 
   return useMutation({
     mutationFn: addTransaction,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] }); // ✅ Refetch transactions
+    onMutate: async (newTransaction) => {
+      // Cancel queries to avoid conflicts
+      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+
+      const previousTransactions = queryClient.getQueryData([
+        QUERY_KEY_TRANSACTIONS,
+      ]);
+
+      queryClient.setQueryData(
+        [QUERY_KEY_TRANSACTIONS],
+        (oldTransactions = []) => [
+          ...oldTransactions,
+          { ...newTransaction, id: Math.random() },
+        ]
+      );
+
+      return { previousTransactions };
+    },
+
+    onError: (_error, _newTransaction, context) => {
+      if (context?.previousTransactions) {
+        queryClient.setQueryData(
+          ["transactions"],
+          context.previousTransactions
+        );
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
     },
   });
 }
@@ -74,7 +97,35 @@ export function UseUpdateTransaction() {
 
   return useMutation({
     mutationFn: updateTransaction,
-    onSuccess: () => {
+
+    onMutate: async (updatedTransaction) => {
+      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+
+      const previousTransactions = queryClient.getQueryData([
+        QUERY_KEY_TRANSACTIONS,
+      ]);
+
+      queryClient.setQueryData(
+        [QUERY_KEY_TRANSACTIONS],
+        (oldTransactions = []) =>
+          oldTransactions.map((oldTransaction) =>
+            oldTransaction.id === updatedTransaction.id
+              ? { ...oldTransaction, ...updatedTransaction.updates }
+              : oldTransaction
+          )
+      );
+
+      return { previousTransactions };
+    },
+    onError: (_error, _updatedTransaction, context) => {
+      if (context?.previousTransactions) {
+        queryClient.setQueryData(
+          [QUERY_KEY_TRANSACTIONS],
+          context.previousTransactions
+        );
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
     },
   });
@@ -100,7 +151,33 @@ export function UseDeleteTransaction() {
 
   return useMutation({
     mutationFn: deleteTransaction,
-    onSuccess: () => {
+
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+
+      const previousTransactions = queryClient.getQueryData([
+        QUERY_KEY_TRANSACTIONS,
+      ]);
+
+      queryClient.setQueryData(
+        [QUERY_KEY_TRANSACTIONS],
+        (oldTransactions = []) =>
+          oldTransactions.filter((transaction) => transaction.id !== id)
+      );
+
+      return { previousTransactions };
+    },
+
+    onError: (_error, _id, context) => {
+      if (context?.previousTransactions) {
+        queryClient.setQueryData(
+          [QUERY_KEY_TRANSACTIONS],
+          context.previousTransactions
+        );
+      }
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
     },
   });
