@@ -1,40 +1,14 @@
 import Banner from "../../components/Banner/Banner.tsx";
-import { useState } from "react";
 import Table from "../../components/Table/Table.tsx";
-import {
-  UseGetTransactions,
-  UseUpdateTransaction,
-} from "../../services/transactions.ts";
-import { AddTransactionForm } from "../../components/Form/AddTransactionForm.tsx";
-import { EditTransactionModal } from "../../components/Form/EditTransactionModal.tsx";
-
-const initialTransaction = {
-  date: "",
-  merchant: "",
-  account: "",
-  category: "",
-  amount: "",
-  note: "",
-};
+import { UseGetTransactions } from "../../services/transactions.ts";
+import { useNavigate } from "react-router";
 
 export default function Transactions() {
-  const [editingTransaction, setEditingTransaction] = useState(null);
-  // const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const navigate = useNavigate();
 
-  const editMutation = UseUpdateTransaction();
-
-  const handleSave = (updatedTransaction) => {
-    console.log("Saving transaction to id " + updatedTransaction.id);
-    editMutation.mutate({
-      id: updatedTransaction.id,
-      updates: updatedTransaction,
-    });
-    setEditingTransaction(null);
-  };
-
-  const handleEditTransaction = (transaction) => {
+  const handleEditTransaction = (id: number) => {
     console.log("Opening transaction modal for editing transaction ");
-    setEditingTransaction(transaction);
+    navigate(`/transactions/edit/${id}`);
   };
 
   const { data, error, isLoading } = UseGetTransactions();
@@ -47,18 +21,10 @@ export default function Transactions() {
     <div>
       <Banner />
       <h1>Transactions</h1>
-      {editingTransaction && (
-        <EditTransactionModal
-          transaction={editingTransaction}
-          onClose={() => setEditingTransaction(null)}
-          onSave={handleSave}
-        />
-      )}
-      {!editingTransaction && (
-        <Table data={data} onEditTransaction={handleEditTransaction} />
-      )}
-      <h2>Add New Transaction</h2>
-      <AddTransactionForm />
+      <button onClick={() => navigate("/transactions/new")}>
+        Add Transaction
+      </button>
+      <Table data={data} onEditTransaction={handleEditTransaction} />
     </div>
   );
 }

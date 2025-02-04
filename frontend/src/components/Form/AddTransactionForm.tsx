@@ -8,8 +8,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FormSchema,
   FormSchemaType,
+  TransactionFormData,
 } from "../../types/schemas/transactionSchema";
 import { UseAddTransaction } from "../../services/transactions";
+import { useNavigate } from "react-router";
+import { capitalizeFirstLetter } from "../../utility/stringUtils";
 
 function AddTransactionForm() {
   const {
@@ -20,6 +23,7 @@ function AddTransactionForm() {
   } = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
   });
+  const navigate = useNavigate();
 
   const transactions = UseAddTransaction();
 
@@ -38,6 +42,7 @@ function AddTransactionForm() {
     );
 
     transactions.mutate(postTransaction);
+    navigate("/transactions");
   };
 
   const setDateToToday = () => {
@@ -63,7 +68,7 @@ function AddTransactionForm() {
 
 type InputFieldPropsType = {
   name: string;
-  register: UseFormRegister<FieldValues>;
+  register: UseFormRegister<TransactionFormData>;
   errors: FieldErrors<FieldValues>;
 };
 
@@ -71,16 +76,12 @@ function InputField({ name, register, errors }: Readonly<InputFieldPropsType>) {
   return (
     <div>
       <label>
-        {capitalizeFirstLetter(name)}
+        {capitalizeFirstLetter(name)}:
         <input {...register(name)} />
       </label>
       <InputFieldErrorMessage name={name} errors={errors} />
     </div>
   );
-}
-
-function capitalizeFirstLetter(word: string) {
-  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 function InputFieldErrorMessage({ name, errors }: FieldValues) {

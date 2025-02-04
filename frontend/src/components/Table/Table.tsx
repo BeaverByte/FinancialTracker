@@ -14,7 +14,7 @@ const defaultHeaders = [
 type TableProps = {
   data: Transaction[];
   headers?: Headers;
-  onEditTransaction: (transaction: any) => void;
+  onEditTransaction: (id: number) => void;
 };
 
 type Headers = string[];
@@ -42,7 +42,7 @@ export default function Table({
           {data?.map((transaction: Transaction) => (
             <tr key={transaction.id}>
               <td>
-                <button onClick={() => onEditTransaction(transaction)}>
+                <button onClick={() => onEditTransaction(transaction.id)}>
                   Edit
                 </button>
                 <DropdownMenu>

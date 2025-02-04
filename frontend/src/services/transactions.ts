@@ -25,6 +25,23 @@ export function UseGetTransactions() {
   });
 }
 
+export const getTransactionById = async (id: number) => {
+  const response = await fetch(
+    `${TRANSACTIONS_ROUTES.GET_TRANSACTIONS}/${id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) throw new Error("Transaction not found");
+
+  return response.json();
+};
+
 export const addTransaction = async (data: FormSchemaType) => {
   const response = await fetch(TRANSACTIONS_ROUTES.POST_TRANSACTION, {
     method: "POST",

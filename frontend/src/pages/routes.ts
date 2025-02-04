@@ -5,7 +5,8 @@
 export const ROUTES = {
   ROOT: "/",
   NEWTRANSACTION: "/transactions/new",
-  TRANSACTIONS: "/transactions",
+  TRANSACTIONSLIST: "/transactions",
+  TRANSACTION: "/transactions",
   FINDTRANSACTION: "/effectivedate",
   LOGIN: "/auth/login",
 };

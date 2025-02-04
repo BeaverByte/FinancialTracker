@@ -16,7 +16,7 @@ export default function Navbar() {
           </Link>
         </li>
         <li className="nav-item">
-          <Link to={ROUTES.TRANSACTIONS} className="nav-link">
+          <Link to={ROUTES.TRANSACTIONSLIST} className="nav-link">
             Transactions
           </Link>
         </li>
