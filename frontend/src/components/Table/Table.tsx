@@ -1,7 +1,4 @@
-import {
-  UseDeleteTransaction,
-  UseUpdateTransaction,
-} from "../../services/transactions";
+import { UseDeleteTransaction } from "../../services/transactions";
 import { Transaction } from "../../types/schemas/transactionSchema";
 import DropdownMenu from "../DropdownMenu/DropdownMenu";
 
@@ -17,6 +14,7 @@ const defaultHeaders = [
 type TableProps = {
   data: Transaction[];
   headers?: Headers;
+  onEditTransaction: (transaction: any) => void;
 };
 
 type Headers = string[];
@@ -24,14 +22,10 @@ type Headers = string[];
 export default function Table({
   data,
   headers,
+  onEditTransaction,
 }: Readonly<TableProps>): JSX.Element {
-  const editMutation = UseUpdateTransaction();
   const deleteMutation = UseDeleteTransaction();
 
-  function handleEditClick(id: number) {
-    // TODO Open Modal for editing transaction
-    console.log("Editing transaction with id ");
-  }
   function handleDeleteClick(id: number) {
     console.log("DELETE transaction with id " + id);
     deleteMutation.mutate(id);
@@ -48,7 +42,7 @@ export default function Table({
           {data?.map((transaction: Transaction) => (
             <tr key={transaction.id}>
               <td>
-                <button onClick={() => handleEditClick(transaction.id)}>
+                <button onClick={() => onEditTransaction(transaction)}>
                   Edit
                 </button>
                 <DropdownMenu>

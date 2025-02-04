@@ -11,11 +11,6 @@ import {
 } from "../../types/schemas/transactionSchema";
 import { UseAddTransaction } from "../../services/transactions";
 
-// type FormPropsType = {
-//   onSubmit: (data: FormSchemaType) => Promise<void>;
-// };
-// Inside Form Params
-// { onSubmit }: Readonly<FormPropsType>
 function AddTransactionForm() {
   const {
     register,
