@@ -50,4 +50,6 @@ dependencies {
     testImplementation(libs.org.mockito.mockito.core)
 }
 
-
+tasks.test {
+    useJUnitPlatform() // Ensure that JUnit platform is being used
+}
