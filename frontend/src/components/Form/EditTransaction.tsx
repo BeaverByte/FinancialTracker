@@ -4,7 +4,7 @@ import {
   UseGetTransactionById,
   UseUpdateTransaction,
 } from "../../services/transactions";
-import { Transaction } from "../../types/schemas/transactionSchema";
+import { Transaction } from "../../types/Transaction";
 
 export function EditTransaction() {
   const { id } = useParams();

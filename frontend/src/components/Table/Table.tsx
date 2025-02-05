@@ -1,27 +1,21 @@
 import { UseDeleteTransaction } from "../../services/transactions";
-import { Transaction } from "../../types/schemas/transactionSchema";
-import DropdownMenu from "../DropdownMenu/DropdownMenu";
+import { TableHeaderConfig, TableProps } from "../../types/Transaction";
+import TableBody from "./TableBody";
+import TableHeader from "./TableHeader";
 
-const defaultHeaders = [
-  "Date",
-  "Merchant",
-  "Account",
-  "Category",
-  "Amount",
-  "Note",
+const defaultHeaders: TableHeaderConfig[] = [
+  { label: "Actions", field: "actions", visible: true },
+  { label: "Date", field: "date", visible: true },
+  { label: "Merchant", field: "merchant", visible: true },
+  { label: "Account", field: "account", visible: true },
+  { label: "Category", field: "category", visible: true },
+  { label: "Amount", field: "amount", visible: true },
+  { label: "Note", field: "note", visible: true },
 ];
-
-type TableProps = {
-  data: Transaction[];
-  headers?: Headers;
-  onEditTransaction: (id: number) => void;
-};
-
-type Headers = string[];
 
 export default function Table({
   data,
-  headers,
+  headers = defaultHeaders,
   onEditTransaction,
 }: Readonly<TableProps>): JSX.Element {
   const deleteMutation = UseDeleteTransaction();
@@ -38,53 +32,11 @@ export default function Table({
         <TableHeader headers={headers} />
         <TableBody
           data={data}
+          headers={headers}
           onEditTransaction={onEditTransaction}
           onDeleteTransaction={handleDeleteClick}
         />
       </table>
     </div>
-  );
-}
-
-function TableHeader({ headers = defaultHeaders }) {
-  return (
-    <thead>
-      <tr>
-        <th>Actions</th>
-        {headers.map((header, index) => (
-          <th key={index}>{header}</th>
-        ))}
-      </tr>
-    </thead>
-  );
-}
-
-function TableBody({ data, onEditTransaction, onDeleteTransaction }) {
-  return (
-    <tbody>
-      {data?.map((transaction: Transaction) => (
-        <tr key={transaction.id}>
-          <td>
-            <button onClick={() => onEditTransaction(transaction.id)}>
-              Edit
-            </button>
-            <DropdownMenu>
-              <button onClick={() => onDeleteTransaction(transaction.id)}>
-                Delete
-              </button>
-            </DropdownMenu>
-          </td>
-          <td>{transaction.date}</td>
-          <td>{transaction.merchant}</td>
-          <td>{transaction.account}</td>
-          <td>{transaction.category}</td>
-          <td>{transaction.amount}</td>
-          <td>
-            {transaction.note}
-            {transaction.id}
-          </td>
-        </tr>
-      ))}
-    </tbody>
   );
 }

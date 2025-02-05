@@ -49,7 +49,7 @@ export function UseGetTransactionById(id: number) {
       console.log(`Fetching transaction with ID: ${id}`);
       return getTransactionById(id);
     },
-    enabled: !!id, // Only fetch if ID exists
+    enabled: !!id, // Lazy Query to id
   });
 }
 

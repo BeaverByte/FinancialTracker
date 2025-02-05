@@ -1,14 +1,5 @@
 import { z, ZodType } from "zod";
-
-export type Transaction = {
-  id: number;
-  date: string;
-  merchant: string;
-  account: string;
-  category: string;
-  amount: number | string;
-  note: string;
-};
+import { Transaction } from "../Transaction";
 
 export type TransactionFormData = Omit<Transaction, "id">;
 

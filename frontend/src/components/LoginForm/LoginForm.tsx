@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { loginUser } from "../../services/auth";
 
 const LoginForm = () => {
@@ -6,14 +6,14 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const { user } = await loginUser(username, password);
       console.log(user + "has logged in");
     } catch (err) {
-      setError("Login failed. Please check your credentials.");
+      setError("Login failed. Please check your credentials: " + err);
     }
   };
 
