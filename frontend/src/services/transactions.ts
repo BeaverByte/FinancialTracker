@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FormSchemaType } from "../types/schemas/transactionSchema";
 import { TRANSACTIONS_ROUTES } from "../utility/API_ROUTES";
+import { Transaction } from "../types/Transaction";
 
 const QUERY_KEY_TRANSACTIONS = "transactions";
 
@@ -76,11 +77,11 @@ export function UseAddTransaction() {
       // Cancel queries to avoid conflicts
       await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
 
-      const previousTransactions = queryClient.getQueryData([
+      const previousTransactions = queryClient.getQueryData<Transaction[]>([
         QUERY_KEY_TRANSACTIONS,
       ]);
 
-      queryClient.setQueryData(
+      queryClient.setQueryData<Transaction[]>(
         [QUERY_KEY_TRANSACTIONS],
         (oldTransactions = []) => [
           ...oldTransactions,
@@ -106,7 +107,15 @@ export function UseAddTransaction() {
   });
 }
 
-export const updateTransaction = async ({ id, updates }) => {
+type updateTransactionPayload = {
+  id: number;
+  updates: string;
+};
+
+export const updateTransaction = async ({
+  id,
+  updates,
+}: updateTransactionPayload) => {
   const response = await fetch(`${TRANSACTIONS_ROUTES.PUT_TRANSACTION}/${id}`, {
     method: "PUT",
     headers: {
@@ -129,11 +138,11 @@ export function UseUpdateTransaction() {
     onMutate: async (updatedTransaction) => {
       await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
 
-      const previousTransactions = queryClient.getQueryData([
+      const previousTransactions = queryClient.getQueryData<Transaction[]>([
         QUERY_KEY_TRANSACTIONS,
       ]);
 
-      queryClient.setQueryData(
+      queryClient.setQueryData<Transaction[]>(
         [QUERY_KEY_TRANSACTIONS],
         (oldTransactions = []) =>
           oldTransactions.map((oldTransaction) =>
@@ -183,11 +192,11 @@ export function UseDeleteTransaction() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
 
-      const previousTransactions = queryClient.getQueryData([
+      const previousTransactions = queryClient.getQueryData<Transaction[]>([
         QUERY_KEY_TRANSACTIONS,
       ]);
 
-      queryClient.setQueryData(
+      queryClient.setQueryData<Transaction[]>(
         [QUERY_KEY_TRANSACTIONS],
         (oldTransactions = []) =>
           oldTransactions.filter((transaction) => transaction.id !== id)
