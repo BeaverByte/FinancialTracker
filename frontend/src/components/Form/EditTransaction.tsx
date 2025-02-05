@@ -1,8 +1,7 @@
 import { useNavigate, useParams } from "react-router";
 import { EditTransactionModal } from "./EditTransactionModal";
-import { useQuery } from "@tanstack/react-query";
 import {
-  getTransactionById,
+  UseGetTransactionById,
   UseUpdateTransaction,
 } from "../../services/transactions";
 import { Transaction } from "../../types/schemas/transactionSchema";
@@ -12,20 +11,22 @@ export function EditTransaction() {
   const navigate = useNavigate();
   const editMutation = UseUpdateTransaction();
 
+  const transactionId = Number(id);
+
+  if (!Number.isInteger(transactionId)) {
+    return <p>Error: "{id}" is not a valid transaction ID</p>;
+  }
+
   const {
     data: transaction,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["transaction", id],
-    queryFn: () => getTransactionById(id),
-    enabled: !!id, // Only fetch if ID exists
-  });
+  } = UseGetTransactionById(transactionId);
 
   const handleSave = (updatedTransaction: Transaction) => {
-    console.log("Saving transaction to id " + id);
+    console.log("Saving transaction to id " + transactionId);
     editMutation.mutate({
-      id,
+      id: transactionId,
       updates: updatedTransaction,
     });
     navigate("/transactions");

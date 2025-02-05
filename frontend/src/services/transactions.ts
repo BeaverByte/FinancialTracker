@@ -42,6 +42,17 @@ export const getTransactionById = async (id: number) => {
   return response.json();
 };
 
+export function UseGetTransactionById(id: number) {
+  return useQuery({
+    queryKey: ["transaction", id],
+    queryFn: async () => {
+      console.log(`Fetching transaction with ID: ${id}`);
+      return getTransactionById(id);
+    },
+    enabled: !!id, // Only fetch if ID exists
+  });
+}
+
 export const addTransaction = async (data: FormSchemaType) => {
   const response = await fetch(TRANSACTIONS_ROUTES.POST_TRANSACTION, {
     method: "POST",
