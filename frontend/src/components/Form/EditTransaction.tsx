@@ -10,7 +10,6 @@ import { Transaction } from "../../types/schemas/transactionSchema";
 export function EditTransaction() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const editMutation = UseUpdateTransaction();
 
   const {
@@ -29,6 +28,7 @@ export function EditTransaction() {
       id,
       updates: updatedTransaction,
     });
+    navigate("/transactions");
   };
 
   if (isLoading) return <p>Loading transaction...</p>;
