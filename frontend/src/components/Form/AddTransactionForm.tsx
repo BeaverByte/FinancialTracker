@@ -27,7 +27,6 @@ function AddTransactionForm() {
 
   const transactions = UseAddTransaction();
 
-  // React Hook Form library has a in built handler
   const onSubmit = (data: FormSchemaType) => {
     const postTransaction = data;
 

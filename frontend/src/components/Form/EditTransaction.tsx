@@ -5,6 +5,7 @@ import {
   getTransactionById,
   UseUpdateTransaction,
 } from "../../services/transactions";
+import { Transaction } from "../../types/schemas/transactionSchema";
 
 export function EditTransaction() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ export function EditTransaction() {
     enabled: !!id, // Only fetch if ID exists
   });
 
-  const handleSave = (updatedTransaction) => {
+  const handleSave = (updatedTransaction: Transaction) => {
     console.log("Saving transaction to id " + id);
     editMutation.mutate({
       id,
