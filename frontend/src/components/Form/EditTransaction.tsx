@@ -1,27 +1,25 @@
 import { useNavigate, useParams } from "react-router";
 import { EditTransactionModal } from "./EditTransactionModal";
-import {
-  UseGetTransactionById,
-  UseUpdateTransaction,
-} from "../../services/transactions";
 import { Transaction } from "../../types/Transaction";
+import { useUpdateTransaction } from "../../hooks/useUpdateTransaction";
+import { useGetTransactionById } from "../../hooks/useGetTransactionById";
 
 export function EditTransaction() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const editMutation = UseUpdateTransaction();
+  const editMutation = useUpdateTransaction();
 
   const transactionId = Number(id);
-
-  if (!Number.isInteger(transactionId)) {
-    return <p>Error: "{id}" is not a valid transaction ID</p>;
-  }
 
   const {
     data: transaction,
     isLoading,
     error,
-  } = UseGetTransactionById(transactionId);
+  } = useGetTransactionById(transactionId);
+
+  if (!Number.isInteger(transactionId)) {
+    return <p>Error: "{id}" is not a valid transaction ID</p>;
+  }
 
   const handleSave = (updatedTransaction: Transaction) => {
     console.log("Saving transaction to id " + transactionId);

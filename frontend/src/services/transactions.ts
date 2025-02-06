@@ -1,11 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TransactionFormSchema } from "../types/schemas/transactionSchema";
 import { TRANSACTIONS_ROUTES } from "../utility/API_ROUTES";
 import { Transaction } from "../types/Transaction";
 
-const QUERY_KEY_TRANSACTIONS = "transactions";
+export const QUERY_KEY_TRANSACTIONS = "transactions";
 
-const getTransactions = async () => {
+export const getTransactions = async () => {
   const response = await fetch(TRANSACTIONS_ROUTES.GET_TRANSACTIONS, {
     method: "GET",
     headers: {
@@ -18,13 +17,6 @@ const getTransactions = async () => {
 
   return response.json();
 };
-
-export function UseGetTransactions() {
-  return useQuery({
-    queryKey: [QUERY_KEY_TRANSACTIONS],
-    queryFn: getTransactions,
-  });
-}
 
 export const getTransactionById = async (id: number) => {
   const response = await fetch(
@@ -43,17 +35,6 @@ export const getTransactionById = async (id: number) => {
   return response.json();
 };
 
-export function UseGetTransactionById(id: number) {
-  return useQuery<Transaction>({
-    queryKey: ["transaction", id],
-    queryFn: async () => {
-      console.log(`Fetching transaction with ID: ${id}`);
-      return getTransactionById(id);
-    },
-    enabled: !!id, // Lazy Query to id
-  });
-}
-
 export const addTransaction = async (data: TransactionFormSchema) => {
   const response = await fetch(TRANSACTIONS_ROUTES.POST_TRANSACTION, {
     method: "POST",
@@ -67,45 +48,6 @@ export const addTransaction = async (data: TransactionFormSchema) => {
   if (!response.ok) throw new Error("Failed to add transaction");
   return response.json();
 };
-
-export function UseAddTransaction() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: addTransaction,
-    onMutate: async (newTransaction) => {
-      // Cancel queries to avoid conflicts
-      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-
-      const previousTransactions = queryClient.getQueryData<Transaction[]>([
-        QUERY_KEY_TRANSACTIONS,
-      ]);
-
-      queryClient.setQueryData<Transaction[]>(
-        [QUERY_KEY_TRANSACTIONS],
-        (oldTransactions = []) => [
-          ...oldTransactions,
-          { ...newTransaction, id: Math.random() },
-        ]
-      );
-
-      return { previousTransactions };
-    },
-
-    onError: (_error, _newTransaction, context) => {
-      if (context?.previousTransactions) {
-        queryClient.setQueryData(
-          ["transactions"],
-          context.previousTransactions
-        );
-      }
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-    },
-  });
-}
 
 type updateTransactionPayload = {
   id: number;
@@ -129,45 +71,6 @@ export const updateTransaction = async ({
   return response.json();
 };
 
-export function UseUpdateTransaction() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: updateTransaction,
-
-    onMutate: async (updatedTransaction) => {
-      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-
-      const previousTransactions = queryClient.getQueryData<Transaction[]>([
-        QUERY_KEY_TRANSACTIONS,
-      ]);
-
-      queryClient.setQueryData<Transaction[]>(
-        [QUERY_KEY_TRANSACTIONS],
-        (oldTransactions = []) =>
-          oldTransactions.map((oldTransaction) =>
-            oldTransaction.id === updatedTransaction.id
-              ? { ...oldTransaction, ...updatedTransaction.updates }
-              : oldTransaction
-          )
-      );
-
-      return { previousTransactions };
-    },
-    onError: (_error, _updatedTransaction, context) => {
-      if (context?.previousTransactions) {
-        queryClient.setQueryData(
-          [QUERY_KEY_TRANSACTIONS],
-          context.previousTransactions
-        );
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-    },
-  });
-}
-
 export const deleteTransaction = async (id: number) => {
   const response = await fetch(
     `${TRANSACTIONS_ROUTES.DELETE_TRANSACTION}/${id}`,
@@ -182,40 +85,3 @@ export const deleteTransaction = async (id: number) => {
 
   if (!response.ok) throw new Error("Failed to delete transaction");
 };
-
-export function UseDeleteTransaction() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: deleteTransaction,
-
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-
-      const previousTransactions = queryClient.getQueryData<Transaction[]>([
-        QUERY_KEY_TRANSACTIONS,
-      ]);
-
-      queryClient.setQueryData<Transaction[]>(
-        [QUERY_KEY_TRANSACTIONS],
-        (oldTransactions = []) =>
-          oldTransactions.filter((transaction) => transaction.id !== id)
-      );
-
-      return { previousTransactions };
-    },
-
-    onError: (_error, _id, context) => {
-      if (context?.previousTransactions) {
-        queryClient.setQueryData(
-          [QUERY_KEY_TRANSACTIONS],
-          context.previousTransactions
-        );
-      }
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-    },
-  });
-}

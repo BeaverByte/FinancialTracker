@@ -2,13 +2,13 @@ import {
   FormSchema,
   TransactionFormSchema,
 } from "../../types/schemas/transactionSchema";
-import { UseAddTransaction } from "../../services/transactions";
 import { useNavigate } from "react-router";
 import { TransactionForm } from "./TransactionForm";
+import { useAddTransaction } from "../../hooks/useAddTransaction";
 
 function AddTransactionForm() {
   const navigate = useNavigate();
-  const transactions = UseAddTransaction();
+  const transactions = useAddTransaction();
 
   const handleSave = (data: TransactionFormSchema) => {
     const postTransaction = data;

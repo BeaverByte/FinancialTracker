@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { loginUser } from "../../services/auth";
-import { UseGetTransactions } from "../../services/transactions";
+import { useGetTransactions } from "../../hooks/useGetTransactions";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const { isLoading, isError } = UseGetTransactions();
+  const { isLoading, isError } = useGetTransactions();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

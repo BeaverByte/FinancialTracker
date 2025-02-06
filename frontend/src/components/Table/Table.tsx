@@ -1,8 +1,8 @@
 import { JSX } from "react";
-import { UseDeleteTransaction } from "../../services/transactions";
 import { TableHeaderConfig, TableProps } from "../../types/Transaction";
 import TableBody from "./TableBody";
 import TableHeader from "./TableHeader";
+import { useDeleteTransaction } from "../../hooks/useDeleteTransaction";
 
 const defaultHeaders: TableHeaderConfig[] = [
   { label: "Actions", field: "actions", visible: true },
@@ -19,7 +19,7 @@ export default function Table({
   headers = defaultHeaders,
   onEditTransaction,
 }: Readonly<TableProps>): JSX.Element {
-  const deleteMutation = UseDeleteTransaction();
+  const deleteMutation = useDeleteTransaction();
 
   function handleDeleteClick(id: number) {
     console.log("DELETE transaction with id " + id);

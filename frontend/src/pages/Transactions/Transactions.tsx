@@ -1,7 +1,7 @@
 import Banner from "../../components/Banner/Banner.tsx";
 import Table from "../../components/Table/Table.tsx";
-import { UseGetTransactions } from "../../services/transactions.ts";
 import { useNavigate } from "react-router";
+import { useGetTransactions } from "../../hooks/useGetTransactions.ts";
 
 export default function Transactions() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function Transactions() {
     navigate(`/transactions/edit/${id}`);
   };
 
-  const { data, error, isLoading } = UseGetTransactions();
+  const { data, error, isLoading } = useGetTransactions();
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
