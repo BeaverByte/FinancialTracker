@@ -1,6 +1,6 @@
 import {
   FormSchema,
-  FormSchemaType,
+  TransactionFormSchema,
 } from "../../types/schemas/transactionSchema";
 import { UseAddTransaction } from "../../services/transactions";
 import { useNavigate } from "react-router";
@@ -10,7 +10,7 @@ function AddTransactionForm() {
   const navigate = useNavigate();
   const transactions = UseAddTransaction();
 
-  const handleSave = (data: FormSchemaType) => {
+  const handleSave = (data: TransactionFormSchema) => {
     const postTransaction = data;
 
     const result = FormSchema.safeParse(postTransaction);
@@ -27,7 +27,7 @@ function AddTransactionForm() {
     navigate("/transactions");
   };
 
-  const initialTransaction = {
+  const initialTransaction: TransactionFormSchema = {
     date: "",
     merchant: "",
     account: "",

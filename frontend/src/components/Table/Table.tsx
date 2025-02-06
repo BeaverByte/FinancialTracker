@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { UseDeleteTransaction } from "../../services/transactions";
 import { TableHeaderConfig, TableProps } from "../../types/Transaction";
 import TableBody from "./TableBody";

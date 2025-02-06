@@ -26,7 +26,7 @@ export const FormSchema: ZodType<TransactionFormData> = z.object({
   note: z.string(),
 });
 
-export type FormSchemaType = z.infer<typeof FormSchema>;
+export type TransactionFormSchema = z.infer<typeof FormSchema>;
 
 function removeNonNumericExceptDecimals(word: string) {
   return word.replace(/[^0-9.-]+/g, "");

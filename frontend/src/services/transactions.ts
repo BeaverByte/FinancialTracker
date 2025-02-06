@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FormSchemaType } from "../types/schemas/transactionSchema";
+import { TransactionFormSchema } from "../types/schemas/transactionSchema";
 import { TRANSACTIONS_ROUTES } from "../utility/API_ROUTES";
 import { Transaction } from "../types/Transaction";
 
@@ -44,7 +44,7 @@ export const getTransactionById = async (id: number) => {
 };
 
 export function UseGetTransactionById(id: number) {
-  return useQuery({
+  return useQuery<Transaction>({
     queryKey: ["transaction", id],
     queryFn: async () => {
       console.log(`Fetching transaction with ID: ${id}`);
@@ -54,7 +54,7 @@ export function UseGetTransactionById(id: number) {
   });
 }
 
-export const addTransaction = async (data: FormSchemaType) => {
+export const addTransaction = async (data: TransactionFormSchema) => {
   const response = await fetch(TRANSACTIONS_ROUTES.POST_TRANSACTION, {
     method: "POST",
     headers: {

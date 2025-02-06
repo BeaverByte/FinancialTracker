@@ -1,6 +1,17 @@
+import { Transaction } from "../../types/Transaction";
 import { TransactionForm } from "./TransactionForm";
 
-export function EditTransactionModal({ transaction, onSave, onClose }) {
+type EditTransactionModal = {
+  transaction: Transaction | undefined;
+  onClose: () => void;
+  onSave: (updatedTransaction: Transaction) => void;
+};
+
+export function EditTransactionModal({
+  transaction,
+  onSave,
+  onClose,
+}: Readonly<EditTransactionModal>) {
   return (
     <TransactionForm
       initialValues={transaction}
