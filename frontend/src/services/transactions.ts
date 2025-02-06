@@ -109,7 +109,7 @@ export function UseAddTransaction() {
 
 type updateTransactionPayload = {
   id: number;
-  updates: string;
+  updates: Transaction;
 };
 
 export const updateTransaction = async ({
