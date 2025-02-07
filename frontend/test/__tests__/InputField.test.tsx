@@ -10,8 +10,8 @@ test("Has correct label", async () => {
 
   const label = screen.getByLabelText("Username:");
   // ACT
-  // await userEvent.click(screen.getByLabelText("Username:"));
-  // await screen.findByRole("heading");
+  await userEvent.click(screen.getByLabelText("Username:"));
+  await screen.findByRole("heading");
 
   // ASSERT
   expect(label).toHaveTextContent("hello there");
