@@ -4,6 +4,13 @@ import { Transaction } from "../types/Transaction";
 
 export const QUERY_KEY_TRANSACTIONS = "transactions";
 
+export class UnauthorizedError extends Error {
+  constructor(message = "Unauthorized") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
 export const getTransactions = async () => {
   const response = await fetch(TRANSACTIONS_ROUTES.GET_TRANSACTIONS, {
     method: "GET",
@@ -13,8 +20,12 @@ export const getTransactions = async () => {
     credentials: "include",
   });
 
-  if (!response.ok) throw new Error("Failed to get transactions");
-
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new UnauthorizedError("Session expired. Please log in again.");
+    }
+    throw new Error(`Failed to get transactions: ${response.status}`);
+  }
   return response.json();
 };
 

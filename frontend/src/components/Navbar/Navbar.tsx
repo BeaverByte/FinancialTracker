@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { ROUTES } from "../../pages/routes";
+import { useAuth } from "../../context/AuthContext";
 
 /**
  * Navbar that provides sets of links to navigate between pages
@@ -7,6 +8,8 @@ import { ROUTES } from "../../pages/routes";
  * @component
  */
 export default function Navbar() {
+  const { isLoggedIn, logout } = useAuth();
+
   return (
     <nav>
       <div>
@@ -25,11 +28,17 @@ export default function Navbar() {
             New Transaction
           </Link>
         </li>
-        <li className="nav-item">
-          <Link to={ROUTES.LOGIN} className="nav-link">
-            Login
-          </Link>
-        </li>
+        {!isLoggedIn ? (
+          <li className="nav-item">
+            <Link to={ROUTES.LOGIN} className="nav-link">
+              Login
+            </Link>
+          </li>
+        ) : (
+          <li className="nav-item">
+            <Link to={""}>Logout</Link>
+          </li>
+        )}
       </div>
     </nav>
   );

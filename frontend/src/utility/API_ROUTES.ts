@@ -1,7 +1,10 @@
-export const BASE_URL = "http://localhost:8080";
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const transactionsEndpoint = `${BASE_URL}/api/transactions`;
 export const TRANSACTIONS_ROUTES = {
-  GET_TRANSACTIONS: BASE_URL + "/api/transactions",
-  POST_TRANSACTION: BASE_URL + "/api/transactions",
-  PUT_TRANSACTION: BASE_URL + "/api/transactions",
-  DELETE_TRANSACTION: BASE_URL + "/api/transactions",
+  ENDPOINT: transactionsEndpoint,
+  GET_TRANSACTIONS: transactionsEndpoint,
+  POST_TRANSACTION: transactionsEndpoint,
+  PUT_TRANSACTION: transactionsEndpoint,
+  DELETE_TRANSACTION: transactionsEndpoint,
 };

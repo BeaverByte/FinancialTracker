@@ -3,11 +3,19 @@ import { createRoot } from "react-dom/client";
 // import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App.tsx";
+import { TRANSACTIONS_ROUTES } from "./utility/API_ROUTES.ts";
 // import React from "react";
 
 async function enableMocking() {
+  console.log(`API Route is ${TRANSACTIONS_ROUTES.ENDPOINT}`);
+  console.log(`Currently in "${process.env.NODE_ENV}" environment`);
+
   if (process.env.NODE_ENV !== "development") {
     console.log("App not in NODE development mode");
+    return;
+  }
+  if (!import.meta.env.VITE_ENABLE_MSW) {
+    console.log("App is not in testing, MSW disabled");
     return;
   }
 

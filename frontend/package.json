@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev-msw": "set VITE_ENABLE_MSW=true && vite",
+    "dev-test": "set VITE_ENABLE_MSW=true && vite --mode test",
+    "dev-msw": "set VITE_ENABLE_MSW=true && vite --mode test",
     "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:backend": "cd ../backend && gradlew bootRun",
     "test": "vitest --ui",
@@ -14,7 +15,7 @@
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:browser": "vitest --workspace=vitest.workspace.browser.ts"
+    "test:browser": "set VITE_ENABLE_MSW=true && vite --mode test && vitest --workspace=vitest.workspace.browser.ts"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",

@@ -1,4 +1,3 @@
-// test-extend.ts
 import { test as testBase } from "vitest";
 import { worker } from "./browser.js";
 

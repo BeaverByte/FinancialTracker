@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { loginUser } from "../../services/auth";
-import { useGetTransactions } from "../../hooks/useGetTransactions";
+import { useAuth } from "../../context/AuthContext";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  const { isLoading, isError } = useGetTransactions();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,7 +18,8 @@ const LoginForm = () => {
     }
   };
 
-  if (!isError && !isLoading) {
+  const { isLoggedIn } = useAuth();
+  if (isLoggedIn) {
     return (
       <p>
         You are already logged in. <a href="/transactions">View transactions</a>

@@ -9,11 +9,6 @@ import { setupWorker } from "msw/browser";
 import { test } from "../../src/mocks/test-extend";
 // import { setupServer } from "msw/node";
 
-// Recommended approach is to mock network response as opposed to result of hook
-// vi.mock("../../services/transactions", () => ({
-//   getTransactions: vi.fn(),
-// }));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
