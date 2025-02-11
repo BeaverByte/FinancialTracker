@@ -3,7 +3,7 @@ import { useGetTransactions } from "../hooks/useGetTransactions";
 import { useNavigate } from "react-router";
 import { loginUser, logoutUser } from "../services/auth";
 import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEY_TRANSACTIONS } from "../services/transactions";
+import { APP_ROUTES } from "../pages/routes";
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -38,7 +38,7 @@ export function AuthProvider({
     try {
       const { user } = await loginUser(username, password);
       setIsLoggedIn(true);
-      navigate("/");
+      navigate(APP_ROUTES.TRANSACTIONS_LIST);
       console.log("User has logged in: " + user);
       return user;
     } catch (err) {
@@ -51,7 +51,6 @@ export function AuthProvider({
 
     try {
       await logoutUser();
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
       setIsLoggedIn(false);
       console.log("User has logged out");
     } catch (err) {

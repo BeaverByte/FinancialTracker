@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { loginUser } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router";
-import { APP_ROUTES } from "../../pages/routes";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
