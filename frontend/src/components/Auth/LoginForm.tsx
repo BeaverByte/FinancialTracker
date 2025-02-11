@@ -1,24 +1,30 @@
 import { useState } from "react";
 import { loginUser } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router";
+import { APP_ROUTES } from "../../pages/routes";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const { isLoggedIn, isLoading, login } = useAuth();
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      const { user } = await loginUser(username, password);
-      console.log(user + "has logged in");
+      await login(username, password);
     } catch (err) {
       setError("Login failed. Please check your credentials: " + err);
     }
   };
 
-  const { isLoggedIn } = useAuth();
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
   if (isLoggedIn) {
     return (
       <p>

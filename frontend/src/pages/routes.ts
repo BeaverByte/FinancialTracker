@@ -2,11 +2,12 @@
  * Constants for application's routes
  * @constant
  */
-export const ROUTES = {
+export const APP_ROUTES = {
   ROOT: "/",
-  NEWTRANSACTION: "/transactions/new",
-  TRANSACTIONSLIST: "/transactions",
+  CREATE_TRANSACTION: "/transactions/new",
+  TRANSACTIONS_LIST: "/transactions",
   TRANSACTION: "/transactions",
-  FINDTRANSACTION: "/effectivedate",
+  FIND_TRANSACTION: "/effectivedate",
   LOGIN: "/auth/login",
+  LOGOUT: "/auth/logout",
 };

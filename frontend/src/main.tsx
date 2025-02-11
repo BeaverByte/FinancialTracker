@@ -3,11 +3,11 @@ import { createRoot } from "react-dom/client";
 // import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App.tsx";
-import { TRANSACTIONS_ROUTES } from "./utility/API_ROUTES.ts";
+import { API_ROUTES } from "./utility/API_ROUTES.ts";
 // import React from "react";
 
 async function enableMocking() {
-  console.log(`API Route is ${TRANSACTIONS_ROUTES.ENDPOINT}`);
+  console.log(`API Route is ${API_ROUTES.TRANSACTIONS.ENDPOINT}`);
   console.log(`Currently in "${process.env.NODE_ENV}" environment`);
 
   if (process.env.NODE_ENV !== "development") {

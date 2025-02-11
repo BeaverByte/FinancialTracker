@@ -1,10 +1,17 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useGetTransactions } from "../hooks/useGetTransactions";
 import { useNavigate } from "react-router";
+import { loginUser, logoutUser } from "../services/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEY_TRANSACTIONS } from "../services/transactions";
 
 interface AuthContextType {
   isLoggedIn: boolean;
   isLoading: boolean;
+  logout: () => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  data: any;
+  error: Error | null;
 }
 
 // User can be logged in, would be undefined if not
@@ -13,10 +20,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { isLoading, isError } = useGetTransactions();
+  const { data, error, isLoading, isError } = useGetTransactions();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoading) {
@@ -24,17 +32,37 @@ export function AuthProvider({
     }
   }, [isLoading, isError]);
 
-  const logout = () => {
+  // TODO: Need to refresh state after user logout
+
+  const login = async (username: string, password: string) => {
+    try {
+      const { user } = await loginUser(username, password);
+      setIsLoggedIn(true);
+      navigate("/");
+      console.log("User has logged in: " + user);
+      return user;
+    } catch (err) {
+      throw new Error("Login failed.");
+    }
+  };
+
+  const logout = async () => {
     console.log("Logging out... (must implement)");
-    // setIsLoggedIn(false); // Update state
-    // navigate("/auth/login", {
-    //   replace: true,
-    //   state: { message: "You have been logged out." },
-    // });
+
+    try {
+      await logoutUser();
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+      setIsLoggedIn(false);
+      console.log("User has logged out");
+    } catch (err) {
+      console.error("Error without user logout");
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isLoading, logout }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, isLoading, logout, login, data, error }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -2,10 +2,9 @@ import "./App.css";
 
 import Home from "./pages/Home/Home";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { ROUTES } from "./pages/routes";
+import { APP_ROUTES } from "./pages/routes";
 import TransactionsList from "./pages/Transactions/Transactions";
 import Layout from "./components/Layout";
-import LoginForm from "./components/Auth/LoginForm";
 import {
   MutationCache,
   QueryCache,
@@ -15,6 +14,9 @@ import {
 import { EditTransaction } from "./components/Form/EditTransaction";
 import { AddTransactionForm } from "./components/Form/AddTransactionForm";
 import { AuthProvider } from "./context/AuthContext";
+import LoginForm from "./components/Auth/LoginForm";
+import Logout from "./components/Auth/Logout";
+import AuthRoute from "./routes/AuthRoute";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -38,21 +40,24 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path={ROUTES.ROOT} element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route
-                path={ROUTES.TRANSACTIONSLIST}
-                element={<TransactionsList />}
-              />
-              <Route
-                path="transactions/edit/:id"
-                element={<EditTransaction />}
-              />
-              <Route
-                path={ROUTES.NEWTRANSACTION}
-                element={<AddTransactionForm />}
-              />
-              <Route path={ROUTES.LOGIN} element={<LoginForm />} />
+            <Route path={APP_ROUTES.LOGIN} element={<LoginForm />} />
+            <Route element={<AuthRoute />}>
+              <Route path={APP_ROUTES.ROOT} element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route
+                  path={APP_ROUTES.TRANSACTIONS_LIST}
+                  element={<TransactionsList />}
+                />
+                <Route
+                  path="transactions/edit/:id"
+                  element={<EditTransaction />}
+                />
+                <Route
+                  path={APP_ROUTES.CREATE_TRANSACTION}
+                  element={<AddTransactionForm />}
+                />
+                <Route path={APP_ROUTES.LOGOUT} element={<Logout />} />
+              </Route>
             </Route>
           </Routes>
         </AuthProvider>
