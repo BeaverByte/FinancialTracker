@@ -5,7 +5,6 @@ import { getTransactions } from "../../src/services/transactions";
 
 import { test } from "../../src/mocks/test-extend";
 import { useAddTransaction } from "../../src/hooks/useAddTransaction";
-import { API_ROUTES } from "../../src/utility/API_ROUTES";
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -5,28 +5,57 @@ import { Transaction } from "../types/Transaction";
 export const QUERY_KEY_TRANSACTIONS = "transactions";
 
 export class UnauthorizedError extends Error {
-  constructor(message = "Unauthorized") {
+  constructor(message) {
     super(message);
     this.name = "UnauthorizedError";
   }
 }
 
-export const getTransactions = async () => {
-  const response = await fetch(API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new UnauthorizedError("Session expired. Please log in again.");
-    }
-    throw new Error(`Failed to get transactions: ${response.status}`);
+export class NetworkError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "NetworkError";
   }
-  return response.json();
+}
+
+interface FetchItemOptions {
+  method: string;
+  body?: unknown;
+}
+
+class FetchError extends Error {
+  constructor(public res: Response, message?: string) {
+    super(message);
+  }
+}
+
+export const getTransactions = async () => {
+  try {
+    const response = await fetch(API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new UnauthorizedError("Session expired. Please log in again: ");
+      }
+      throw new Error(`Failed to get transactions: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
+  }
 };
 
 export const getTransactionById = async (id: number) => {

@@ -7,12 +7,13 @@ import { test } from "../../src/mocks/test-extend";
 import { http, HttpResponse } from "msw";
 import { API_ROUTES } from "../../src/utility/API_ROUTES";
 import { worker } from "../../src/mocks/browser";
+import { NetworkError } from "../../src/services/transactions";
 
 const createQueryWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: 3,
+        retry: false,
       },
     },
   });
@@ -53,8 +54,6 @@ describe("useGetTransactions", () => {
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(true));
-
-    expect(result.current.isLoading).toBe(true);
   });
 
   test("Should render error message on error", async () => {
@@ -70,8 +69,26 @@ describe("useGetTransactions", () => {
 
     console.log(result);
 
-    await waitFor(() => expect(result.current.status).toBe("error"), {
-      timeout: 3000000,
+    await waitFor(() => expect(result.current.isError).toBe(true), {
+      timeout: 10000,
     });
+
+    expect(result.current.error).toBeDefined();
+  });
+
+  test("Should handle network error", async () => {
+    worker.use(
+      http.get(`${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}`, () => {
+        return HttpResponse.error();
+      })
+    );
+
+    const { result } = renderHook(() => useGetTransactions(), {
+      wrapper: createQueryWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(result.current.error).toBeInstanceOf(NetworkError);
   });
 });

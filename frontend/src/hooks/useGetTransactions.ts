@@ -9,11 +9,4 @@ export function useGetTransactions() {
     queryKey: [QUERY_KEY_TRANSACTIONS],
     queryFn: getTransactions,
   });
-
-  // const query = useQuery({
-  //   queryKey: [QUERY_KEY_TRANSACTIONS],
-  //   queryFn: getTransactions,
-  // });
-
-  // return query;
 }

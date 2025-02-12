@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { InputField } from "../../src/components/Form/Input";
 import "@testing-library/jest-dom";
-import { assert, expect, test } from "vitest";
+import { test } from "../../src/mocks/test-extend";
+import { expect } from "vitest";
 
 test("Has correct label", async () => {
   // ARRANGE
