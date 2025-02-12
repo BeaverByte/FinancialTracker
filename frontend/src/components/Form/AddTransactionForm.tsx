@@ -5,6 +5,7 @@ import {
 import { useNavigate } from "react-router";
 import { TransactionForm } from "./TransactionForm";
 import { useAddTransaction } from "../../hooks/useAddTransaction";
+import { APP_ROUTES } from "../../pages/routes";
 
 function AddTransactionForm() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ function AddTransactionForm() {
     <TransactionForm
       initialValues={{ initialTransaction }}
       onSubmit={handleSave}
-      onCancel={() => navigate("/transactions")}
+      onCancel={() => navigate(APP_ROUTES.BACK)}
     />
   );
 }

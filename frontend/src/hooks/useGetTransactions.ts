@@ -5,10 +5,15 @@ import {
 } from "../services/transactions";
 
 export function useGetTransactions() {
-  const query = useQuery({
+  return useQuery({
     queryKey: [QUERY_KEY_TRANSACTIONS],
     queryFn: getTransactions,
   });
 
-  return query;
+  // const query = useQuery({
+  //   queryKey: [QUERY_KEY_TRANSACTIONS],
+  //   queryFn: getTransactions,
+  // });
+
+  // return query;
 }

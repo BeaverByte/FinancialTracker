@@ -3,6 +3,7 @@ import { EditTransactionModal } from "./EditTransactionModal";
 import { Transaction } from "../../types/Transaction";
 import { useUpdateTransaction } from "../../hooks/useUpdateTransaction";
 import { useGetTransactionById } from "../../hooks/useGetTransactionById";
+import { APP_ROUTES } from "../../pages/routes";
 
 export function EditTransaction() {
   const { id } = useParams();
@@ -36,7 +37,7 @@ export function EditTransaction() {
   return (
     <EditTransactionModal
       transaction={transaction}
-      onClose={() => navigate("/transactions")}
+      onClose={() => navigate(APP_ROUTES.BACK)}
       onSave={handleSave}
     />
   );

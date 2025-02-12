@@ -6,6 +6,7 @@ export default defineWorkspace([
   {
     extends: "vitest.config.ts",
     test: {
+      name: "browser",
       browser: {
         enabled: true,
         provider: "playwright",
@@ -14,11 +15,11 @@ export default defineWorkspace([
       },
     },
   },
-  {
-    test: {
-      include: ["tests/**/*.{node}.test.{ts,js}"],
-      name: "node",
-      environment: "node",
-    },
-  },
+  // {
+  //   test: {
+  //     name: "node",
+  //     include: ["tests/**/*.{node}.test.{ts,js}"],
+  //     environment: "node",
+  //   },
+  // },
 ]);

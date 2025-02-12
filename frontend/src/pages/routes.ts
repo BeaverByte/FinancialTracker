@@ -10,4 +10,5 @@ export const APP_ROUTES = {
   FIND_TRANSACTION: "/effectivedate",
   LOGIN: "/auth/login",
   LOGOUT: "/auth/logout",
+  BACK: -1, // Wrapper for React Router to avoid navigate(-1) indirection
 };

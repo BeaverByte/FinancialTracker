@@ -7,19 +7,19 @@ import { Transaction } from "../types/Transaction";
 
 export function useDeleteTransaction() {
   const queryClient = useQueryClient();
+  const queryKey = [QUERY_KEY_TRANSACTIONS];
 
   return useMutation({
     mutationFn: deleteTransaction,
 
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+      await queryClient.cancelQueries({ queryKey });
 
-      const previousTransactions = queryClient.getQueryData<Transaction[]>([
-        QUERY_KEY_TRANSACTIONS,
-      ]);
+      const previousTransactions =
+        queryClient.getQueryData<Transaction[]>(queryKey);
 
       queryClient.setQueryData<Transaction[]>(
-        [QUERY_KEY_TRANSACTIONS],
+        queryKey,
         (oldTransactions = []) =>
           oldTransactions.filter((transaction) => transaction.id !== id)
       );
@@ -29,15 +29,12 @@ export function useDeleteTransaction() {
 
     onError: (_error, _id, context) => {
       if (context?.previousTransactions) {
-        queryClient.setQueryData(
-          [QUERY_KEY_TRANSACTIONS],
-          context.previousTransactions
-        );
+        queryClient.setQueryData(queryKey, context.previousTransactions);
       }
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 }

@@ -36,7 +36,10 @@ export default function Navbar() {
           </li>
         ) : (
           <li className="nav-item">
-            <button onClick={logout}>Logout</button>
+            <Link to={APP_ROUTES.LOGOUT} className="nav-link">
+              Logout
+            </Link>
+            {/* <button onClick={logout}>Logout</button> */}
           </li>
         )}
       </div>

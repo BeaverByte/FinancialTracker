@@ -7,39 +7,42 @@ import { Transaction } from "../types/Transaction";
 
 export function useAddTransaction() {
   const queryClient = useQueryClient();
+  const queryKey = [QUERY_KEY_TRANSACTIONS];
 
   return useMutation({
     mutationFn: addTransaction,
-    onMutate: async (newTransaction) => {
-      // Cancel queries to avoid conflicts
-      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
 
-      const previousTransactions = queryClient.getQueryData<Transaction[]>([
-        QUERY_KEY_TRANSACTIONS,
-      ]);
+    onMutate: async (newTransaction) => {
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousTransactions =
+        queryClient.getQueryData<Transaction[]>(queryKey);
 
       queryClient.setQueryData<Transaction[]>(
-        [QUERY_KEY_TRANSACTIONS],
+        queryKey,
         (oldTransactions = []) => [
           ...oldTransactions,
           { ...newTransaction, id: Math.random() },
         ]
       );
 
-      return { previousTransactions };
+      return { previousTransactions }; //  This is considered 'context' for Tanstack Query, for rollback
     },
 
     onError: (_error, _newTransaction, context) => {
-      if (context?.previousTransactions) {
-        queryClient.setQueryData(
-          ["transactions"],
-          context.previousTransactions
+      const queryExists = context?.previousTransactions;
+      console.log("Error with add query");
+      if (queryExists) {
+        console.log(
+          `Rolling back query to ${queryKey}: ${context.previousTransactions}`
         );
+        queryClient.setQueryData(queryKey, context.previousTransactions);
       }
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+      console.log("Add query settled");
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 }

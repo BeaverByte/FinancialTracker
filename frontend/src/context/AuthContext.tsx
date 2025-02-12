@@ -24,7 +24,6 @@ export function AuthProvider({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
 
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoading) {
@@ -38,7 +37,7 @@ export function AuthProvider({
     try {
       const { user } = await loginUser(username, password);
       setIsLoggedIn(true);
-      navigate(APP_ROUTES.TRANSACTIONS_LIST);
+      navigate(APP_ROUTES.ROOT);
       console.log("User has logged in: " + user);
       return user;
     } catch (err) {
@@ -47,7 +46,7 @@ export function AuthProvider({
   };
 
   const logout = async () => {
-    console.log("Logging out... (must implement)");
+    console.log("Logging out...");
 
     try {
       await logoutUser();

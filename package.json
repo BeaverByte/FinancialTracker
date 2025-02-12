@@ -7,9 +7,8 @@
     "dev:backend": "npm run dev:backend --prefix frontend",
     "backend": "npm run dev:backend",
     "dev:all": "npm run dev:backend --prefix frontend",
-    "install": "npm install --prefix frontend",
     "frontend:build": "npm run build --prefix frontend",
-    "frontend:test": "npm test --prefix frontend",
+    "frontend:test": "npm run test:browser --prefix frontend",
     "backend:test": "mvn test",
     "backend:start": "cd backend && mvnw.cmd spring-boot:run"
   },

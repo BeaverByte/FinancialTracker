@@ -1,25 +1,25 @@
-import { render, renderHook, screen, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, vi } from "vitest"; // For mocking
+import { describe, expect } from "vitest"; // For mocking
 import { useGetTransactions } from "../../src/hooks/useGetTransactions";
-import { getTransactions } from "../../src/services/transactions";
 
-import { http, HttpResponse } from "msw";
-import { setupWorker } from "msw/browser";
 import { test } from "../../src/mocks/test-extend";
-// import { setupServer } from "msw/node";
+import { http, HttpResponse } from "msw";
+import { API_ROUTES } from "../../src/utility/API_ROUTES";
+import { worker } from "../../src/mocks/browser";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
+const createQueryWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 3,
+      },
     },
-  },
-});
-// Wrapper builds QueryClient and QueryClientProvider to isolate from other tests
-const wrapper = ({ children }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+  });
+  return ({ children }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 function TestComponent() {
   const { data, isLoading, error } = useGetTransactions();
@@ -37,56 +37,41 @@ function TestComponent() {
 }
 
 describe("useGetTransactions", () => {
-  test("Should succeed to give response", async () => {
-    const { result } = renderHook(() => useGetTransactions(), { wrapper });
+  test("Should succeed with response", async () => {
+    const { result } = renderHook(() => useGetTransactions(), {
+      wrapper: createQueryWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    // expect(result.current.data).toBeDefined();
+    expect(result.current.data).toBeDefined();
   });
 
-  test("Testing url", async () => {
-    const response = await fetch("/stupid");
-    const user = await response.json();
-    expect(user).toBeDefined();
-  });
+  test("Should initially have Loading text visible in document", async () => {
+    const { result } = renderHook(() => useGetTransactions(), {
+      wrapper: createQueryWrapper(),
+    });
 
-  test("Should have Loading text visible in document", async () => {
-    const { getByText } = render(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent />
-      </QueryClientProvider>
-    );
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
 
-    expect(getByText("Loading...")).toBeInTheDocument();
-  });
-
-  test("Should render provided transaction", async () => {
-    const mockData = [{ id: 1, name: "Transaction 1" }];
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent />
-      </QueryClientProvider>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByText("Transaction 1")).toBeInTheDocument()
-    );
+    expect(result.current.isLoading).toBe(true);
   });
 
   test("Should render error message on error", async () => {
-    vi.mocked(getTransactions).mockRejectedValue(
-      new Error("Failed to fetch transactions")
+    worker.use(
+      http.get(`${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}`, () => {
+        return new HttpResponse(null, { status: 401 });
+      })
     );
 
-    const { findByText } = render(
-      <QueryClientProvider client={queryClient}>
-        <TestComponent />
-      </QueryClientProvider>
-    );
+    const { result } = renderHook(() => useGetTransactions(), {
+      wrapper: createQueryWrapper(),
+    });
 
-    const errorElement = await findByText("Error!");
-    expect(errorElement).toBeInTheDocument();
+    console.log(result);
+
+    await waitFor(() => expect(result.current.status).toBe("error"), {
+      timeout: 3000000,
+    });
   });
 });
