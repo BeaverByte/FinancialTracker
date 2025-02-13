@@ -9,6 +9,7 @@ beforeAll(() => {
 
 afterEach(() => {
   // server.resetHandlers();
+  console.log("Unmounting React trees that were mounted with render");
   cleanup();
 });
 

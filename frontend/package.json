@@ -9,14 +9,16 @@
     "dev-msw": "set VITE_ENABLE_MSW=true && vite --mode test",
     "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:backend": "cd ../backend && gradlew bootRun",
-    "test": "vitest --ui",
+    "testtttt": "vitest --ui --coverage",
+    "test": "vitest --coverage",
+    "coverage": "vitest --coverage.enabled=true --ui",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test:browserrr": "set VITE_ENABLE_MSW=true && vite --mode test && vitest --workspace=vitest.workspace.browser.ts",
-    "test:browser": "set VITE_ENABLE_MSW=true && vitest --ui"
+    "test:browser": "set VITE_ENABLE_MSW=true && vitest --ui --coverage"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
@@ -56,6 +58,7 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/browser": "^3.0.5",
+    "@vitest/coverage-v8": "^3.0.5",
     "babel-jest": "^29.7.0",
     "concurrently": "^9.1.2",
     "eslint": "^9.19.0",

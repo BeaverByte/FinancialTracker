@@ -3,8 +3,9 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
-    "types": ["@vitest/browser/providers/playwright"]
-  }
+  ]
+  // Specifying compilerOptions here will disable auto loading of @types/*
+  // "compilerOptions": {
+  //   "types": ["@vitest/browser/providers/playwright"]
+  // }
 }
