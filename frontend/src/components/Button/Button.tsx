@@ -1,20 +1,12 @@
-import { PropsWithChildren } from "react";
-import styles from "./Button.module.css";
-
 type ButtonProps = {
-  title?: string;
+  type: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
   children?: React.ReactNode;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-// function Button({ children, onClick, type, title }) {
-function Button({ children, onClick, title }: ButtonProps) {
+function Button({ children, onClick, type }: Readonly<ButtonProps>) {
   return (
-    <button
-      title={title}
-      onClick={onClick}
-      // className={`${styles.btn} ${styles[title]}`}
-    >
+    <button type={type} onClick={onClick}>
       {children}
     </button>
   );

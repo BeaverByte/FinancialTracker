@@ -1,300 +1,337 @@
 package com.beaverbyte.financial_tracker_application;
 
-import static io.restassured.RestAssured.authentication;
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.beaverbyte.financial_tracker_application.entity.ERole;
-import com.beaverbyte.financial_tracker_application.entity.Role;
-import com.beaverbyte.financial_tracker_application.entity.User;
-import com.beaverbyte.financial_tracker_application.payload.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
+import com.beaverbyte.financial_tracker_application.dto.request.SignupRequest;
+import com.beaverbyte.financial_tracker_application.model.RoleType;
+import com.beaverbyte.financial_tracker_application.model.Role;
+import com.beaverbyte.financial_tracker_application.model.User;
+import com.beaverbyte.financial_tracker_application.repository.RefreshTokenRepository;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
+import com.beaverbyte.financial_tracker_application.security.jwt.AuthenticationUtils;
+import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
+import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
+import com.beaverbyte.financial_tracker_application.utils.HttpTestUtils;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class IntegrationTests extends AbstractIntegrationTest{
+class IntegrationTests extends AbstractIntegrationTest {
 
-    @LocalServerPort
-    private Integer port;
+	@LocalServerPort
+	private Integer port;
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+	@Autowired
+	AuthenticationManager authenticationManager;
 
-    @Autowired
-    TestRestTemplate restTemplate;
+	@Autowired
+	TestRestTemplate restTemplate;
 
-    @Autowired
-    UserRepository userRepository;
+	@Autowired
+	UserRepository userRepository;
 
-    @Autowired
-    RoleRepository roleRepository;
-    
-    @Autowired
-    RoleService roleService;
+	@Autowired
+	RoleRepository roleRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
+	@Autowired
+	RefreshTokenRepository refreshTokenRepository;
 
-    @BeforeAll
-    static void beforeAll() {
-        postgres.start();
-    }
-    @AfterAll
-    static void afterAll() {
-        postgres.stop();
-    }
+	@Autowired
+	RoleService roleService;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.baseURI = "http://localhost:" + port;
+	@Autowired
+	PasswordEncoder encoder;
 
-        sanitizeRepos();
-        seedTestContainers();
+	@Autowired
+	JwtUtils jwtUtils;
 
-        System.out.println("Database cleared before each test");
-    }
+	@Autowired
+	CustomUserDetailsService customUserDetailsService;
 
-    void sanitizeRepos(){
-        // Sanitizing repos
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
+	@Autowired
+	RefreshTokenService refreshTokenService;
 
-        userRepository.flush();
-        roleRepository.flush();
-    }
+	@Value("${JWT_COOKIE_NAME}")
+	private String jwtCookieName;
 
-    void seedTestContainers() {
-        // Seeding TestContainers with roles 
-        Role roleUser = new Role(ERole.ROLE_USER);
-        roleRepository.save(roleUser);
-        Role roleMod = new Role(ERole.ROLE_MODERATOR);
-        roleRepository.save(roleMod);
-        Role roleAdmin = new Role(ERole.ROLE_ADMIN);
-        roleRepository.save(roleAdmin);
-    }
+	@Value("${JWT_REFRESH_COOKIE_NAME}")
+	private String jwtRefreshCookieName;
 
-    Response signUp(SignupRequest signupRequest) {
-        return given()
-            .header("Content-type", "application/json")
-            .and()
-            .body(Map.of(
-                "username", signupRequest.getUsername(),
-                "email", signupRequest.getEmail(),
-                "password", signupRequest.getPassword(),
-                "role", signupRequest.getRole()
-            ))
-            .when()
-            .post("/api/auth/signup")
-            .then()
-            .extract().response();
-    }
+	@BeforeEach
+	private void setUp() {
+		RestAssured.baseURI = "http://localhost:" + port;
 
-    Response signIn(String username, String password) {
-        return given()
-            .header("Content-type", "application/json")
-            .and()
-            .body(Map.of(
-                "username", username,
-                "password", password
-            ))
-            .when()
-            .post("/api/auth/signin")
-            .then()
-            .extract().response();
-    }
+		sanitizeRepos();
+		seedTestContainers();
+		SecurityContextHolder.clearContext();
 
-    String authenticateUserAndGetToken(String username, String password) throws Exception {
-        Response response = signIn(username, password);
-        
-        String accessToken = response.jsonPath().getString("accessToken");
+		System.out.println("Database cleared before each test");
+	}
 
-        //  Check if token is found
-        if (accessToken == null || accessToken.isEmpty()) {
-            throw new RuntimeException("Access token not found in the response.");
-        }
+	private void sanitizeRepos() {
+		// Sanitizing repos
 
-        return accessToken;
-    }
-    Response sendGETHTTPJwtRequest(String path, String token) {
-        Response response = given()
-        .header("Authorization", "Bearer " + token)
-        .when()
-        .get(path)
-        .then()
-        .extract().response();
+		refreshTokenRepository.deleteAll();
+		userRepository.deleteAll();
+		roleRepository.deleteAll();
 
-        return response;
-    }
+		refreshTokenRepository.flush();
+		userRepository.flush();
+		roleRepository.flush();
+	}
 
-    @Test
-    void shouldAllowAuthorizedUserAccessToProtectedRoute() throws Exception{
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+	private void seedTestContainers() {
+		// Seeding TestContainers with roles
+		Role roleUser = new Role(RoleType.ROLE_USER);
+		roleRepository.save(roleUser);
+		Role roleMod = new Role(RoleType.ROLE_MODERATOR);
+		roleRepository.save(roleMod);
+		Role roleAdmin = new Role(RoleType.ROLE_ADMIN);
+		roleRepository.save(roleAdmin);
+	}
 
-        signUpUser(signUpRequest);
+	@Test
+	void shouldAllowAuthorizedModeratorAccessToProtectedRoute() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
 
-        String token = authenticateUserAndGetToken(signUpRequest.getUsername(),signUpRequest.getPassword());
-        String path = "api/test/user";
-        Response response = sendGETHTTPJwtRequest(path, token);
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
-        Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
-    }
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
 
-    @Test
-    void shouldHaveZeroUsersInDatabaseAtStart(){
-        long users = userRepository.count();
-        assertEquals(0, users);
-    }
+		Response response = HttpTestUtils.sendGETRequestWithHeaders(
+				ApiEndpoints.TEST_MOD_URL,
+				Map.of("Cookie", sessionCookie));
 
-    @Test
-    void shouldHavePublicLinkAccessible(){
-        given()
-        .contentType(ContentType.JSON)
-        .when()
-        .get("/api/test/all")
-        .then()
-        .statusCode(200);
-    }
+		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
+	}
 
-    @Test 
-    void shouldAllowUserSignInWithCorrectDetails(){
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+	@Test
+	void shouldHaveZeroUsersInDatabaseAtStart() {
+		long users = userRepository.count();
+		assertEquals(0, users);
+	}
 
-        signUp(signUpRequest);
+	@Test
+	void shouldHavePublicLinkAccessible() {
+		given()
+				.contentType(ContentType.JSON)
+				.when()
+				.get("/api/test/all")
+				.then()
+				.statusCode(200);
+	}
 
-        Response signInResponse = signIn(signUpRequest.getUsername(), signUpRequest.getPassword());
-        Assertions.assertEquals(200, signInResponse.statusCode(), "Expecting OK");
-    }
-    @Test 
-    void shouldPreventUserSignInWithIncorrectDetails(){
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+	@Test
+	void shouldAllowUserSignInWithCorrectDetails() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
 
-        signUp(signUpRequest);
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
-        Response signInResponse = signIn(signUpRequest.getUsername() + "string to ruin username", signUpRequest.getPassword() + "string to ruin username");
-        Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(), "Expecting Unauthorized");
-    }
-    @Test
-    void shouldHaveCorrectRolesInDatabase() {
-        List<Role> roles = roleRepository.findAll();
-        int expectedRoles = 3;
+		Response signInResponse = HttpTestUtils.signIn(signUpRequest.getUsername(), signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL);
+		Assertions.assertEquals(200, signInResponse.statusCode(), "Expecting OK");
+	}
 
-        Assertions.assertNotNull(roleRepository);
-        assertEquals(expectedRoles, roles.size());
-        assertTrue(roles.stream().anyMatch(role -> role.getName().equals(ERole.ROLE_USER)));
-        assertTrue(roles.stream().anyMatch(role -> role.getName().equals(ERole.ROLE_MODERATOR)));
-        assertTrue(roles.stream().anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN)));
-    }
+	@Test
+	void shouldAllowUserSignOut() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
-    @Test
-    void shouldHaveRoleRepositoryInjected() {
-        Assertions.assertNotNull(roleRepository, "RoleRepository should be injected.");
-    }
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
 
-    @Test
-    void shouldAllowUserSignUp() {
-        SignupRequest signUpRequest = new SignupRequest();
-        signUpRequest.setUsername("dumbusername");
-        signUpRequest.setEmail("dumbemailg@gmail.com");
-        signUpRequest.setPassword("dumbpassword");
+		Response signOutResponse = HttpTestUtils.sendPOSTRequestWithHeaders(
+				ApiEndpoints.AUTH_SIGN_OUT_URL,
+				Map.of("Cookie", sessionCookie));
 
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        signUpRequest.setRole(signUpRoles);
+		Assertions.assertEquals(HttpStatus.OK.value(), signOutResponse.statusCode());
+		Assertions.assertEquals(200, signOutResponse.statusCode(), "Expecting User Sign Out");
+	}
 
-        Set<Role> roles = roleService.validateAgainstTable(signUpRoles);
+	@Test
+	void shouldPreventUserSignInWithIncorrectDetails() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				"stupid",
+				"stupid@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
 
-        Response response = signUp(signUpRequest);
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
-        // Assertions.assertEquals("Assert incorrect for String error", response.getBody().asPrettyString());
+		String ruiner = "string to ruin credential";
+		String badUsername = signUpRequest.getUsername() + ruiner;
+		String badPassword = signUpRequest.getPassword() + ruiner;
 
-        Assertions.assertEquals(200, response.statusCode(), "Expecting OK");
-    }
+		Response signInResponse = HttpTestUtils.signIn(badUsername, badPassword,
+				ApiEndpoints.AUTH_SIGN_IN_URL);
 
-    Response signUpUser(SignupRequest signUpRequest) {
-        return signUp(signUpRequest);
-    }
+		Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, signInResponse.statusCode(),
+				"Expecting Unauthorized");
+	}
 
-    SignupRequest createSignUpRequest(String username, String email, String password, Set<String> roles) {
-        SignupRequest signUpRequest = new SignupRequest();
-        signUpRequest.setUsername(username);
-        signUpRequest.setEmail(email);
-        signUpRequest.setPassword(password);
-        signUpRequest.setRole(roles);
+	Set<String> createBadRole(String input) {
+		return Stream.of(input)
+				.collect(Collectors.toSet());
+	}
 
-        return signUpRequest;
-    }
+	@Test
+	void shouldPreventUserSignUpWithInvalidRole() {
+		SignupRequest signUpRequest = new SignupRequest("dumblikebricks",
+				"dumbemail@gmail.com",
+				createBadRole("Yuck"),
+				"dumbpassword");
 
-    @Test
-    void shouldHaveUserInDatabaseAfterSignUp() {
-        Set<String> signUpRoles = Stream.of("user","mod")
-        .collect(Collectors.toCollection(HashSet::new));
-        SignupRequest signUpRequest = createSignUpRequest("dumblikebricks", 
-        "dumbemail@gmail.com", 
-        "dumbpassword",
-        signUpRoles);
+		Response response = HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
-        Response response = signUpUser(signUpRequest);
+		Assertions.assertEquals(HttpServletResponse.SC_BAD_REQUEST, response.statusCode(),
+				"Expecting Unauthorized");
+	}
 
-        List<User> users = userRepository.findAll();
+	@Test
+	void shouldHaveCorrectRolesInDatabase() {
+		List<Role> roles = roleRepository.findAll();
+		int expectedRoles = 3;
 
-        // Assertions.assertEquals("Assert incorrect for String error", response.getBody().asPrettyString());
-        Assertions.assertEquals(200, response.statusCode(), "Expecting OK for response");
-        // Assertions.assertEquals(200, response.getBody(), "Expecting yuck");
-        assertTrue(users.stream().anyMatch(user -> user.getUsername().contains("dumblikebricks")));
-    }
-    @Test
-    void shouldHaveTokenHandledByAuthenticationManager() {
-        UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken("validuser", "validpassword");
-        
-        try {
-            authenticationManager.authenticate(authenticationToken);
-            System.out.println("Authentication successful.");
-        } catch (Exception e) {
-            System.out.println("Authentication failed.");
-        }
-    }
+		Assertions.assertNotNull(roleRepository);
+		assertEquals(expectedRoles, roles.size());
+		assertTrue(roles.stream().anyMatch(role -> role.getName().equals(RoleType.ROLE_USER)));
+		assertTrue(roles.stream().anyMatch(role -> role.getName().equals(RoleType.ROLE_MODERATOR)));
+		assertTrue(roles.stream().anyMatch(role -> role.getName().equals(RoleType.ROLE_ADMIN)));
+	}
+
+	@Test
+	void shouldHaveRoleRepositoryInjected() {
+		Assertions.assertNotNull(roleRepository, "RoleRepository should be injected.");
+	}
+
+	@Test
+	void shouldAllowUserSignUp() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumbusername",
+				"dubmemail@gmail.com",
+				"dumbpassword",
+				RoleType.ROLE_MODERATOR);
+
+		Response response = HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		Assertions.assertEquals(200, response.statusCode(), "Expecting OK");
+	}
+
+	@Test
+	void shouldHaveUserInDatabaseAfterSignUp() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				"stupid",
+				"stupid@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
+
+		Response response = HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		List<User> users = userRepository.findAll();
+
+		Assertions.assertEquals(200, response.statusCode(), "Expecting OK for response");
+		assertTrue(users.stream().anyMatch(user -> user.getUsername().contains(signUpRequest.getUsername())));
+	}
+
+	@Test
+	void shouldHaveTokenHandledByAuthenticationManager() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				"salmon",
+				"salmon@gmail.com",
+				"salmon",
+				RoleType.ROLE_MODERATOR);
+
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+				signUpRequest.getUsername(),
+				signUpRequest.getPassword());
+
+		Authentication authentication = authenticationManager.authenticate(authenticationToken);
+		assertTrue(authentication.isAuthenticated());
+	}
+
+	@Test
+	void shouldAllowMultipleUsersInSecurityContext() {
+		SignupRequest signUpRequestForUser1 = HttpTestUtils.createSignupRequest(
+				"user1",
+				"stupid@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
+
+		SignupRequest signUpRequestForUser2 = HttpTestUtils.createSignupRequest(
+				"user2",
+				"stupider@gmail.com",
+				"stupid",
+				RoleType.ROLE_MODERATOR);
+
+		HttpTestUtils.signUp(signUpRequestForUser1, ApiEndpoints.AUTH_SIGN_UP_URL);
+		HttpTestUtils.signUp(signUpRequestForUser2, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		UserDetails user1 = customUserDetailsService.loadUserByUsername(signUpRequestForUser1.getUsername());
+		UserDetails user2 = customUserDetailsService.loadUserByUsername(signUpRequestForUser2.getUsername());
+
+		Authentication auth1 = new UsernamePasswordAuthenticationToken(user1, user1.getPassword(),
+				user1.getAuthorities());
+
+		AuthenticationUtils.setAuthentication(auth1);
+
+		// Assert that SecurityContextHolder has user1
+		Authentication currentAuth = AuthenticationUtils.getCurrentAuthentication();
+		assertEquals("Expected user1 to be authenticated", "user1", currentAuth.getName());
+
+		// Second user logging in
+		Authentication auth2 = new UsernamePasswordAuthenticationToken(user2, user2.getPassword(),
+				user2.getAuthorities());
+
+		AuthenticationUtils.setAuthentication(auth2);
+		currentAuth = AuthenticationUtils.getCurrentAuthentication();
+
+		assertEquals("Expected user2 to be authenticated", "user2", currentAuth.getName());
+
+		assertNotEquals("user1 should no longer be in Context", "user1", currentAuth.getName());
+	}
 }

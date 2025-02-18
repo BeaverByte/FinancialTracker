@@ -1,18 +1,130 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { Transaction } from "../pages/Transactions/Transactions";
+import { TransactionFormSchema } from "../types/schemas/transactionSchema";
+import { API_ROUTES } from "../utility/API_ROUTES";
+import { Transaction } from "../types/Transaction";
 
-const TRANSACTIONS_API = "http://localhost:8080/api";
+export const QUERY_KEY_TRANSACTIONS = "transactions";
 
-export const transactionsApi = createApi({
-  reducerPath: "transactionsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: TRANSACTIONS_API }),
-  endpoints: (builder) => ({
-    getTransactionById: builder.query<Transaction, number>({
-      query: (id) => `/transactions/${id}`,
-    }),
-  }),
-});
+export class UnauthorizedError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
-export const { useGetTransactionByIdQuery } = transactionsApi;
+export class NetworkError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "NetworkError";
+  }
+}
+
+interface FetchItemOptions {
+  method: string;
+  body?: unknown;
+}
+
+class FetchError extends Error {
+  constructor(public res: Response, message?: string) {
+    super(message);
+  }
+}
+
+export const getTransactions = async () => {
+  try {
+    const response = await fetch(API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new UnauthorizedError("Session expired. Please log in again: ");
+      }
+      throw new Error(`Failed to get transactions: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
+  }
+};
+
+export const getTransactionById = async (id: number) => {
+  const response = await fetch(
+    `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}/${id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) throw new Error("Transaction not found");
+
+  return response.json();
+};
+
+export const addTransaction = async (data: TransactionFormSchema) => {
+  const response = await fetch(API_ROUTES.TRANSACTIONS.POST_TRANSACTION, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error("Failed to add transaction");
+  return response.json();
+};
+
+type updateTransactionPayload = {
+  id: number;
+  updates: Transaction;
+};
+
+export const updateTransaction = async ({
+  id,
+  updates,
+}: updateTransactionPayload) => {
+  const response = await fetch(
+    `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(updates),
+    }
+  );
+
+  if (!response.ok) throw new Error("Failed to update transaction");
+  return response.json();
+};
+
+export const deleteTransaction = async (id: number) => {
+  const response = await fetch(
+    `${API_ROUTES.TRANSACTIONS.DELETE_TRANSACTION}/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) throw new Error("Failed to delete transaction");
+};

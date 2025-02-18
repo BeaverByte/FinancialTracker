@@ -1,82 +1,43 @@
-import { Transaction } from "../../pages/Transactions/Transactions";
+import { JSX } from "react";
+import { TableHeaderConfig, TableProps } from "../../types/Transaction";
+import TableBody from "./TableBody";
+import TableHeader from "./TableHeader";
+import { useDeleteTransaction } from "../../hooks/useDeleteTransaction";
 
-const defaultHeaders = [
-  "Date",
-  "Merchant",
-  "Account",
-  "Category",
-  "Amount",
-  "Note",
+const defaultHeaders: TableHeaderConfig[] = [
+  { label: "Actions", field: "actions", visible: true },
+  { label: "Date", field: "date", visible: true },
+  { label: "Merchant", field: "merchant", visible: true },
+  { label: "Account", field: "account", visible: true },
+  { label: "Category", field: "category", visible: true },
+  { label: "Amount", field: "amount", visible: true },
+  { label: "Note", field: "note", visible: true },
 ];
 
-// Provide type safety for Table Props
-type TableProps = {
-  data: Transaction[];
-  headers?: Headers;
-  onChangeTransaction?: void;
-  onDeleteTransaction?: void;
-};
-
-type Headers = string[];
-
-/**
- *
- * @param data Data that will fill table, an object corresponding to a row
- * @param [headers] Optional - Headers row that describe respective columns. If not provided, default Headers will inject
- * @returns { JSX.Element }
- */
 export default function Table({
   data,
-  headers,
-  onChangeTransaction,
-  onDeleteTransaction,
-}: TableProps): JSX.Element {
+  headers = defaultHeaders,
+  onEditTransaction,
+}: Readonly<TableProps>): JSX.Element {
+  const deleteMutation = useDeleteTransaction();
+
+  function handleDeleteClick(id: number) {
+    console.log("DELETE transaction with id " + id);
+    deleteMutation.mutate(id);
+  }
+
   return (
-    <div>
+    <div style={{ overflowX: "auto", maxHeight: "500px", overflowY: "auto" }}>
+      {/* TODO will need to replace overflow with actual pagination */}
       <table>
-        <thead>
-          <TableHeader headers={headers} />
-        </thead>
-        <tbody>
-          {data &&
-            data.map((transaction: Transaction) => (
-              <tr key={transaction.id}>
-                <td>{transaction.date}</td>
-                <td>{transaction.merchant}</td>
-                <td>{transaction.account}</td>
-                <td>{transaction.category}</td>
-                <td>{transaction.amount}</td>
-                <td>
-                  {transaction.note}
-                  {transaction.id}
-                </td>
-                <td>
-                  <button onClick={() => onDeleteTransaction(transaction.id)}>
-                    Delete
-                  </button>
-                </td>
-                <td>
-                  <button onClick={() => onChangeTransaction(transaction.id)}>
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
+        <TableHeader headers={headers} />
+        <TableBody
+          data={data}
+          headers={headers}
+          onEditTransaction={onEditTransaction}
+          onDeleteTransaction={handleDeleteClick}
+        />
       </table>
     </div>
-  );
-}
-
-function TableHeader({ headers = defaultHeaders }) {
-  const headersExist = headers && headers.length > 0;
-
-  // Render a row per header
-  const renderHeaderColumns = () => {
-    return headers.map((header, index) => <th key={index}>{header}</th>);
-  };
-
-  return (
-    <tr>{headersExist ? renderHeaderColumns() : <th>No data provided</th>}</tr>
   );
 }

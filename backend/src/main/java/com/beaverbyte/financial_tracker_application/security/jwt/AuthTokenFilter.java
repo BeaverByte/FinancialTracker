@@ -14,64 +14,58 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.beaverbyte.financial_tracker_application.security.UserDetailsServiceImpl;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
 
 /**
- * Filters token, validating the token. On success, an user is returned, and set as the principal in Security Context.
+ * Filters token, validating the token. On success, an user is returned, and set
+ * as the principal in Security Context.
  * 
  */
 public class AuthTokenFilter extends OncePerRequestFilter {
-  @Autowired
-  private JwtUtils jwtUtils;
+	private final JwtUtils jwtUtils;
+	private final CustomUserDetailsService userDetailsService;
 
-  @Autowired
-  private UserDetailsServiceImpl userDetailsService;
+	private static final Logger log = LoggerFactory.getLogger(AuthTokenFilter.class);
 
-  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
+	public AuthTokenFilter(JwtUtils jwtUtils, CustomUserDetailsService userDetailsService) {
+		this.jwtUtils = jwtUtils;
+		this.userDetailsService = userDetailsService;
+	}
 
-  @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
-    try {
-    // Get JSON web Token from Auth header and remove 'Bearer' string, the Spring-Boot token prefix
-      String jwt = parseJwt(request);
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-        String username = jwtUtils.getUserNameFromJwtToken(jwt);
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		try {
+			String jwt = parseJwt(request);
+			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+				String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-        // userDetails retrieved to create authentication object
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        // SecurityContext updates with User and Authentication related details
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
-    } catch (Exception e) {
-      logger.error("Cannot set user authentication: {}", e);
-    }
+				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+						userDetails,
+						null,
+						userDetails.getAuthorities());
+				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-    filterChain.doFilter(request, response);
-  }
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
+		} catch (Exception e) {
+			log.error("Cannot set user authentication: {}", e.getMessage());
+		}
 
-  /**
-   *  Checks request's header for "Authorization" to extract out JWT token
-   * 
-   * @return JWT token if present and validated, otherwise null
-   * */ 
-  private String parseJwt(HttpServletRequest request) {
-    String headerAuth = request.getHeader("Authorization");
+		filterChain.doFilter(request, response);
+	}
 
-    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-      return headerAuth.substring(7);
-    }
-
-    return null;
-  }
+	/**
+	 * Checks request's header for "Authorization" to extract out JWT token
+	 * 
+	 * @return JWT token if present and validated, otherwise null
+	 */
+	private String parseJwt(HttpServletRequest request) {
+		return jwtUtils.getJwtValueFromCookies(request);
+	}
 }

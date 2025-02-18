@@ -1,62 +1,70 @@
 package com.beaverbyte.financial_tracker_application.service;
 
-import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.beaverbyte.financial_tracker_application.entity.ERole;
-import com.beaverbyte.financial_tracker_application.entity.Role;
+import com.beaverbyte.financial_tracker_application.exception.RoleNotFoundException;
+import com.beaverbyte.financial_tracker_application.mapper.RoleMapper;
+import com.beaverbyte.financial_tracker_application.model.RoleType;
+import com.beaverbyte.financial_tracker_application.model.Role;
 import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
+import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 
 @Service
 public class RoleService {
-    @Autowired
-    RoleRepository roleRepository;
 
-    // @Override
-    // @Transactional
-    // public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    //     User user = userRepository.findByUsername(username)
-    //         .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+	private final RoleRepository roleRepository;
+	private final RoleMapper roleMapper;
 
-    //     return UserDetailsImpl.build(user);
-    // }
+	public RoleService(RoleRepository roleRepository, RoleMapper roleMapper) {
+		this.roleRepository = roleRepository;
+		this.roleMapper = roleMapper;
+	}
 
-    public Set<Role> validateAgainstTable(Set<String> roles) {
-        Set<Role> newRoles = new HashSet<>();
+	public List<String> extractRoles(Authentication authentication) {
+		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+		return roleMapper.mapAuthoritiesToRoles(userDetails.getAuthorities());
+	}
 
-        if (roles == null) {
-            // No roles entered so default just User
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            newRoles.add(userRole);
-        } else {
-            roles.forEach(role -> {
-                switch (role) {
-                case "admin":
-                Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
-                newRoles.add(adminRole);
+	public Set<Role> validateAgainstTable(Set<String> roles) {
+		if (roles == null || roles.isEmpty()) {
+			return Set.of(defaultUser());
+		}
 
-                break;
-                case "mod":
-                Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                    .orElseThrow(() -> new RuntimeException("Error: Mod Role is not found."));
-                newRoles.add(modRole);
+		return roles.stream()
+				.map(this::validateRoleByName)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+	}
 
-                break;
-                default:
-                Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: User Role is not found."));
-                newRoles.add(userRole);
-                }
-            });
-        }
-        
-        return newRoles;
-    } 
+	private Role defaultUser() {
+		return getRole(RoleType.ROLE_USER);
+	}
 
-    
+	public static final String EXPECTED_INPUT_ADMIN = "admin";
+	public static final String EXPECTED_INPUT_MOD = "mod";
+	public static final String EXPECTED_INPUT_USER = "user";
+
+	private Role validateRoleByName(String role) {
+		switch (role.toLowerCase()) {
+			case EXPECTED_INPUT_ADMIN:
+				return getRole(RoleType.ROLE_ADMIN);
+			case EXPECTED_INPUT_MOD:
+				return getRole(RoleType.ROLE_MODERATOR);
+			case EXPECTED_INPUT_USER:
+				return getRole(RoleType.ROLE_USER);
+			default:
+				throw new RoleNotFoundException("Error: '" + role + "' input is not a valid Role.");
+		}
+	}
+
+	private Role getRole(RoleType roleType) {
+		return roleRepository.findByName(roleType)
+				.orElseThrow(() -> new RoleNotFoundException("Error: " + roleType + " Role is not found."));
+	}
 }
