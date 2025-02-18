@@ -2,11 +2,9 @@ package com.beaverbyte.financial_tracker_application.security;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -52,26 +50,6 @@ public class WebSecurityConfig {
 		return new AuthTokenFilter(jwtUtils, userDetailsService);
 	}
 
-	/**
-	 * An AuthenticationManager delegates to this with an authenticate() method.
-	 * 
-	 * Validates user provided username (with {@link #userDetailsService}) and
-	 * password against hashed password in database using set
-	 * {@link #passwordEncoder}. Adds to SecurityContext upon success.
-	 * 
-	 */
-	@Bean
-	public DaoAuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-		// Service used here to inject user Details when they're fired
-		authProvider.setUserDetailsService(userDetailsService);
-		// PasswordEncoder set, otherwise will be plain text
-		authProvider.setPasswordEncoder(passwordEncoder());
-
-		return authProvider;
-	}
-
 	// Delegates to one or more AuthenticationProvider implementations for
 	// authentication
 	@Bean
@@ -93,9 +71,10 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
 						.requestMatchers("/api/test/**").permitAll()
+						.requestMatchers("/v3/api-docs/**",
+								"/swagger-ui/**", "/swagger-ui.html")
+						.permitAll()
 						.anyRequest().authenticated());
-
-		http.authenticationProvider(authenticationProvider());
 
 		// Adding to filter before to ensure Jwt Filter for authenticating users
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

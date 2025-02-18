@@ -19,23 +19,22 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UserLoginException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public CustomProblemDetail userNotFoundExceptionHandler(UserLoginException ex, WebRequest request) {
+	public CustomProblemDetail userNotFoundExceptionHandler(UserLoginException exception, WebRequest request) {
 		return new CustomProblemDetail(
 				HttpStatus.BAD_REQUEST.toString(),
 				HttpStatus.BAD_REQUEST.value(),
-				ex.getMessage(),
+				exception.getMessage(),
 				request.getDescription(false));
 	}
 
 	// Handle HTTP Method Request errors (e.g. if GET is used for a POST method)
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-	// @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-	public ResponseEntity<ErrorMessage> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+	public ResponseEntity<ErrorMessage> handleMethodNotAllowed(HttpRequestMethodNotSupportedException exception) {
 		ErrorMessage errors = new ErrorMessage(
 				HttpStatus.METHOD_NOT_ALLOWED.value(),
 				new Date(),
-				ex.getMessage(),
+				exception.getMessage(),
 				"Method not allowed for requested URL");
 
 		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
@@ -44,10 +43,11 @@ public class GlobalExceptionHandler {
 	// Handle validation errors from @Valid annotation
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	public CustomProblemDetail handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
+	public CustomProblemDetail handleValidationExceptions(MethodArgumentNotValidException exception,
+			WebRequest request) {
 		Map<String, String> errors = new HashMap<>();
 		// There can be multiple validation errors and messages
-		ex.getBindingResult().getAllErrors().forEach(error -> {
+		exception.getBindingResult().getAllErrors().forEach(error -> {
 			String fieldName = ((FieldError) error).getField();
 			String errorMessage = error.getDefaultMessage();
 			errors.put(fieldName, errorMessage);
