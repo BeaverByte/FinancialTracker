@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.io.jsonwebtoken.jjwt.api)
     implementation(libs.io.rest.assured.rest.assured)
     implementation(libs.org.mapstruct.mapstruct)
+    implementation(libs.org.springdoc.springdoc.openapi.starter.webmvc.ui)
+    implementation("org.webjars:webjars-locator-lite:1.0.1")
     annotationProcessor(libs.org.mapstruct.mapstruct.processor)
     runtimeOnly(libs.org.springframework.boot.spring.boot.devtools)
     runtimeOnly(libs.org.postgresql.postgresql)
