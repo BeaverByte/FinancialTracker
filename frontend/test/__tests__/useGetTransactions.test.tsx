@@ -1,5 +1,4 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect } from "vitest"; // For mocking
 import { useGetTransactions } from "../../src/hooks/useGetTransactions";
 
@@ -8,39 +7,12 @@ import { http, HttpResponse } from "msw";
 import { API_ROUTES } from "../../src/utility/API_ROUTES";
 import { worker } from "../../src/mocks/browser";
 import { NetworkError } from "../../src/services/transactions";
-
-const createQueryWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-  return ({ children }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
-
-function TestComponent() {
-  const { data, isLoading, error } = useGetTransactions();
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error!</div>;
-
-  return (
-    <div>
-      {data?.map((transaction: any) => (
-        <div key={transaction.id}>{transaction.name}</div>
-      ))}
-    </div>
-  );
-}
+import { createTestQueryWrapper } from "./utility/TestQueryWrapper";
 
 describe("useGetTransactions", () => {
   test("Should succeed with response", async () => {
     const { result } = renderHook(() => useGetTransactions(), {
-      wrapper: createQueryWrapper(),
+      wrapper: createTestQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -50,7 +22,7 @@ describe("useGetTransactions", () => {
 
   test("Should initially have Loading text visible in document", async () => {
     const { result } = renderHook(() => useGetTransactions(), {
-      wrapper: createQueryWrapper(),
+      wrapper: createTestQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(true));
@@ -64,7 +36,7 @@ describe("useGetTransactions", () => {
     );
 
     const { result } = renderHook(() => useGetTransactions(), {
-      wrapper: createQueryWrapper(),
+      wrapper: createTestQueryWrapper(),
     });
 
     console.log(result);
@@ -84,7 +56,7 @@ describe("useGetTransactions", () => {
     );
 
     const { result } = renderHook(() => useGetTransactions(), {
-      wrapper: createQueryWrapper(),
+      wrapper: createTestQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
