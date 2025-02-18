@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.service.TransactionService;
+
+import jakarta.validation.constraints.Min;
+
 import org.springframework.web.bind.annotation.PutMapping;
 
 /**
@@ -37,7 +40,9 @@ public class TransactionRestController {
 
 	@GetMapping("/transactions")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Transaction> findAll(@RequestParam("page") int page, @RequestParam("size") int size) {
+	public List<Transaction> findAll(
+			@RequestParam(defaultValue = "1") @Min(1) int page,
+			@RequestParam(defaultValue = "0") @Min(0) int size) {
 		return transactionService.findAll(page, size);
 	}
 

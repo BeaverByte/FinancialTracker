@@ -25,6 +25,9 @@ public class TransactionService {
 	}
 
 	public List<Transaction> findAll(int page, int size) {
+		if (size == 0) {
+			return transactionRepository.findAll();
+		}
 		Pageable pageable = PageRequest.of(page - 1, size);
 		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
 		return transactionPage.stream().toList();
