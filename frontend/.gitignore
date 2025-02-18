@@ -23,9 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-<<<<<<< HEAD
 # Environment Variables
 *.env.*
-=======
 *storybook.log
->>>>>>> 98b7e70abaf7881ab1f91747ed25550bd7780bb6
+
+# Generated Test Coverage
+/coverage
