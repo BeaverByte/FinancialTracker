@@ -28,4 +28,4 @@ dist-ssr
 *storybook.log
 
 # Generated Test Coverage
-/coverage
+coverage/
