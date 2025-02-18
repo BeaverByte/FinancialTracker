@@ -4,13 +4,24 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class CustomProblemDetail {
+
+	@Schema(description = "Short description of error")
 	private String title;
+
+	@Schema(description = "HTTP status code of error")
 	private int status;
+
+	@Schema(description = "Explanation of error")
 	private String detail;
+
+	@Schema(description = "URI of the resource that caused the error")
 	private String instance;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL) // Exclude when null
+	@Schema(description = "Optional: Validation errors")
 	private Map<String, String> validationErrors;
 
 	// Default constructor
