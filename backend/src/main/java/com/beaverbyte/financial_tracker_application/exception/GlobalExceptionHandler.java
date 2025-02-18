@@ -60,4 +60,15 @@ public class GlobalExceptionHandler {
 				request.getDescription(false),
 				errors);
 	}
+
+	@ExceptionHandler(TransactionNotFoundException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public CustomProblemDetail handleTransactionNotFoundException(TransactionNotFoundException exception,
+			WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
+				"Transaction not found with id",
+				request.getDescription(false));
+	}
 }

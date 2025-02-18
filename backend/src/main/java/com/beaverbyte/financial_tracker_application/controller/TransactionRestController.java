@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.beaverbyte.financial_tracker_application.model.Transaction;
@@ -27,24 +29,22 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api")
 public class TransactionRestController {
 
-	private TransactionService transactionService;
+	private final TransactionService transactionService;
 
 	public TransactionRestController(TransactionService transactionService) {
 		this.transactionService = transactionService;
 	}
 
 	@GetMapping("/transactions")
-	public ResponseEntity<List<Transaction>> findAll() {
-		return ResponseEntity.status(HttpStatus.OK).body(transactionService.findAll());
+	@ResponseStatus(HttpStatus.OK)
+	public List<Transaction> findAll(@RequestParam("page") int page, @RequestParam("size") int size) {
+		return transactionService.findAll(page, size);
 	}
 
 	@GetMapping("/transactions/{id}")
-	public ResponseEntity<Transaction> getTransaction(@PathVariable int id) {
-		if (!transactionService.existsById(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
-		Transaction transaction = transactionService.findById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(transaction);
+	@ResponseStatus(HttpStatus.OK)
+	public Transaction getTransaction(@PathVariable int id) {
+		return transactionService.findById(id);
 	}
 
 	@PostMapping("/transactions")
