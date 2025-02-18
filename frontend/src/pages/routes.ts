@@ -2,10 +2,13 @@
  * Constants for application's routes
  * @constant
  */
-export const ROUTES = {
-  NEWTRANSACTION: "/transactions/new",
-  TRANSACTIONS: "/transactions",
+export const APP_ROUTES = {
   ROOT: "/",
-  FINDTRANSACTION: "/effectivedate",
-  LOGIN: "auth/login",
+  CREATE_TRANSACTION: "/transactions/new",
+  TRANSACTIONS_LIST: "/transactions",
+  TRANSACTION: "/transactions",
+  FIND_TRANSACTION: "/effectivedate",
+  LOGIN: "/auth/login",
+  LOGOUT: "/auth/logout",
+  BACK: -1, // Wrapper for React Router to avoid navigate(-1) indirection
 };

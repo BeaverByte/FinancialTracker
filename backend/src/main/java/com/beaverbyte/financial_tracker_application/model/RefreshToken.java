@@ -10,51 +10,92 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-@Entity(name="refreshtoken")
+@Entity(name = "refreshtoken")
 public class RefreshToken {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+	@OneToOne
+	@JoinColumn(name = "user_id", referencedColumnName = "id")
+	private User user;
 
-    @Column(nullable = false, unique = true)
-    private String token;
+	@Column(nullable = false, unique = true)
+	private String token;
 
-    @Column(nullable = false)
-    private Instant expiryDate;
+	@Column(nullable = false)
+	private Instant expiryDate;
 
-    public long getId() {
-        return id;
-    }
+	protected RefreshToken() {
+		// Needed by JPA for Builder
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public RefreshToken(long id, User user, String token, Instant expiryDate) {
+		this.id = id;
+		this.user = user;
+		this.token = token;
+		this.expiryDate = expiryDate;
+	}
 
-    public User getUser() {
-        return user;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public String getToken() {
-        return token;
-    }
+	public User getUser() {
+		return user;
+	}
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public Instant getExpiryDate() {
-        return expiryDate;
-    }
+	public String getToken() {
+		return token;
+	}
 
-    public void setExpiryDate(Instant expiryDate) {
-        this.expiryDate = expiryDate;
-    }
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public Instant getExpiryDate() {
+		return expiryDate;
+	}
+
+	public void setExpiryDate(Instant expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+
+	public static class RefreshTokenBuilder {
+		private User user;
+		private String token;
+		private Instant expiryDate;
+
+		public RefreshTokenBuilder user(User user) {
+			this.user = user;
+			return this;
+		}
+
+		public RefreshTokenBuilder token(String token) {
+			this.token = token;
+			return this;
+		}
+
+		public RefreshTokenBuilder expiryDate(Instant expiryDate) {
+			this.expiryDate = expiryDate;
+			return this;
+		}
+
+		// id is set by JPA when persisted
+		public RefreshToken build() {
+			return new RefreshToken(0, user, token, expiryDate);
+		}
+	}
+
+	public static RefreshTokenBuilder builder() {
+		return new RefreshTokenBuilder();
+	}
 }

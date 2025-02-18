@@ -1,4 +1,3 @@
-// src/components/Banner.js
 import React, { useState } from "react";
 import styles from "../Banner/Banner.module.css";
 

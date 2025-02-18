@@ -1,13 +1,18 @@
 {
-  "name": "test",
+  "name": "root",
   "scripts": {
-    "frontend:install": "npm install --prefix frontend",
-    "frontend:start": "npm start --prefix frontend",
+    "dev": "npm run dev --prefix frontend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "frontend": "npm run dev:frontend",
+    "dev:backend": "npm run dev:backend --prefix frontend",
+    "backend": "npm run dev:backend",
+    "dev:all": "npm run dev:backend --prefix frontend",
     "frontend:build": "npm run build --prefix frontend",
-    "frontend:test": "npm test --prefix frontend",
+    "frontend:test": "npm run test:browser --prefix frontend",
+    "backend:test": "mvn test",
     "backend:start": "cd backend && mvnw.cmd spring-boot:run"
   },
   "dependencies": {
-    "test": "file:"
+    "root": "file:"
   }
 }

@@ -3,6 +3,8 @@ package com.beaverbyte.financial_tracker_application.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.beaverbyte.financial_tracker_application.dto.response.UserInfoResponse;
 import com.beaverbyte.financial_tracker_application.exception.UserNotLoggedInException;
 import com.beaverbyte.financial_tracker_application.exception.SignupException;
-import com.beaverbyte.financial_tracker_application.exception.UserLoginException;
 import com.beaverbyte.financial_tracker_application.model.User;
 import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
 import com.beaverbyte.financial_tracker_application.dto.request.LoginRequest;
@@ -26,22 +27,26 @@ import com.beaverbyte.financial_tracker_application.dto.response.MessageResponse
 import com.beaverbyte.financial_tracker_application.dto.response.RefreshTokenResponse;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetails;
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthenticationUtils;
+import com.beaverbyte.financial_tracker_application.service.AuthenticationService;
 import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.UserService;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping(ApiEndpoints.AUTH)
 public class AuthController {
-	private final UserService userService;
-	private final RefreshTokenService refreshTokenService;
-	private final AuthenticationUtils authenticationUtils;
 
-	public AuthController(UserService userService, RefreshTokenService refreshTokenService,
-			AuthenticationUtils authenticationUtils) {
+	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
+	private final UserService userService;
+	private final AuthenticationService authenticationService;
+	private final RefreshTokenService refreshTokenService;
+
+	public AuthController(UserService userService, AuthenticationService authenticationService,
+			RefreshTokenService refreshTokenService) {
 		this.userService = userService;
+		this.authenticationService = authenticationService;
 		this.refreshTokenService = refreshTokenService;
-		this.authenticationUtils = authenticationUtils;
 	}
 
 	/**
@@ -52,16 +57,16 @@ public class AuthController {
 	 */
 	@PostMapping(ApiEndpoints.SIGN_IN)
 	public ResponseEntity<UserInfoResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		if (authenticationUtils.hasActiveUser()) {
-			throw new UserLoginException(
-					"User already logged in!");
+		Authentication authentication = authenticationService.authenticate(loginRequest);
+		AuthenticationUtils.setAuthentication(authentication);
+		CustomUserDetails userDetails = AuthenticationUtils.getCustomUserDetails(authentication);
+
+		if (refreshTokenService.existsByUserId(userDetails.getId())) {
+			log.info("Refresh Token exists for given user ID, deleting token");
+			refreshTokenService.deleteByUserId(userDetails.getId());
 		}
-		Authentication authentication = userService.authenticate(loginRequest);
-		authenticationUtils.setAuthentication(authentication);
 
-		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-		LoginResponse loginResponse = userService.login(userDetails);
+		LoginResponse loginResponse = authenticationService.login(userDetails);
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, loginResponse.jwtCookie().toString())
@@ -72,13 +77,16 @@ public class AuthController {
 	@PostMapping(ApiEndpoints.SIGN_UP)
 	public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 		if (userService.existsByUsername(signUpRequest.getUsername())) {
+			log.error("Username in signup already used");
 			throw new SignupException("Username already in use!");
 		}
 		if (userService.existsByEmail(signUpRequest.getEmail())) {
+			log.error("Email in signup already used");
 			throw new SignupException("Email already in use!");
 		}
 
 		User user = userService.createUser(signUpRequest);
+
 		userService.save(user);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
@@ -86,15 +94,19 @@ public class AuthController {
 
 	@PostMapping(ApiEndpoints.SIGN_OUT)
 	public ResponseEntity<MessageResponse> logoutUser() {
-		Authentication authentication = authenticationUtils.getCurrentAuthentication();
-		if (!authenticationUtils.hasActiveUser()) {
+		if (!AuthenticationUtils.hasActiveUser()) {
 			throw new UserNotLoggedInException("Action requires active session");
 		}
 
-		Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
-		refreshTokenService.deleteByUserId(userId);
+		Authentication authentication = AuthenticationUtils.getCurrentAuthentication();
+		CustomUserDetails userDetails = AuthenticationUtils.getCustomUserDetails(authentication);
 
-		JwtResponse logoutResponse = userService.logoutUser();
+		if (refreshTokenService.existsByUserId(userDetails.getId())) {
+			log.info("Refresh Token exists for given user ID, deleting token");
+			refreshTokenService.deleteByUserId(userDetails.getId());
+		}
+
+		JwtResponse logoutResponse = authenticationService.logoutUser();
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, logoutResponse.jwtCookie().toString())
@@ -104,7 +116,7 @@ public class AuthController {
 
 	@PostMapping(ApiEndpoints.REFRESH_TOKEN)
 	public ResponseEntity<MessageResponse> refreshToken(HttpServletRequest request) {
-		RefreshTokenResponse refreshTokenResponse = userService.refreshToken(request);
+		RefreshTokenResponse refreshTokenResponse = authenticationService.refreshToken(request);
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, refreshTokenResponse.jwtCookie().toString())

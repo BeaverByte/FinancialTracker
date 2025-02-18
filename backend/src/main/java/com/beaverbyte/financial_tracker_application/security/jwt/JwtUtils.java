@@ -11,6 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
+import com.beaverbyte.financial_tracker_application.constants.ApiEndpoints;
 import com.beaverbyte.financial_tracker_application.security.UserBase;
 
 import io.jsonwebtoken.*;
@@ -30,34 +31,34 @@ public class JwtUtils {
 	private int jwtExpirationMs;
 
 	@Value("${JWT_COOKIE_NAME}")
-	private String jwtCookieName;
+	private String cookieName;
 
 	@Value("${JWT_REFRESH_COOKIE_NAME}")
-	private String jwtRefreshCookieName;
+	private String refreshCookieName;
 
 	public ResponseCookie generateJwtCookie(UserBase user) {
 		String jwt = generateTokenFromUsername(user.getUsername());
-		return generateCookie(jwtCookieName, jwt, "/api");
+		return generateCookie(cookieName, jwt, ApiEndpoints.BASE);
 	}
 
-	public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
-		return generateCookie(jwtRefreshCookieName, refreshToken, "/api/auth/refreshtoken");
+	public ResponseCookie generateRefreshJwtCookie(String refreshTokenValue) {
+		return generateCookie(refreshCookieName, refreshTokenValue, ApiEndpoints.AUTH_REFRESH_TOKEN_URL);
 	}
 
-	public String getJwtFromCookies(HttpServletRequest request) {
-		return getCookieValueByName(request, jwtCookieName);
+	public String getJwtValueFromCookies(HttpServletRequest request) {
+		return getCookieValueByName(request, cookieName);
 	}
 
-	public String getJwtRefreshFromCookies(HttpServletRequest request) {
-		return getCookieValueByName(request, jwtRefreshCookieName);
+	public String getJwtRefreshValueFromCookies(HttpServletRequest request) {
+		return getCookieValueByName(request, refreshCookieName);
 	}
 
 	public ResponseCookie getCleanJwtCookie() {
-		return ResponseCookie.from(jwtCookieName, null).path("/api").build();
+		return ResponseCookie.from(cookieName, null).path(ApiEndpoints.BASE).build();
 	}
 
 	public ResponseCookie getCleanJwtRefreshCookie() {
-		return ResponseCookie.from(jwtRefreshCookieName, null).path("/api/auth/refreshtoken").build();
+		return ResponseCookie.from(refreshCookieName, null).path(ApiEndpoints.AUTH_REFRESH_TOKEN_URL).build();
 	}
 
 	public String getUserNameFromJwtToken(String token) {
@@ -103,7 +104,7 @@ public class JwtUtils {
 		return ResponseCookie
 				.from(name, value)
 				.path(path)
-				.maxAge(24 * 60 * 60)
+				.maxAge((long) 24 * 60 * 60)
 				.httpOnly(true).build();
 	}
 

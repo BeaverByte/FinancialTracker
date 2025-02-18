@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
@@ -24,47 +25,47 @@ import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsSe
  * 
  */
 public class AuthTokenFilter extends OncePerRequestFilter {
-  @Autowired
-  private JwtUtils jwtUtils;
+	private final JwtUtils jwtUtils;
+	private final CustomUserDetailsService userDetailsService;
 
-  @Autowired
-  private CustomUserDetailsService userDetailsService;
+	private static final Logger log = LoggerFactory.getLogger(AuthTokenFilter.class);
 
-  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
+	public AuthTokenFilter(JwtUtils jwtUtils, CustomUserDetailsService userDetailsService) {
+		this.jwtUtils = jwtUtils;
+		this.userDetailsService = userDetailsService;
+	}
 
-  @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
-    try {
-      String jwt = parseJwt(request);
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-        String username = jwtUtils.getUserNameFromJwtToken(jwt);
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		try {
+			String jwt = parseJwt(request);
+			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+				String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-        // userDetails retrieved to create authentication object
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-            userDetails,
-            null,
-            userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+						userDetails,
+						null,
+						userDetails.getAuthorities());
+				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-        // SecurityContext updates with User and Authentication related details
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
-    } catch (Exception e) {
-      logger.error("Cannot set user authentication: {}", e);
-    }
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
+		} catch (Exception e) {
+			log.error("Cannot set user authentication: {}", e.getMessage());
+		}
 
-    filterChain.doFilter(request, response);
-  }
+		filterChain.doFilter(request, response);
+	}
 
-  /**
-   * Checks request's header for "Authorization" to extract out JWT token
-   * 
-   * @return JWT token if present and validated, otherwise null
-   */
-  private String parseJwt(HttpServletRequest request) {
-    return jwtUtils.getJwtFromCookies(request);
-  }
+	/**
+	 * Checks request's header for "Authorization" to extract out JWT token
+	 * 
+	 * @return JWT token if present and validated, otherwise null
+	 */
+	private String parseJwt(HttpServletRequest request) {
+		return jwtUtils.getJwtValueFromCookies(request);
+	}
 }

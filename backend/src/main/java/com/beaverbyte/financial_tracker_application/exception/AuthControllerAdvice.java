@@ -9,6 +9,17 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice
 public class AuthControllerAdvice {
 
+	@ExceptionHandler(value = RoleNotFoundException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public CustomProblemDetail handleRoleNotFoundException(RoleNotFoundException ex,
+			WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
+				ex.getMessage(),
+				request.getDescription(false));
+	}
+
 	@ExceptionHandler(value = SignupException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public CustomProblemDetail handleSignupException(SignupException ex,
