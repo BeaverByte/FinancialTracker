@@ -5,94 +5,92 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-
 @Entity
 @Table(name = "transactions")
 public class Transaction {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
-    private long id;
 
-    @Column(name="date")
-    private LocalDate date;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
+	private long id;
 
-    // Merchant name (like mcdonald's, Spotify, etc.)
-    @Column(name="merchant")
-    private String merchant;
+	@Column(name = "date")
+	private LocalDate date;
 
-    // Account (user generated)
-    @Column(name="account")
-    private String account;
+	// Merchant name (like mcdonald's, Spotify, etc.)
+	@Column(name = "merchant")
+	private String merchant;
 
-    // Category (like Shopping, Income, Mortgage)
-    @Column(name="category")
-    private String category;
+	// Account (user generated)
+	@Column(name = "account")
+	private String account;
 
-    // Amount (using Postgresql numeric(19,4))
-    @Column(name="amount", precision=19, scale=4)
-    private BigDecimal amount;
+	// Category (like Shopping, Income, Mortgage)
+	@Column(name = "category")
+	private String category;
 
-    // Note set by user
-    @Column(name="note")
-    private String note;
+	// Amount (using Postgresql numeric(19,4))
+	@Column(name = "amount", precision = 19, scale = 4)
+	private BigDecimal amount;
 
-    public long getId() {
-        return id;
-    }
+	// Note set by user
+	@Column(name = "note")
+	private String note;
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public LocalDate getDate() {
-        return date;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+	public LocalDate getDate() {
+		return date;
+	}
 
-    public String getMerchant() {
-        return merchant;
-    }
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
 
-    public void setMerchant(String merchant) {
-        this.merchant = merchant;
-    }
+	public String getMerchant() {
+		return merchant;
+	}
 
-    public String getAccount() {
-        return account;
-    }
+	public void setMerchant(String merchant) {
+		this.merchant = merchant;
+	}
 
-    public void setAccount(String account) {
-        this.account = account;
-    }
+	public String getAccount() {
+		return account;
+	}
 
-    public String getCategory() {
-        return category;
-    }
+	public void setAccount(String account) {
+		this.account = account;
+	}
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+	public String getCategory() {
+		return category;
+	}
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+	public void setCategory(String category) {
+		this.category = category;
+	}
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
+	public BigDecimal getAmount() {
+		return amount;
+	}
 
-    public String getNote() {
-        return note;
-    }
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
 
-    public void setNote(String note) {
-        this.note = note;
-    }
+	public String getNote() {
+		return note;
+	}
 
+	public void setNote(String note) {
+		this.note = note;
+	}
 
 }

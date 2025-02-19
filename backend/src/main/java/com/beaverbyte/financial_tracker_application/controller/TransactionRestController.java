@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.service.TransactionService;
 
@@ -48,47 +49,26 @@ public class TransactionRestController {
 
 	@GetMapping("/transactions/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public Transaction getTransaction(@PathVariable int id) {
+	public Transaction getTransaction(@PathVariable @Min(1) int id) {
 		return transactionService.findById(id);
 	}
 
 	@PostMapping("/transactions")
-	public ResponseEntity<Transaction> addTransaction(@RequestBody Transaction transaction) {
-		try {
-			// Set id to 0 in case id is passed through JSON to force save of item instead
-			// update
-			transaction.setId(0);
-			Transaction savedTransaction = transactionService.save(transaction);
-			return new ResponseEntity<>(savedTransaction, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@ResponseStatus(HttpStatus.CREATED)
+	public Transaction addTransaction(@RequestBody TransactionRequest transactionRequest) {
+		return transactionService.add(transactionRequest);
 	}
 
 	@PutMapping("/transactions/{id}")
-	public ResponseEntity<Transaction> updateTransaction(@PathVariable int id, @RequestBody Transaction transaction) {
-		try {
-			if (!transactionService.existsById(id)) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-			// If id sent in body, set it to url ID to prevent incorrect update
-			transaction.setId(id);
-			return new ResponseEntity<>(transactionService.save(transaction), HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@ResponseStatus(HttpStatus.OK)
+	public Transaction updateTransaction(@PathVariable @Min(1) int id,
+			@RequestBody TransactionRequest transactionRequest) {
+		return transactionService.update(transactionRequest);
 	}
 
 	@DeleteMapping("/transactions/{id}")
-	public ResponseEntity<HttpStatus> deleteTransaction(@PathVariable long id) {
-		try {
-			if (!transactionService.existsById(id)) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-			transactionService.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteTransaction(@PathVariable long id) {
+		transactionService.deleteById(id);
 	}
 }
