@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.org.mapstruct.mapstruct)
     implementation(libs.org.springdoc.springdoc.openapi.starter.webmvc.ui)
     implementation("org.webjars:webjars-locator-lite:1.0.1")
+    implementation("net.datafaker:datafaker:2.4.2")
     annotationProcessor(libs.org.mapstruct.mapstruct.processor)
     runtimeOnly(libs.org.springframework.boot.spring.boot.devtools)
     runtimeOnly(libs.org.postgresql.postgresql)

@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.unit.service;
+package com.beaverbyte.financial_tracker_application.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
-import com.beaverbyte.financial_tracker_application.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -20,7 +19,7 @@ class UserServiceTest {
 	private UserService userService;
 
 	@Test
-	void shouldBeTrueIfEmaiLExists() {
+	void shouldBeTrueIfEmailExists() {
 		String email = "fake@gmail.com";
 		Mockito.when(userRepository.existsByEmail(email)).thenReturn(true);
 

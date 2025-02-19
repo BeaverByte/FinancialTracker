@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application.unit;
+package com.beaverbyte.financial_tracker_application.mapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
-import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 
 class TransactionMapperTest {
