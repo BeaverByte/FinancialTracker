@@ -63,7 +63,7 @@ public class TransactionRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public Transaction updateTransaction(@PathVariable @Min(1) int id,
 			@RequestBody TransactionRequest transactionRequest) {
-		return transactionService.update(transactionRequest);
+		return transactionService.update(transactionRequest, id);
 	}
 
 	@DeleteMapping("/transactions/{id}")

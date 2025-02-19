@@ -37,6 +37,20 @@ public class Transaction {
 	@Column(name = "note")
 	private String note;
 
+	public Transaction() {
+	}
+
+	public Transaction(long id, LocalDate date, String merchant, String account, String category, BigDecimal amount,
+			String note) {
+		this.id = id;
+		this.date = date;
+		this.merchant = merchant;
+		this.account = account;
+		this.category = category;
+		this.amount = amount;
+		this.note = note;
+	}
+
 	public long getId() {
 		return id;
 	}
