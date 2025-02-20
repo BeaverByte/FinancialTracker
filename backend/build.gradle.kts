@@ -25,6 +25,12 @@ repositories {
 	mavenCentral()
 }
 
+configurations {
+    runtimeOnly {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+}
+
 dependencies {
     implementation(libs.org.springframework.boot.spring.boot.starter.actuator)
     implementation(libs.org.springframework.boot.spring.boot.starter.data.jpa)

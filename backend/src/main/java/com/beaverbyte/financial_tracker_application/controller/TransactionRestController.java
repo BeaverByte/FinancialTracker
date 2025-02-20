@@ -20,6 +20,7 @@ import com.beaverbyte.financial_tracker_application.service.TransactionService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.web.bind.annotation.PutMapping;
@@ -51,18 +52,22 @@ public class TransactionRestController {
 
 	@GetMapping("/transactions/{id}")
 	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Get a single transaction")
 	public TransactionDTO getTransaction(@PathVariable @Min(1) int id) {
 		return transactionService.findById(id);
 	}
 
 	@PostMapping("/transactions")
 	@ResponseStatus(HttpStatus.CREATED)
-	public TransactionDTO addTransaction(@RequestBody TransactionRequest transactionRequest) {
+	@Operation(summary = "Create a transaction")
+	public TransactionDTO addTransaction(
+			@Valid @RequestBody TransactionRequest transactionRequest) {
 		return transactionService.add(transactionRequest);
 	}
 
 	@PutMapping("/transactions/{id}")
 	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Update transaction")
 	public TransactionDTO updateTransaction(@PathVariable @Min(1) int id,
 			@RequestBody TransactionRequest transactionRequest) {
 		return transactionService.update(transactionRequest, id);

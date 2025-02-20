@@ -58,7 +58,9 @@ public class TransactionService {
 
 		// Set id to 0 in case id is passed through JSON to force save of item instead
 		// update
+		log.info("Transaction id, {}, setting to 0", transaction.getId());
 		transaction.setId(0);
+
 		log.info("Transaction, {}, saved in database", transaction);
 		Transaction savedTransaction = transactionRepository.save(transaction);
 
@@ -73,6 +75,8 @@ public class TransactionService {
 		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
 
 		// If id sent in body, set it to url ID to prevent incorrect update
+
+		log.info("Transaction id, {}, setting to {}", transaction.getId(), id);
 		transaction.setId(id);
 
 		log.info("Transaction, {}, updated in database", transaction);
