@@ -1,7 +1,6 @@
 package com.beaverbyte.financial_tracker_application.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +26,7 @@ public class GlobalExceptionHandler {
 				request.getDescription(false));
 	}
 
+	// Handle HTTP Request with null RequestBody
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public CustomProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException exception,
@@ -43,14 +42,13 @@ public class GlobalExceptionHandler {
 	// Handle HTTP Method Request errors (e.g. if GET is used for a POST method)
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-	public ResponseEntity<ErrorMessage> handleMethodNotAllowed(HttpRequestMethodNotSupportedException exception) {
-		ErrorMessage errors = new ErrorMessage(
-				HttpStatus.METHOD_NOT_ALLOWED.value(),
-				new Date(),
+	public CustomProblemDetail handleMethodNotAllowed(HttpRequestMethodNotSupportedException exception,
+			WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
 				exception.getMessage(),
-				"Method not allowed for requested URL");
-
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
+				request.getDescription(false));
 	}
 
 	// Handle validation errors from @Valid annotation
@@ -87,11 +85,11 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(value = TokenRefreshException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)
-	public ErrorMessage handleTokenRefreshException(TokenRefreshException ex, WebRequest request) {
-		return new ErrorMessage(
+	public CustomProblemDetail handleTokenRefreshException(TokenRefreshException exception, WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.FORBIDDEN.toString(),
 				HttpStatus.FORBIDDEN.value(),
-				new Date(),
-				ex.getMessage(),
+				exception.getMessage(),
 				request.getDescription(false));
 	}
 }

@@ -44,14 +44,6 @@ public class CustomProblemDetail {
 		this.instance = instance;
 	}
 
-	// Static factory method
-	public static CustomProblemDetail forStatusAndDetail(Integer status, String detail) {
-		CustomProblemDetail problemDetail = new CustomProblemDetail();
-		problemDetail.setStatus(status != null ? status : 500); // Default to 500 if null
-		problemDetail.setDetail(detail != null ? detail : "An unexpected error occurred.");
-		return problemDetail;
-	}
-
 	public void setTitle(String title) {
 		this.title = title;
 	}
