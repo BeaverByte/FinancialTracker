@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
+import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
@@ -31,43 +32,53 @@ public class TransactionService {
 		this.transactionMapper = transactionMapper;
 	}
 
-	public List<Transaction> findAll(int page, int size) {
+	public List<TransactionDTO> findAll(int page, int size) {
+		List<Transaction> transactions;
 		if (size == 0) {
-			return transactionRepository.findAll();
+			transactions = transactionRepository.findAll();
+		} else {
+			Pageable pageable = PageRequest.of(page - 1, size);
+			Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
+			transactions = transactionPage.stream().toList();
 		}
-		Pageable pageable = PageRequest.of(page - 1, size);
-		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
-		return transactionPage.stream().toList();
+
+		return transactions.stream()
+				.map(transactionMapper::transactionToTransactionDTO)
+				.toList();
 	}
 
-	public Transaction findById(long id) {
-		return transactionRepository.findById(id).orElseThrow(
+	public TransactionDTO findById(long id) {
+		Transaction transaction = transactionRepository.findById(id).orElseThrow(
 				() -> new TransactionNotFoundException("Transaction does not exist with id " + id));
+		return transactionMapper.transactionToTransactionDTO(transaction);
 	}
 
-	public Transaction add(TransactionRequest transactionRequest) {
-		Transaction transaction = transactionMapper.transactionDTOToTransaction(transactionRequest);
+	public TransactionDTO add(TransactionRequest transactionRequest) {
+		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
 
 		// Set id to 0 in case id is passed through JSON to force save of item instead
 		// update
 		transaction.setId(0);
-
 		log.info("Transaction, {}, saved in database", transaction);
-		return transactionRepository.save(transaction);
+		Transaction savedTransaction = transactionRepository.save(transaction);
+
+		return transactionMapper.transactionToTransactionDTO(savedTransaction);
 	}
 
-	public Transaction update(TransactionRequest transactionRequest, int id) {
+	public TransactionDTO update(TransactionRequest transactionRequest, int id) {
 		if (!transactionRepository.findById(transactionRequest.id()).isPresent()) {
 			throw new TransactionNotFoundException("Transaction does not exist with id " + transactionRequest.id());
 		}
 
-		Transaction transaction = transactionMapper.transactionDTOToTransaction(transactionRequest);
+		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
 
 		// If id sent in body, set it to url ID to prevent incorrect update
 		transaction.setId(id);
 
 		log.info("Transaction, {}, updated in database", transaction);
-		return transactionRepository.save(transaction);
+		Transaction savedTransaction = transactionRepository.save(transaction);
+
+		return transactionMapper.transactionToTransactionDTO(savedTransaction);
 	}
 
 	public void deleteById(long id) {

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
+import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 
 class TransactionMapperTest {
@@ -16,7 +17,7 @@ class TransactionMapperTest {
 	LocalDate testDate = LocalDate.of(2020, 1, 5);
 
 	@Test
-	void shouldMapTransactionRequestToTransaction() {
+	void shouldMapTransactionToTransactionDTO() {
 		Transaction transaction = new Transaction();
 		transaction.setDate(testDate);
 		transaction.setAccount(null);
@@ -24,15 +25,15 @@ class TransactionMapperTest {
 		transaction.setMerchant(null);
 		transaction.setNote(null);
 
-		TransactionRequest transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
+		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
 
 		assertNotNull(transactionDTO);
 		assertEquals(transactionDTO.account(), transaction.getAccount());
 	}
 
 	@Test
-	void shouldMapTransactionToTransactionRequest() {
-		TransactionRequest transactionDTO = new TransactionRequest(1L,
+	void shouldMapTransactionRequestToTransaction() {
+		TransactionRequest transactionRequest = new TransactionRequest(1L,
 				testDate,
 				"Mcronalds",
 				"Bank",
@@ -40,9 +41,9 @@ class TransactionMapperTest {
 				new BigDecimal(99.00),
 				"Justanote");
 
-		Transaction transaction = TransactionMapper.INSTANCE.transactionDTOToTransaction(transactionDTO);
+		Transaction transaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
 
-		assertNotNull(transactionDTO);
-		assertEquals(transactionDTO.account(), transaction.getAccount());
+		assertNotNull(transactionRequest);
+		assertEquals(transactionRequest.account(), transaction.getAccount());
 	}
 }

@@ -3,7 +3,6 @@ package com.beaverbyte.financial_tracker_application.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +15,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
-import com.beaverbyte.financial_tracker_application.model.Transaction;
+import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.service.TransactionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,27 +42,28 @@ public class TransactionRestController {
 
 	@GetMapping("/transactions")
 	@ResponseStatus(HttpStatus.OK)
-	public List<Transaction> findAll(
-			@RequestParam(defaultValue = "1") @Min(1) int page,
-			@RequestParam(defaultValue = "0") @Min(0) int size) {
+	@Operation(summary = "Get all/paginated transactions")
+	public List<TransactionDTO> findAll(
+			@Parameter(description = "Number of pages to contain entities") @RequestParam(defaultValue = "1") @Min(1) int page,
+			@Parameter(description = "Amount of entities allowed on a given page. Value of 0 will provide all entities") @RequestParam(defaultValue = "0") @Min(0) int size) {
 		return transactionService.findAll(page, size);
 	}
 
 	@GetMapping("/transactions/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public Transaction getTransaction(@PathVariable @Min(1) int id) {
+	public TransactionDTO getTransaction(@PathVariable @Min(1) int id) {
 		return transactionService.findById(id);
 	}
 
 	@PostMapping("/transactions")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Transaction addTransaction(@RequestBody TransactionRequest transactionRequest) {
+	public TransactionDTO addTransaction(@RequestBody TransactionRequest transactionRequest) {
 		return transactionService.add(transactionRequest);
 	}
 
 	@PutMapping("/transactions/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public Transaction updateTransaction(@PathVariable @Min(1) int id,
+	public TransactionDTO updateTransaction(@PathVariable @Min(1) int id,
 			@RequestBody TransactionRequest transactionRequest) {
 		return transactionService.update(transactionRequest, id);
 	}
