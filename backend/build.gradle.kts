@@ -7,12 +7,12 @@
 plugins {
     id("java")
     id("org.springframework.boot") version "3.4.2"
+    jacoco
 }
 
 group = "com.beaverbyte"
 version = "0.0.1-SNAPSHOT"
 description = "Financial Tracker Application"
-// java.sourceCompatibility = JavaVersion.VERSION_1_7
 
 java {
 	toolchain {
@@ -61,4 +61,18 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform() // Ensure that JUnit platform is being used
+    finalizedBy("jacocoTestReport") // Allows for "gradle test" instead "gradle test jacocoTestReport"
+    doLast {
+        println("View code coverage at:")
+        println("file://$buildDir/reports/jacoco/test/html/index.html")
+    }
+}
+
+tasks.withType<JacocoReport> {
+  classDirectories.setFrom(
+    sourceSets.main.get().output.asFileTree.matching {
+        // exclude("com/beaverbyte/financial_tracker_application/dto")
+        // exclude("com/beaverbyte/financial_tracker_application/constants")
+    }
+  )
 }
