@@ -1,7 +1,7 @@
 package com.beaverbyte.financial_tracker_application.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,22 +26,34 @@ public class GlobalExceptionHandler {
 				request.getDescription(false));
 	}
 
+	// Handle HTTP Request with null RequestBody
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public CustomProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException exception,
+			WebRequest request) {
+
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
+				exception.getMessage(),
+				request.getDescription(false));
+	}
+
 	// Handle HTTP Method Request errors (e.g. if GET is used for a POST method)
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-	public ResponseEntity<ErrorMessage> handleMethodNotAllowed(HttpRequestMethodNotSupportedException exception) {
-		ErrorMessage errors = new ErrorMessage(
-				HttpStatus.METHOD_NOT_ALLOWED.value(),
-				new Date(),
+	public CustomProblemDetail handleMethodNotAllowed(HttpRequestMethodNotSupportedException exception,
+			WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
 				exception.getMessage(),
-				"Method not allowed for requested URL");
-
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errors);
+				request.getDescription(false));
 	}
 
 	// Handle validation errors from @Valid annotation
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public CustomProblemDetail handleValidationExceptions(MethodArgumentNotValidException exception,
 			WebRequest request) {
 		Map<String, String> errors = new HashMap<>();
@@ -54,10 +65,31 @@ public class GlobalExceptionHandler {
 		});
 
 		return new CustomProblemDetail(
-				HttpStatus.UNAUTHORIZED.toString(),
-				HttpStatus.UNAUTHORIZED.value(),
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
 				"Validation(s) failed",
 				request.getDescription(false),
 				errors);
+	}
+
+	@ExceptionHandler(TransactionNotFoundException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public CustomProblemDetail handleTransactionNotFoundException(TransactionNotFoundException exception,
+			WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
+				"Transaction not found with id",
+				request.getDescription(false));
+	}
+
+	@ExceptionHandler(value = TokenRefreshException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public CustomProblemDetail handleTokenRefreshException(TokenRefreshException exception, WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.FORBIDDEN.toString(),
+				HttpStatus.FORBIDDEN.value(),
+				exception.getMessage(),
+				request.getDescription(false));
 	}
 }

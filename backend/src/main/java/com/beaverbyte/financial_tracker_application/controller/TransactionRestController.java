@@ -3,7 +3,6 @@ package com.beaverbyte.financial_tracker_application.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +10,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.beaverbyte.financial_tracker_application.model.Transaction;
+import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
+import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.service.TransactionService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
 import org.springframework.web.bind.annotation.PutMapping;
 
 /**
@@ -27,63 +35,47 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api")
 public class TransactionRestController {
 
-	private TransactionService transactionService;
+	private final TransactionService transactionService;
 
 	public TransactionRestController(TransactionService transactionService) {
 		this.transactionService = transactionService;
 	}
 
 	@GetMapping("/transactions")
-	public ResponseEntity<List<Transaction>> findAll() {
-		return ResponseEntity.status(HttpStatus.OK).body(transactionService.findAll());
+	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Get all/paginated transactions")
+	public List<TransactionDTO> findAll(
+			@Parameter(description = "Number of pages to contain entities") @RequestParam(defaultValue = "1") @Min(1) int page,
+			@Parameter(description = "Amount of entities allowed on a given page. Value of 0 will provide all entities") @RequestParam(defaultValue = "0") @Min(0) int size) {
+		return transactionService.findAll(page, size);
 	}
 
 	@GetMapping("/transactions/{id}")
-	public ResponseEntity<Transaction> getTransaction(@PathVariable int id) {
-		if (!transactionService.existsById(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
-		Transaction transaction = transactionService.findById(id);
-		return ResponseEntity.status(HttpStatus.OK).body(transaction);
+	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Get a single transaction")
+	public TransactionDTO getTransaction(@PathVariable @Min(1) int id) {
+		return transactionService.findById(id);
 	}
 
 	@PostMapping("/transactions")
-	public ResponseEntity<Transaction> addTransaction(@RequestBody Transaction transaction) {
-		try {
-			// Set id to 0 in case id is passed through JSON to force save of item instead
-			// update
-			transaction.setId(0);
-			Transaction savedTransaction = transactionService.save(transaction);
-			return new ResponseEntity<>(savedTransaction, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@ResponseStatus(HttpStatus.CREATED)
+	@Operation(summary = "Create a transaction")
+	public TransactionDTO addTransaction(
+			@Valid @RequestBody TransactionRequest transactionRequest) {
+		return transactionService.add(transactionRequest);
 	}
 
 	@PutMapping("/transactions/{id}")
-	public ResponseEntity<Transaction> updateTransaction(@PathVariable int id, @RequestBody Transaction transaction) {
-		try {
-			if (!transactionService.existsById(id)) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-			// If id sent in body, set it to url ID to prevent incorrect update
-			transaction.setId(id);
-			return new ResponseEntity<>(transactionService.save(transaction), HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@ResponseStatus(HttpStatus.OK)
+	@Operation(summary = "Update transaction")
+	public TransactionDTO updateTransaction(@PathVariable @Min(1) int id,
+			@RequestBody TransactionRequest transactionRequest) {
+		return transactionService.update(transactionRequest, id);
 	}
 
 	@DeleteMapping("/transactions/{id}")
-	public ResponseEntity<HttpStatus> deleteTransaction(@PathVariable long id) {
-		try {
-			if (!transactionService.existsById(id)) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-			transactionService.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteTransaction(@PathVariable long id) {
+		transactionService.deleteById(id);
 	}
 }

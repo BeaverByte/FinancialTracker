@@ -10,59 +10,55 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 
-@ExtendWith(MockitoExtension.class) 
-public class UserServiceTest {
-    @Mock
-    private UserRepository userRepository; 
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+	@Mock
+	private UserRepository userRepository;
 
-    @InjectMocks
-    private UserService userService; 
+	@InjectMocks
+	private UserService userService;
 
-    @Test
-    public void shouldBeTrueIfEmaiLExists() {
-        String email ="fake@gmail.com";
-        Mockito.when(userRepository.existsByEmail(email)).thenReturn(true);
+	@Test
+	void shouldBeTrueIfEmailExists() {
+		String email = "fake@gmail.com";
+		Mockito.when(userRepository.existsByEmail(email)).thenReturn(true);
 
-        boolean result = userService.existsByEmail(email);
+		boolean result = userService.existsByEmail(email);
 
-        Assertions.assertTrue(result);
-        Mockito.verify(userRepository, Mockito.times(1)).existsByEmail(email);
-    }
+		Assertions.assertTrue(result);
+		Mockito.verify(userRepository, Mockito.times(1)).existsByEmail(email);
+	}
 
-    @Test
-    public void shouldBeFalseIfEmailDoesNotExist() {
-        String email ="bademail";
-        Mockito.when(userRepository.existsByEmail(email)).thenReturn(false);
+	@Test
+	void shouldBeFalseIfEmailDoesNotExist() {
+		String email = "bademail";
+		Mockito.when(userRepository.existsByEmail(email)).thenReturn(false);
 
-        boolean result = userService.existsByEmail(email);
+		boolean result = userService.existsByEmail(email);
 
-        Assertions.assertFalse(result);
-        Mockito.verify(userRepository, Mockito.times(1)).existsByEmail(email);
-    }
+		Assertions.assertFalse(result);
+		Mockito.verify(userRepository, Mockito.times(1)).existsByEmail(email);
+	}
 
+	@Test
+	void shouldBeTrueIfUserExists() {
+		String username = "testuser";
+		Mockito.when(userRepository.existsByUsername(username)).thenReturn(true);
 
+		boolean result = userService.existsByUsername(username);
 
-    @Test
-    public void shouldBeTrueIfUserExists() {
-        String username = "testuser";
-        Mockito.when(userRepository.existsByUsername(username)).thenReturn(true);
+		Assertions.assertTrue(result);
+		Mockito.verify(userRepository, Mockito.times(1)).existsByUsername(username);
+	}
 
-        boolean result = userService.existsByUsername(username);
+	@Test
+	void shouldBeFalseIfUserDoesNotExist() {
+		String username = "nonexistentuser";
+		Mockito.when(userRepository.existsByUsername(username)).thenReturn(false);
 
-        Assertions.assertTrue(result);
-        Mockito.verify(userRepository, Mockito.times(1)).existsByUsername(username);
-    }
+		boolean result = userService.existsByUsername(username);
 
-    @Test
-    public void shouldBeFalseIfUserDoesNotExist() {
-        String username = "nonexistentuser";
-        Mockito.when(userRepository.existsByUsername(username)).thenReturn(false);
-
-        boolean result = userService.existsByUsername(username);
-
-        Assertions.assertFalse(result);
-        Mockito.verify(userRepository, Mockito.times(1)).existsByUsername(username);
-    }
-}   
-
-
+		Assertions.assertFalse(result);
+		Mockito.verify(userRepository, Mockito.times(1)).existsByUsername(username);
+	}
+}

@@ -7,10 +7,9 @@ public class UserMapper {
 	private UserMapper() {
 	}
 
-    public static User toUser(SignupRequest signUpRequest) {
-        return new User(
-            signUpRequest.getUsername(),
-            signUpRequest.getEmail()
-        );
-    }
+	public static User toUser(SignupRequest signUpRequest) {
+		return new User(
+				signUpRequest.getUsername(),
+				signUpRequest.getEmail());
+	}
 }

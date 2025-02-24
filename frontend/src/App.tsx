@@ -29,7 +29,7 @@ function App() {
                   element={<TransactionsList />}
                 />
                 <Route
-                  path="transactions/edit/:id"
+                  path={APP_ROUTES.EDIT_TRANSACTION}
                   element={<EditTransaction />}
                 />
                 <Route

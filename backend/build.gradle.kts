@@ -7,12 +7,13 @@
 plugins {
     id("java")
     id("org.springframework.boot") version "3.4.2"
+    id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
+    jacoco
 }
 
 group = "com.beaverbyte"
 version = "0.0.1-SNAPSHOT"
 description = "Financial Tracker Application"
-// java.sourceCompatibility = JavaVersion.VERSION_1_7
 
 java {
 	toolchain {
@@ -23,6 +24,12 @@ java {
 repositories {
     gradlePluginPortal()
 	mavenCentral()
+}
+
+configurations {
+    runtimeOnly {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
 }
 
 dependencies {
@@ -38,6 +45,7 @@ dependencies {
     implementation(libs.org.mapstruct.mapstruct)
     implementation(libs.org.springdoc.springdoc.openapi.starter.webmvc.ui)
     implementation("org.webjars:webjars-locator-lite:1.0.1")
+    implementation("net.datafaker:datafaker:2.4.2")
     annotationProcessor(libs.org.mapstruct.mapstruct.processor)
     runtimeOnly(libs.org.springframework.boot.spring.boot.devtools)
     runtimeOnly(libs.org.postgresql.postgresql)
@@ -54,4 +62,18 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform() // Ensure that JUnit platform is being used
+    finalizedBy("jacocoTestReport") // Allows for "gradle test" instead "gradle test jacocoTestReport"
+    doLast {
+        println("View code coverage at:")
+        println("file://$buildDir/reports/jacoco/test/html/index.html")
+    }
+}
+
+tasks.withType<JacocoReport> {
+  classDirectories.setFrom(
+    sourceSets.main.get().output.asFileTree.matching {
+        // exclude("com/beaverbyte/financial_tracker_application/dto")
+        // exclude("com/beaverbyte/financial_tracker_application/constants")
+    }
+  )
 }
