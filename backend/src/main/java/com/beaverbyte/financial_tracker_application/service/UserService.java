@@ -40,7 +40,8 @@ public class UserService {
 	public User createUser(SignupRequest signUpRequest) {
 		User user = UserMapper.toUser(signUpRequest);
 		user.setPassword(authenticationService.encode(signUpRequest.getPassword()));
-		Set<Role> roles = roleService.validateAgainstTable(signUpRequest.getRole());
+		log.info("Validating signup request's roles");
+		Set<Role> roles = roleService.validate(signUpRequest.getRole());
 		user.setRoles(roles);
 
 		log.info("User created");

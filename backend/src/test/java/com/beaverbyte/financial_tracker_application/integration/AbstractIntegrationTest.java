@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application;
+package com.beaverbyte.financial_tracker_application.integration;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +9,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
+
+import com.beaverbyte.financial_tracker_application.FinancialTrackerApplication;
 
 // Booting up Spring app context for end to end behavior, HTTP Requests, etc.
 @SpringBootTest(classes = FinancialTrackerApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)

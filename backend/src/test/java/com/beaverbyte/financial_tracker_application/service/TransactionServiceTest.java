@@ -185,7 +185,7 @@ class TransactionServiceTest {
 	}
 
 	@Test
-	void testFindById() {
+	void shouldFindById() {
 		TransactionRequest transactionRequest = createRandomTransactionRequest();
 		Transaction mappedTransaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
 		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(mappedTransaction);

@@ -1,4 +1,4 @@
-package com.beaverbyte.financial_tracker_application;
+package com.beaverbyte.financial_tracker_application.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
@@ -40,11 +40,13 @@ import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 import com.beaverbyte.financial_tracker_application.utils.HttpTestUtils;
+import com.beaverbyte.financial_tracker_application.utils.JpaTestUtils;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import jakarta.servlet.http.HttpServletResponse;
+import net.datafaker.Faker;
 
 class IntegrationTests extends AbstractIntegrationTest {
 
@@ -73,9 +75,6 @@ class IntegrationTests extends AbstractIntegrationTest {
 	PasswordEncoder encoder;
 
 	@Autowired
-	JwtUtils jwtUtils;
-
-	@Autowired
 	CustomUserDetailsService customUserDetailsService;
 
 	@Autowired
@@ -88,7 +87,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 	private String jwtRefreshCookieName;
 
 	@BeforeEach
-	private void setUp() {
+	void setUp() {
 		RestAssured.baseURI = "http://localhost:" + port;
 
 		sanitizeRepos();
@@ -101,13 +100,9 @@ class IntegrationTests extends AbstractIntegrationTest {
 	private void sanitizeRepos() {
 		// Sanitizing repos
 
-		refreshTokenRepository.deleteAll();
-		userRepository.deleteAll();
-		roleRepository.deleteAll();
-
-		refreshTokenRepository.flush();
-		userRepository.flush();
-		roleRepository.flush();
+		JpaTestUtils.clearRepository(refreshTokenRepository);
+		JpaTestUtils.clearRepository(userRepository);
+		JpaTestUtils.clearRepository(roleRepository);
 	}
 
 	private void seedTestContainers() {
@@ -120,11 +115,14 @@ class IntegrationTests extends AbstractIntegrationTest {
 		roleRepository.save(roleAdmin);
 	}
 
+	private Faker faker = new Faker();
+
 	@Test
 	void shouldAllowAuthorizedModeratorAccessToProtectedRoute() {
-		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumblikebricks",
-				"dumbemail@gmail.com",
-				"dumbpassword",
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -159,9 +157,10 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	@Test
 	void shouldAllowUserSignInWithCorrectDetails() {
-		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumblikebricks",
-				"dumbemail@gmail.com",
-				"dumbpassword",
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -173,9 +172,10 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	@Test
 	void shouldAllowUserSignOut() {
-		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumblikebricks",
-				"dumbemail@gmail.com",
-				"dumbpassword",
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
@@ -195,9 +195,9 @@ class IntegrationTests extends AbstractIntegrationTest {
 	@Test
 	void shouldPreventUserSignInWithIncorrectDetails() {
 		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
-				"stupid",
-				"stupid@gmail.com",
-				"stupid",
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -220,10 +220,11 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	@Test
 	void shouldPreventUserSignUpWithInvalidRole() {
-		SignupRequest signUpRequest = new SignupRequest("dumblikebricks",
-				"dumbemail@gmail.com",
+		SignupRequest signUpRequest = new SignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
 				createBadRole("Yuck"),
-				"dumbpassword");
+				faker.internet().password());
 
 		Response response = HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
 
@@ -250,9 +251,10 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 	@Test
 	void shouldAllowUserSignUp() {
-		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest("dumbusername",
-				"dubmemail@gmail.com",
-				"dumbpassword",
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		Response response = HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -263,9 +265,9 @@ class IntegrationTests extends AbstractIntegrationTest {
 	@Test
 	void shouldHaveUserInDatabaseAfterSignUp() {
 		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
-				"stupid",
-				"stupid@gmail.com",
-				"stupid",
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		Response response = HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -279,9 +281,9 @@ class IntegrationTests extends AbstractIntegrationTest {
 	@Test
 	void shouldHaveTokenHandledByAuthenticationManager() {
 		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
-				"salmon",
-				"salmon@gmail.com",
-				"salmon",
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -297,15 +299,15 @@ class IntegrationTests extends AbstractIntegrationTest {
 	@Test
 	void shouldAllowMultipleUsersInSecurityContext() {
 		SignupRequest signUpRequestForUser1 = HttpTestUtils.createSignupRequest(
-				"user1",
-				"stupid@gmail.com",
-				"stupid",
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		SignupRequest signUpRequestForUser2 = HttpTestUtils.createSignupRequest(
-				"user2",
-				"stupider@gmail.com",
-				"stupid",
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
 				RoleType.ROLE_MODERATOR);
 
 		HttpTestUtils.signUp(signUpRequestForUser1, ApiEndpoints.AUTH_SIGN_UP_URL);
@@ -321,7 +323,7 @@ class IntegrationTests extends AbstractIntegrationTest {
 
 		// Assert that SecurityContextHolder has user1
 		Authentication currentAuth = AuthenticationUtils.getCurrentAuthentication();
-		assertEquals("Expected user1 to be authenticated", "user1", currentAuth.getName());
+		assertEquals("Expected user1 to be authenticated", user1.getUsername(), currentAuth.getName());
 
 		// Second user logging in
 		Authentication auth2 = new UsernamePasswordAuthenticationToken(user2, user2.getPassword(),
@@ -330,8 +332,8 @@ class IntegrationTests extends AbstractIntegrationTest {
 		AuthenticationUtils.setAuthentication(auth2);
 		currentAuth = AuthenticationUtils.getCurrentAuthentication();
 
-		assertEquals("Expected user2 to be authenticated", "user2", currentAuth.getName());
+		assertEquals("Expected user2 to be authenticated", user2.getUsername(), currentAuth.getName());
 
-		assertNotEquals("user1 should no longer be in Context", "user1", currentAuth.getName());
+		assertNotEquals("user1 should no longer be in Context", user1.getUsername(), currentAuth.getName());
 	}
 }

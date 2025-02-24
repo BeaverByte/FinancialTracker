@@ -70,14 +70,11 @@ public class HttpTestUtils {
 	private static Set<String> getRolesForInput(RoleType role) {
 		switch (role) {
 			case ROLE_USER:
-				return Stream.of("user")
-						.collect(Collectors.toSet());
+				return Set.of("user");
 			case ROLE_MODERATOR:
-				return Stream.of("user", "mod")
-						.collect(Collectors.toSet());
+				return Set.of("moderator", "user");
 			case ROLE_ADMIN:
-				return Stream.of("admin")
-						.collect(Collectors.toSet());
+				return Set.of("admin");
 			default:
 				throw new IllegalArgumentException("Invalid role input: " + role);
 		}
