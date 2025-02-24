@@ -1,10 +1,18 @@
 import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
+import { useAddTransaction } from "../hooks/useAddTransaction";
+import {
   FormSchema,
   TransactionFormSchema,
-} from "../../types/schemas/transactionSchema";
-import { TransactionForm } from "./TransactionForm";
-import { useAddTransaction } from "../../hooks/useAddTransaction";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+} from "../types/schemas/transactionSchema";
+import { TransactionForm } from "../components/Form/TransactionForm";
+
+export const Route = createFileRoute("/_auth/transactions/create")({
+  component: AddTransactionForm,
+});
 
 function AddTransactionForm() {
   const navigate = useNavigate();
@@ -45,5 +53,3 @@ function AddTransactionForm() {
     />
   );
 }
-
-export { AddTransactionForm };

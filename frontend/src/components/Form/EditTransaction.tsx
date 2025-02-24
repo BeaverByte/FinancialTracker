@@ -1,34 +1,30 @@
-import { useNavigate, useParams } from "react-router";
 import { EditTransactionModal } from "./EditTransactionModal";
 import { Transaction } from "../../types/Transaction";
 import { useUpdateTransaction } from "../../hooks/useUpdateTransaction";
 import { useGetTransactionById } from "../../hooks/useGetTransactionById";
-import { APP_ROUTES } from "../../pages/routes";
+import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 
 export function EditTransaction() {
-  const { id } = useParams();
+  const params = useParams({ from: "/transaction/$transactionId" });
   const navigate = useNavigate();
   const editMutation = useUpdateTransaction();
+  const { history } = useRouter();
 
-  const transactionId = Number(id);
+  const id = Number(params.transactionId);
 
-  const {
-    data: transaction,
-    isLoading,
-    error,
-  } = useGetTransactionById(transactionId);
+  const { data: transaction, isLoading, error } = useGetTransactionById(id);
 
-  if (!Number.isInteger(transactionId)) {
-    return <p>Error: "{id}" is not a valid transaction ID</p>;
+  if (!Number.isInteger(id)) {
+    return <p>Error: "{params.transactionId}" is not a valid transaction ID</p>;
   }
 
   const handleSave = (updatedTransaction: Transaction) => {
-    console.log("Saving transaction to id " + transactionId);
+    console.log("Saving transaction to id " + id);
     editMutation.mutate({
-      id: transactionId,
+      id,
       updates: updatedTransaction,
     });
-    navigate("/transactions");
+    navigate({ to: "/transactions" });
   };
 
   if (isLoading) return <p>Loading transaction...</p>;
@@ -37,7 +33,7 @@ export function EditTransaction() {
   return (
     <EditTransactionModal
       transaction={transaction}
-      onClose={() => navigate(APP_ROUTES.BACK)}
+      onClose={() => history.go(-1)}
       onSave={handleSave}
     />
   );

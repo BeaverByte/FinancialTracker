@@ -67,9 +67,9 @@ public class TransactionService {
 		return transactionMapper.transactionToTransactionDTO(savedTransaction);
 	}
 
-	public TransactionDTO update(TransactionRequest transactionRequest, int id) {
-		if (!transactionRepository.findById(transactionRequest.id()).isPresent()) {
-			throw new TransactionNotFoundException("Transaction does not exist with id " + transactionRequest.id());
+	public TransactionDTO update(TransactionRequest transactionRequest, long id) {
+		if (!transactionRepository.findById(id).isPresent()) {
+			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
 		}
 
 		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);

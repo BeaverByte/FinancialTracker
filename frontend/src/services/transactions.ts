@@ -24,7 +24,10 @@ interface FetchItemOptions {
 }
 
 class FetchError extends Error {
-  constructor(public res: Response, message?: string) {
+  constructor(
+    public res: Response,
+    message?: string
+  ) {
     super(message);
   }
 }
@@ -58,7 +61,9 @@ export const getTransactions = async () => {
   }
 };
 
-export const getTransactionById = async (id: number) => {
+export class TransactionNotFoundError extends Error {}
+
+export const getTransactionById = async (id: string) => {
   const response = await fetch(
     `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}/${id}`,
     {
@@ -70,7 +75,10 @@ export const getTransactionById = async (id: number) => {
     }
   );
 
-  if (!response.ok) throw new Error("Transaction not found");
+  if (!response.ok)
+    throw new TransactionNotFoundError(
+      `Transaction with id "${id}" not found!`
+    );
 
   return response.json();
 };

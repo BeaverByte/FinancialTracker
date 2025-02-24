@@ -1,47 +1,28 @@
 import "./App.css";
 
-import Home from "./pages/Home/Home";
-import { BrowserRouter, Route, Routes } from "react-router";
-import { APP_ROUTES } from "./pages/routes";
-import TransactionsList from "./pages/Transactions/Transactions";
-import Layout from "./components/Layout";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { EditTransaction } from "./components/Form/EditTransaction";
-import { AddTransactionForm } from "./components/Form/AddTransactionForm";
-import { AuthProvider } from "./context/AuthContext";
-import LoginForm from "./components/Auth/LoginForm";
-import Logout from "./components/Auth/Logout";
-import AuthRoute from "./routes/AuthRoute";
-import { globalQueryClient } from "./services/queryClientConfig";
+import { globalQueryClient as queryClient } from "./services/queryClientConfig";
+import { RouterProvider } from "@tanstack/react-router";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { router } from "./router";
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+function InnerApp() {
+  const auth = useAuth();
+  return <RouterProvider router={router} context={{ auth }} />;
+}
 
 function App() {
   return (
-    <QueryClientProvider client={globalQueryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path={APP_ROUTES.LOGIN} element={<LoginForm />} />
-            <Route element={<AuthRoute />}>
-              <Route path={APP_ROUTES.ROOT} element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route
-                  path={APP_ROUTES.TRANSACTIONS_LIST}
-                  element={<TransactionsList />}
-                />
-                <Route
-                  path={APP_ROUTES.EDIT_TRANSACTION}
-                  element={<EditTransaction />}
-                />
-                <Route
-                  path={APP_ROUTES.CREATE_TRANSACTION}
-                  element={<AddTransactionForm />}
-                />
-                <Route path={APP_ROUTES.LOGOUT} element={<Logout />} />
-              </Route>
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <InnerApp />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

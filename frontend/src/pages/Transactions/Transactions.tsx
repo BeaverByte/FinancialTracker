@@ -1,5 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
 import Table from "../../components/Table/Table.tsx";
-import { useNavigate } from "react-router";
 import { useGetTransactions } from "../../hooks/useGetTransactions.ts";
 import { APP_ROUTES } from "../routes.ts";
 
@@ -14,13 +14,13 @@ export default function Transactions() {
 
   const handleEditTransaction = (id: number) => {
     console.log("Opening transaction modal for editing transaction ");
-    navigate(`/transactions/edit/${id}`);
+    navigate({ to: `/transactions/edit/${id}` });
   };
 
   return (
     <div>
       <h1>Transactions</h1>
-      <button onClick={() => navigate(APP_ROUTES.CREATE_TRANSACTION)}>
+      <button onClick={() => navigate({ to: APP_ROUTES.CREATE_TRANSACTION })}>
         Add Transaction
       </button>
       <Table data={data} onEditTransaction={handleEditTransaction} />

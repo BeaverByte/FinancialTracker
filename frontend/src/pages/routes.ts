@@ -4,8 +4,8 @@
  */
 export const APP_ROUTES = {
   ROOT: "/",
-  CREATE_TRANSACTION: "/transactions/new",
-  EDIT_TRANSACTION: "transactions/edit/:id",
+  CREATE_TRANSACTION: "/transactions/create",
+  EDIT_TRANSACTION: "/transactions/edit/$transactionId",
   TRANSACTIONS_LIST: "/transactions",
   TRANSACTION: "/transactions",
   FIND_TRANSACTION: "/effectivedate",
