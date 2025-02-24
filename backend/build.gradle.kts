@@ -7,6 +7,7 @@
 plugins {
     id("java")
     id("org.springframework.boot") version "3.4.2"
+    id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
     jacoco
 }
 
