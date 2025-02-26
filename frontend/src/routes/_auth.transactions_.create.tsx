@@ -10,7 +10,7 @@ import {
 } from "../types/schemas/transactionSchema";
 import { TransactionForm } from "../components/Form/TransactionForm";
 
-export const Route = createFileRoute("/_auth/transactions/create")({
+export const Route = createFileRoute("/_auth/transactions_/create")({
   component: AddTransactionForm,
 });
 

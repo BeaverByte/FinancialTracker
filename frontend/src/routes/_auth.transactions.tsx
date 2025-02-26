@@ -1,21 +1,13 @@
-import {
-  createFileRoute,
-  ErrorComponent,
-  Outlet,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { APP_ROUTES } from "../pages/routes";
 import Table from "../components/Table/Table";
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const Route = createFileRoute("/_auth/transactions")({
   loader: ({ context: { queryClient } }) =>
     queryClient.ensureQueryData(transactionsQueryOptions),
-  errorComponent: ({ error }) => {
-    // Fallback to the default ErrorComponent
-    return <ErrorComponent error={error} />;
-  },
   component: TransactionsComponent,
 });
 
@@ -31,8 +23,8 @@ function TransactionsComponent() {
     return <p>Error getting transactions: {transactionsQuery.error.message}</p>;
 
   const handleEditTransaction = (id: number) => {
-    console.log("Opening transaction modal for editing transaction ");
-    navigate({ to: `/transactions/${id}` });
+    // console.log("Opening transaction modal for editing transaction ");
+    // navigate({ to: `/transactions/${id}` });
   };
 
   return (
@@ -43,6 +35,7 @@ function TransactionsComponent() {
       </button>
       <Outlet />
       <Table data={transactions} onEditTransaction={handleEditTransaction} />
+      <ReactQueryDevtools initialIsOpen={false} />
     </div>
   );
 }

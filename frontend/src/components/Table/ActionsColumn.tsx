@@ -19,6 +19,7 @@ function ActionsColumn({
       <Link
         to={`${APP_ROUTES.EDIT_TRANSACTION}`}
         params={{ transactionId: transactionId.toString() }}
+        // replace={true}
       >
         <button onClick={() => onEditTransaction(transactionId)}>Edit</button>
       </Link>

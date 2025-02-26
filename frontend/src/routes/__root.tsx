@@ -1,22 +1,43 @@
 import {
+  ErrorComponent,
   Link,
   Outlet,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import AuthLayout from "../components/AuthLayout";
 import { MyRouterContext } from "../router";
+import { NetworkError } from "../services/transactions";
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootComponent,
-  notFoundComponent: () => {
-    return (
-      <div>
-        <p>This is the notFoundComponent configured on root route</p>
-        <Link to="/">Start Over</Link>
-      </div>
-    );
+  errorComponent: ({ error }) => {
+    if (error instanceof NetworkError) {
+      // Render a custom error message
+      return <div>{error.message}</div>;
+    }
+    // Fallback to the default ErrorComponent
+    return <CustomErrorComponent error={error} />;
   },
+  notFoundComponent: NotFound,
 });
+
+export function CustomErrorComponent({ error }: Readonly<{ error: Error }>) {
+  return (
+    <div>
+      <ErrorComponent error={error} />
+      <Link to="/">Start Over</Link>
+    </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <div>
+      <p>This is the notFoundComponent configured on root route</p>
+      <Link to="/">Start Over</Link>
+    </div>
+  );
+}
 
 function RootComponent() {
   return (
