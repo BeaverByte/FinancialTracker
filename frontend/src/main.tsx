@@ -1,10 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-// import ReactDOM from "react-dom";
 import "./index.css";
-import App from "./App.tsx";
 import { API_ROUTES } from "./utility/API_ROUTES.ts";
-// import React from "react";
+
+import App from "./App.tsx";
 
 async function enableMocking() {
   console.log(`API Route is ${API_ROUTES.TRANSACTIONS.ENDPOINT}`);
@@ -25,14 +24,6 @@ async function enableMocking() {
   // once the Service Worker is up and ready to intercept requests.
   return worker.start();
 }
-
-// enableMocking().then(() => {
-//   ReactDOM.createRoot(document.getElementById("root")!).render(
-//     <React.StrictMode>
-//       <App />
-//     </React.StrictMode>
-//   );
-// });
 
 const container = document.getElementById("root");
 

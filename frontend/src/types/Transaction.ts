@@ -11,7 +11,7 @@ export type TableHeaderConfig = {
 };
 
 export type Transaction = {
-  id: number;
+  id: number | string;
   date: string;
   merchant: string;
   account: string;

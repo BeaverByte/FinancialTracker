@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router";
+import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useAuthStatus } from "../context/useAuthStatus";
 import { APP_ROUTES } from "../pages/routes";
 
@@ -11,7 +11,7 @@ const AuthRoute = () => {
   }
 
   if (!isLoggedIn) {
-    navigate(APP_ROUTES.LOGIN);
+    navigate({ to: APP_ROUTES.LOGIN });
     return <p>You are not logged in. Redirecting to login...</p>;
   }
 

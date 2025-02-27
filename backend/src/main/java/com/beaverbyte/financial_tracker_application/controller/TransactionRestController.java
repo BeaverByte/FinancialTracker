@@ -68,7 +68,7 @@ public class TransactionRestController {
 	@PutMapping("/transactions/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@Operation(summary = "Update transaction")
-	public TransactionDTO updateTransaction(@PathVariable @Min(1) int id,
+	public TransactionDTO updateTransaction(@PathVariable @Min(1) long id,
 			@RequestBody TransactionRequest transactionRequest) {
 		return transactionService.update(transactionRequest, id);
 	}

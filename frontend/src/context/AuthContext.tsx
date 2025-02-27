@@ -1,16 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useGetTransactions } from "../hooks/useGetTransactions";
-import { useNavigate } from "react-router";
 import { loginUser, logoutUser } from "../services/auth";
-import { useQueryClient } from "@tanstack/react-query";
+import { redirect } from "@tanstack/react-router";
 import { APP_ROUTES } from "../pages/routes";
 
-interface AuthContextType {
-  isLoggedIn: boolean;
+export interface AuthContextType {
+  isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
-  data: any;
   error: Error | null;
 }
 
@@ -20,14 +18,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { data, error, isLoading, isError } = useGetTransactions();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
-
-  const navigate = useNavigate();
+  const { error, isLoading, isError } = useGetTransactions();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isLoading) {
-      setIsLoggedIn(!isError); // If there's an error fetching transactions, assume not logged in
+      setIsAuthenticated(!isError); // If there's an error fetching transactions, assume not logged in
     }
   }, [isLoading, isError]);
 
@@ -36,8 +32,10 @@ export function AuthProvider({
   const login = async (username: string, password: string) => {
     try {
       const { user } = await loginUser(username, password);
-      setIsLoggedIn(true);
-      navigate(APP_ROUTES.ROOT);
+      setIsAuthenticated(true);
+      redirect({
+        to: APP_ROUTES.LOGIN,
+      });
       console.log("User has logged in: " + user);
       return user;
     } catch (err) {
@@ -50,18 +48,18 @@ export function AuthProvider({
 
     try {
       await logoutUser();
-      setIsLoggedIn(false);
+      setIsAuthenticated(false);
       console.log("User has logged out");
     } catch (err) {
       console.error("Error without user logout");
     }
   };
 
+  const contextValue = { isAuthenticated, isLoading, logout, login, error };
+
   return (
-    <AuthContext.Provider
-      value={{ isLoggedIn, isLoading, logout, login, data, error }}
-    >
-      {children}
+    <AuthContext.Provider value={{ ...contextValue }}>
+      {isLoading ? null : children}
     </AuthContext.Provider>
   );
 }
