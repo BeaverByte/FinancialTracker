@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +31,7 @@ import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoun
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
+import com.beaverbyte.financial_tracker_application.utils.JpaTestUtils;
 
 import net.datafaker.Faker;
 
@@ -54,6 +57,20 @@ class TransactionServiceTest {
 				faker.random().toString(),
 				new BigDecimal(faker.number().randomNumber()),
 				faker.witcher().quote());
+	}
+
+	@BeforeEach
+	void setUp() {
+
+		sanitizeRepos();
+
+		System.out.println("Database cleared before each test");
+	}
+
+	private void sanitizeRepos() {
+		// Sanitizing repos
+
+		JpaTestUtils.clearRepository(transactionRepository);
 	}
 
 	@Test
@@ -94,22 +111,25 @@ class TransactionServiceTest {
 	@Test
 	void shouldUpdateTransaction() {
 		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction mappedTransaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
-		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(mappedTransaction);
+		Transaction transaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
+		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
 
-		Mockito.when(transactionRepository.save(mappedTransaction)).thenReturn(mappedTransaction);
+		long requestedTransactionID = faker.number().randomNumber();
+
+		Mockito.when(transactionRepository.findById(requestedTransactionID)).thenReturn(Optional.of(transaction));
+
 		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
-				.thenReturn(mappedTransaction);
+				.thenReturn(transaction);
 
-		Mockito.when(transactionRepository.findById(transactionRequest.id()))
-				.thenReturn(Optional.of(mappedTransaction));
+		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
 
 		Mockito.when(transactionMapper.transactionToTransactionDTO(Mockito.any(Transaction.class)))
 				.thenReturn(transactionDTO);
 
-		TransactionDTO result = transactionService.update(transactionRequest, faker.number().positive());
+		TransactionDTO result = transactionService.update(transactionRequest, requestedTransactionID);
 
 		assertNotNull(result);
+		assertEquals(transactionDTO, result);
 	}
 
 	@Test
@@ -119,23 +139,22 @@ class TransactionServiceTest {
 		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
 
 		long initialTransactionID = transaction.getId();
+		long requestedTransactionID = faker.number().randomNumber();
 
 		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
 				.thenReturn(transaction);
 
 		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
 
-		Mockito.when(transactionRepository.findById(transactionRequest.id()))
+		Mockito.when(transactionRepository.findById(requestedTransactionID))
 				.thenReturn(Optional.of(transaction));
 
 		Mockito.when(transactionMapper.transactionToTransactionDTO(Mockito.any(Transaction.class)))
 				.thenReturn(transactionDTO);
 
-		int updateParam = faker.number().positive();
+		transactionService.update(transactionRequest, requestedTransactionID);
 
-		transactionService.update(transactionRequest, updateParam);
-
-		assertEquals(transaction.getId(), updateParam);
+		assertEquals(transaction.getId(), requestedTransactionID);
 		assertNotEquals(transaction.getId(), initialTransactionID);
 	}
 

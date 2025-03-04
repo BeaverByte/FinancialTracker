@@ -1,3 +1,5 @@
+import { Filters } from "./api/types";
+
 export type TableProps = {
   data: Transaction[];
   headers?: TableHeaderConfig[];
@@ -9,6 +11,8 @@ export type TableHeaderConfig = {
   field: keyof Transaction | "actions";
   visible: boolean;
 };
+
+export type TransactionFilters = Filters<Transaction>;
 
 export type Transaction = {
   id: number | string;

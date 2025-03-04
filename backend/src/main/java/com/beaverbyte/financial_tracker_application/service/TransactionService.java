@@ -1,12 +1,16 @@
 package com.beaverbyte.financial_tracker_application.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
@@ -34,17 +38,35 @@ public class TransactionService {
 
 	public List<TransactionDTO> findAll(int page, int size) {
 		List<Transaction> transactions;
+
 		if (size == 0) {
 			transactions = transactionRepository.findAll();
-		} else {
-			Pageable pageable = PageRequest.of(page - 1, size);
-			Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
-			transactions = transactionPage.stream().toList();
+			return transactions.stream()
+					.map(transactionMapper::transactionToTransactionDTO)
+					.toList();
 		}
+
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
+		transactions = transactionPage.stream().toList();
 
 		return transactions.stream()
 				.map(transactionMapper::transactionToTransactionDTO)
 				.toList();
+	}
+
+	public Page<TransactionDTO> findByFilter(Pageable pageable) {
+		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
+
+		return new PageImpl<>(transactionPage.map(transactionMapper::transactionToTransactionDTO).toList());
+
+		// return new PageImpl<>(transactionPage.stream()
+		// .map(transactionMapper::transactionToTransactionDTO)
+		// .toList());
+
+		// return new PageImpl<>(transactionPage.stream()
+		// .map(transactionMapper::transactionToTransactionDTO)
+		// .toList());
 	}
 
 	public TransactionDTO findById(long id) {
@@ -68,6 +90,8 @@ public class TransactionService {
 	}
 
 	public TransactionDTO update(TransactionRequest transactionRequest, long id) {
+		log.info("update() called with ID: {}", id);
+
 		if (!transactionRepository.findById(id).isPresent()) {
 			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
 		}

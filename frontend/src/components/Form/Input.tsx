@@ -1,5 +1,5 @@
 import { FieldValues } from "react-hook-form";
-import { capitalizeFirstLetter } from "../../utility/stringUtils";
+import { capitalizeFirstLetter } from "../../utils/stringUtils";
 import { ChangeEventHandler } from "react";
 
 type InputFieldPropsType = {

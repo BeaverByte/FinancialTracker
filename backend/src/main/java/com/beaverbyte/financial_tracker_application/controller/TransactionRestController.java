@@ -1,7 +1,7 @@
 package com.beaverbyte.financial_tracker_application.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +18,6 @@ import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.service.TransactionService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
@@ -43,11 +41,9 @@ public class TransactionRestController {
 
 	@GetMapping("/transactions")
 	@ResponseStatus(HttpStatus.OK)
-	@Operation(summary = "Get all/paginated transactions")
-	public List<TransactionDTO> findAll(
-			@Parameter(description = "Number of pages to contain entities") @RequestParam(defaultValue = "1") @Min(1) int page,
-			@Parameter(description = "Amount of entities allowed on a given page. Value of 0 will provide all entities") @RequestParam(defaultValue = "0") @Min(0) int size) {
-		return transactionService.findAll(page, size);
+	@Operation(summary = "Get sorted and paginated transactions")
+	public Page<TransactionDTO> findByFilter(Pageable pageable) {
+		return transactionService.findByFilter(pageable);
 	}
 
 	@GetMapping("/transactions/{id}")
