@@ -1,5 +1,6 @@
 package com.beaverbyte.financial_tracker_application.exception;
 
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -19,6 +20,17 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(UserLoginException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public CustomProblemDetail userNotFoundExceptionHandler(UserLoginException exception, WebRequest request) {
+		return new CustomProblemDetail(
+				HttpStatus.BAD_REQUEST.toString(),
+				HttpStatus.BAD_REQUEST.value(),
+				exception.getMessage(),
+				request.getDescription(false));
+	}
+
+	@ExceptionHandler(PropertyReferenceException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public CustomProblemDetail badPropertyReferenceExceptionHandler(PropertyReferenceException exception,
+			WebRequest request) {
 		return new CustomProblemDetail(
 				HttpStatus.BAD_REQUEST.toString(),
 				HttpStatus.BAD_REQUEST.value(),
