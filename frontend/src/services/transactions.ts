@@ -56,9 +56,10 @@ export async function fetchTransactions(
     searchParams.append("sort", sort);
   }
 
-  // searchParams.append("page", pageIndex.toString());
-  // searchParams.append("size", pageSize.toString());
+  searchParams.append("page", pageIndex.toString());
+  searchParams.append("size", pageSize.toString());
 
+  // Appending filter property to url
   Object.keys(filters).forEach((key) => {
     const filterValue = filters[key as keyof Transaction];
     if (filterValue !== undefined && filterValue !== "") {
@@ -86,8 +87,6 @@ export async function fetchTransactions(
     }
 
     const transactions = await response.json();
-
-    console.log(`Fetched transactions json is ${JSON.stringify(transactions)}`);
 
     return {
       result: transactions.content,

@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
+import { useState } from "react";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -34,17 +35,20 @@ export default function Table<T extends Record<string, string | number>>({
   onFilterChange,
   sorting,
   onSortingChange,
-}: Props<T>) {
+}: Readonly<Props<T>>) {
   const table = useReactTable({
     data,
     columns,
     state: { pagination, sorting },
     onSortingChange,
+    sortDescFirst: true,
     ...paginationOptions,
     manualFiltering: true,
     manualSorting: true,
     manualPagination: true,
+    enableSortingRemoval: true,
     getCoreRowModel: getCoreRowModel(),
+    debugTable: true,
   });
 
   return (
@@ -59,12 +63,21 @@ export default function Table<T extends Record<string, string | number>>({
                   <th key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <>
-                        <div
+                        <button
                           {...{
                             className: header.column.getCanSort()
                               ? "cursor-pointer select-none"
                               : "",
+                            // Handler will toggle column sorting state
                             onClick: header.column.getToggleSortingHandler(),
+                            // onClick: header.column.getToggleSortingHandler(),
+                            title: header.column.getCanSort()
+                              ? header.column.getNextSortingOrder() === "asc"
+                                ? "Sort ascending"
+                                : header.column.getNextSortingOrder() === "desc"
+                                  ? "Sort descending"
+                                  : "Clear sort"
+                              : undefined,
                           }}
                         >
                           {flexRender(
@@ -76,7 +89,7 @@ export default function Table<T extends Record<string, string | number>>({
                             desc: " 🔽",
                             false: " 🔃",
                           }[header.column.getIsSorted() as string] ?? null}
-                        </div>
+                        </button>
                         {header.column.getCanFilter() &&
                         fieldMeta?.filterKey !== undefined ? (
                           <DebouncedInput

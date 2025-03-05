@@ -35,7 +35,6 @@ function TransactionsComponent() {
       </button>
       <Outlet />
       <Table data={transactions} onEditTransaction={handleEditTransaction} />
-      <ReactQueryDevtools initialIsOpen={false} />
     </div>
   );
 }

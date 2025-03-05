@@ -3,7 +3,6 @@ import { useFilters } from "../hooks/useFilters";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   fetchTransactions,
-  getTransactions,
   QUERY_KEY_TRANSACTIONS,
 } from "../services/transactions";
 import Table, {
@@ -11,16 +10,31 @@ import Table, {
   DEFAULT_PAGE_SIZE,
 } from "../components/Table/TanstackTable";
 import {
-  sortByToState,
-  stateToSortBy,
+  convertSortByInURLToState,
+  convertStateToSortByInURL,
 } from "../components/Table/tableSortMapper";
 import { useMemo } from "react";
 import { TRANSACTION_COLUMNS } from "../components/Table/TransactionColumns";
 import { TransactionFilters } from "../types/Transaction";
+import { SortingState } from "@tanstack/react-table";
+import { z } from "zod";
+
+const transactionsSearchSchema = z.object({
+  page: z.number().optional().catch(1),
+  filter: z.string().optional(),
+  sortBy: z
+    .string()
+    .regex(/^(id|date|merchant|account|category|amount|note)\.(asc|desc)$/)
+    .optional(),
+});
+
+type transactionsSearch = z.infer<typeof transactionsSearchSchema>;
 
 export const Route = createFileRoute("/")({
   component: TransactionsPage,
-  validateSearch: () => ({}) as TransactionFilters,
+  // validateSearch: () => ({}) as TransactionFilters,
+  validateSearch: (search) =>
+    transactionsSearchSchema.parse(search) as TransactionFilters,
 });
 
 function HomeComponent() {
@@ -32,31 +46,46 @@ function HomeComponent() {
 }
 
 function TransactionsPage() {
+  // Filters are set based off path of current route
   const { filters, resetFilters, setFilters } = useFilters(Route.fullPath);
 
-  console.log("Filters is " + JSON.stringify(filters));
+  console.log("Filters are " + JSON.stringify(filters));
 
-  const { data } = useQuery({
+  const { data: queriedData } = useQuery({
     queryKey: [QUERY_KEY_TRANSACTIONS, filters],
     queryFn: () => fetchTransactions(filters),
     placeholderData: keepPreviousData,
   });
 
+  const transactions = queriedData?.result;
+
   const paginationState = {
     pageIndex: filters.pageIndex ?? DEFAULT_PAGE_INDEX,
     pageSize: filters.pageSize ?? DEFAULT_PAGE_SIZE,
   };
-  const sortingState = sortByToState(filters.sortBy);
-  const columns = useMemo(() => TRANSACTION_COLUMNS, []);
+  const sortingState = convertSortByInURLToState(filters.sortBy);
+  const transactionsColumns = useMemo(() => TRANSACTION_COLUMNS, []);
+
+  // Tanstack Updaters can either be raw values or callback functions, parsing is needed
+  function handleSortingChange(
+    updaterOrValue: SortingState | ((prevState: SortingState) => SortingState)
+  ) {
+    console.log("Sort change handler triggered");
+    const newSortingState =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(sortingState)
+        : updaterOrValue;
+    // Change to sorting will update Filter/URL Params
+    console.log(convertStateToSortByInURL(newSortingState));
+    return setFilters({ sortBy: convertStateToSortByInURL(newSortingState) });
+  }
 
   return (
     <div className="flex flex-col gap-2 p-2">
-      <h1 className="text-2xl font-semibold mb-1">
-        TanStack Table + Query + Router
-      </h1>
+      <h1 className="text-2xl font-semibold mb-1">Transactions</h1>
       <Table
-        data={data?.result ?? []}
-        columns={columns}
+        data={transactions ?? []}
+        columns={transactionsColumns}
         pagination={paginationState}
         paginationOptions={{
           onPaginationChange: (pagination) => {
@@ -66,21 +95,15 @@ function TransactionsPage() {
                 : pagination
             );
           },
-          rowCount: data?.rowCount,
+          rowCount: queriedData?.rowCount,
         }}
         filters={filters}
         onFilterChange={(filters) => setFilters(filters)}
         sorting={sortingState}
-        onSortingChange={(updaterOrValue) => {
-          const newSortingState =
-            typeof updaterOrValue === "function"
-              ? updaterOrValue(sortingState)
-              : updaterOrValue;
-          return setFilters({ sortBy: stateToSortBy(newSortingState) });
-        }}
+        onSortingChange={handleSortingChange}
       />
       <div className="flex items-center gap-2">
-        {data?.rowCount} users found
+        {queriedData?.rowCount} users found
         <button
           className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={resetFilters}

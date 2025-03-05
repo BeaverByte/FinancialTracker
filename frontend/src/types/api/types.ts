@@ -1,7 +1,7 @@
 import { PaginationState } from "@tanstack/react-table";
 
-export type PaginatedData<T> = {
-  result: T[];
+export type PaginatedData<Type> = {
+  result: Type[];
   rowCount: number;
 };
 

@@ -7,6 +7,7 @@ import {
 import AuthLayout from "../components/AuthLayout";
 import { MyRouterContext } from "../router";
 import { NetworkError } from "../services/transactions";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootComponent,
@@ -45,6 +46,7 @@ function RootComponent() {
       <AuthLayout />
       <main>
         <Outlet />
+        <ReactQueryDevtools initialIsOpen={false} />
       </main>
     </>
   );
