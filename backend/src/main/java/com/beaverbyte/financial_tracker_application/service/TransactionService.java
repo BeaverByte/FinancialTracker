@@ -1,16 +1,14 @@
 package com.beaverbyte.financial_tracker_application.service;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PagedModel;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
@@ -19,6 +17,7 @@ import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoun
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
+import com.beaverbyte.financial_tracker_application.util.PropertyValidator;
 
 /**
  * Logic and processing for Transactions
@@ -56,17 +55,33 @@ public class TransactionService {
 	}
 
 	public Page<TransactionDTO> findByFilter(Pageable pageable) {
-		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
+		log.info("Initial pageable is {}", pageable);
+		log.info("Pageable sorts are {}", pageable.getSort());
 
-		return new PageImpl<>(transactionPage.map(transactionMapper::transactionToTransactionDTO).toList());
+		validatePageable(pageable.getSort());
 
-		// return new PageImpl<>(transactionPage.stream()
-		// .map(transactionMapper::transactionToTransactionDTO)
-		// .toList());
+		Page<Transaction> requestedTransactions = transactionRepository.findAll(pageable);
 
-		// return new PageImpl<>(transactionPage.stream()
-		// .map(transactionMapper::transactionToTransactionDTO)
-		// .toList());
+		Page<TransactionDTO> transactions = requestedTransactions.map(transactionMapper::transactionToTransactionDTO);
+
+		log.info("Page of TransactionsDTO are {}", transactions);
+
+		return transactions;
+	}
+
+	public void validatePageable(Sort sort) {
+		if (sort.isUnsorted())
+			return;
+
+		List<Order> properties = sort.toList();
+
+		log.info("Validating sort properties, {}", properties);
+
+		List<String> misMatchedProperties = PropertyValidator.getMismatchedProperties(properties, Transaction.class);
+
+		if (!misMatchedProperties.isEmpty()) {
+			throw new TransactionNotFoundException("Invalid sort field(s): " + misMatchedProperties);
+		}
 	}
 
 	public TransactionDTO findById(long id) {

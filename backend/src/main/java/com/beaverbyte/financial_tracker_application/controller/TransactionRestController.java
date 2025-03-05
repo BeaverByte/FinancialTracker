@@ -1,5 +1,6 @@
 package com.beaverbyte.financial_tracker_application.controller;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,8 @@ public class TransactionRestController {
 	@GetMapping("/transactions")
 	@ResponseStatus(HttpStatus.OK)
 	@Operation(summary = "Get sorted and paginated transactions")
-	public Page<TransactionDTO> findByFilter(Pageable pageable) {
+	public Page<TransactionDTO> findByFilter(
+			@ParameterObject Pageable pageable) {
 		return transactionService.findByFilter(pageable);
 	}
 

@@ -34,6 +34,8 @@ function HomeComponent() {
 function TransactionsPage() {
   const { filters, resetFilters, setFilters } = useFilters(Route.fullPath);
 
+  console.log("Filters is " + JSON.stringify(filters));
+
   const { data } = useQuery({
     queryKey: [QUERY_KEY_TRANSACTIONS, filters],
     queryFn: () => fetchTransactions(filters),
@@ -46,9 +48,6 @@ function TransactionsPage() {
   };
   const sortingState = sortByToState(filters.sortBy);
   const columns = useMemo(() => TRANSACTION_COLUMNS, []);
-
-  console.log("Filters is " + JSON.stringify(filters));
-  console.log(JSON.stringify(data));
 
   return (
     <div className="flex flex-col gap-2 p-2">

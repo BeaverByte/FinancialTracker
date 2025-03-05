@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
 		return new CustomProblemDetail(
 				HttpStatus.BAD_REQUEST.toString(),
 				HttpStatus.BAD_REQUEST.value(),
-				"Transaction not found with id",
+				exception.getMessage(),
 				request.getDescription(false));
 	}
 

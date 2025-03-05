@@ -48,10 +48,29 @@ export async function fetchTransactions(
     ...filters
   } = filtersAndPagination;
 
-  console.log("SortBy is " + sortBy);
+  const searchParams = new URLSearchParams();
+
+  if (sortBy) {
+    const [field, order] = sortBy.split(".");
+    const sort = `${field},${order}`;
+    searchParams.append("sort", sort);
+  }
+
+  // searchParams.append("page", pageIndex.toString());
+  // searchParams.append("size", pageSize.toString());
+
+  Object.keys(filters).forEach((key) => {
+    const filterValue = filters[key as keyof Transaction];
+    if (filterValue !== undefined && filterValue !== "") {
+      searchParams.append(key, filterValue.toString());
+    }
+  });
+
+  const url = `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}?${searchParams.toString()}`;
+  console.log(`Final URL: ${url}`);
 
   try {
-    const response = await fetch(API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS, {
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -65,41 +84,15 @@ export async function fetchTransactions(
       }
       throw new Error(`Failed to get transactions: ${response.status}`);
     }
-    const requestedData = await response.json();
 
-    if (sortBy) {
-      const [field, order] = sortBy.split(".");
-      requestedData.sort((a, b) => {
-        const aValue = a[field as keyof Transaction];
-        const bValue = b[field as keyof Transaction];
+    const transactions = await response.json();
 
-        if (aValue === bValue) return 0;
-        if (order === "asc") return aValue > bValue ? 1 : -1;
-        return aValue < bValue ? 1 : -1;
-      });
-    }
-
-    const filteredData = requestedData.filter((transaction: Transaction) => {
-      return Object.keys(filters).every((key) => {
-        const filter = filters[key as keyof Transaction];
-        if (filter === undefined || filter === "") return true;
-
-        const value = transaction[key as keyof Transaction];
-        if (typeof value === "number") return value === +filter;
-
-        return value.toLowerCase().includes(`${filter}`.toLowerCase());
-      });
-    });
+    console.log(`Fetched transactions json is ${JSON.stringify(transactions)}`);
 
     return {
-      result: filteredData.slice(
-        pageIndex * pageSize,
-        (pageIndex + 1) * pageSize
-      ),
-      rowCount: filteredData.length,
+      result: transactions.content,
+      rowCount: transactions.totalElements,
     };
-
-    // return response.json();
   } catch (error) {
     console.error(`Response not returned in fetch:
     (${error})`);

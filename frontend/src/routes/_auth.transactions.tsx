@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_auth/transactions")({
 function TransactionsComponent() {
   // SuspenseQuery allows for throwOnError
   const transactionsQuery = useSuspenseQuery(transactionsQueryOptions);
-  const transactions = transactionsQuery.data;
+  const transactions = transactionsQuery.data.content;
 
   const navigate = useNavigate();
 
