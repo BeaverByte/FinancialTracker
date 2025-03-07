@@ -17,7 +17,7 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthTransactionsImport } from './routes/_auth.transactions'
 import { Route as AuthTransactionsCreateImport } from './routes/_auth.transactions_.create'
-import { Route as AuthTransactionsEditTransactionIdImport } from './routes/_auth.transactions_.edit.$transactionId'
+import { Route as AuthTransactionsEditTransactionIdImport } from './routes/_auth.transactions.edit.$transactionId'
 
 // Create/Update Routes
 
@@ -58,9 +58,9 @@ const AuthTransactionsCreateRoute = AuthTransactionsCreateImport.update({
 
 const AuthTransactionsEditTransactionIdRoute =
   AuthTransactionsEditTransactionIdImport.update({
-    id: '/transactions_/edit/$transactionId',
-    path: '/transactions/edit/$transactionId',
-    getParentRoute: () => AuthRoute,
+    id: '/edit/$transactionId',
+    path: '/edit/$transactionId',
+    getParentRoute: () => AuthTransactionsRoute,
   } as any)
 
 // Populate the FileRoutesByPath interface
@@ -109,29 +109,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTransactionsCreateImport
       parentRoute: typeof AuthImport
     }
-    '/_auth/transactions_/edit/$transactionId': {
-      id: '/_auth/transactions_/edit/$transactionId'
-      path: '/transactions/edit/$transactionId'
+    '/_auth/transactions/edit/$transactionId': {
+      id: '/_auth/transactions/edit/$transactionId'
+      path: '/edit/$transactionId'
       fullPath: '/transactions/edit/$transactionId'
       preLoaderRoute: typeof AuthTransactionsEditTransactionIdImport
-      parentRoute: typeof AuthImport
+      parentRoute: typeof AuthTransactionsImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface AuthRouteChildren {
-  AuthTransactionsRoute: typeof AuthTransactionsRoute
-  AuthTransactionsCreateRoute: typeof AuthTransactionsCreateRoute
+interface AuthTransactionsRouteChildren {
   AuthTransactionsEditTransactionIdRoute: typeof AuthTransactionsEditTransactionIdRoute
 }
 
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthTransactionsRoute: AuthTransactionsRoute,
-  AuthTransactionsCreateRoute: AuthTransactionsCreateRoute,
+const AuthTransactionsRouteChildren: AuthTransactionsRouteChildren = {
   AuthTransactionsEditTransactionIdRoute:
     AuthTransactionsEditTransactionIdRoute,
+}
+
+const AuthTransactionsRouteWithChildren =
+  AuthTransactionsRoute._addFileChildren(AuthTransactionsRouteChildren)
+
+interface AuthRouteChildren {
+  AuthTransactionsRoute: typeof AuthTransactionsRouteWithChildren
+  AuthTransactionsCreateRoute: typeof AuthTransactionsCreateRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthTransactionsRoute: AuthTransactionsRouteWithChildren,
+  AuthTransactionsCreateRoute: AuthTransactionsCreateRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -141,7 +150,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
-  '/transactions': typeof AuthTransactionsRoute
+  '/transactions': typeof AuthTransactionsRouteWithChildren
   '/transactions/create': typeof AuthTransactionsCreateRoute
   '/transactions/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
 }
@@ -151,7 +160,7 @@ export interface FileRoutesByTo {
   '': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
-  '/transactions': typeof AuthTransactionsRoute
+  '/transactions': typeof AuthTransactionsRouteWithChildren
   '/transactions/create': typeof AuthTransactionsCreateRoute
   '/transactions/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
 }
@@ -162,9 +171,9 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
-  '/_auth/transactions': typeof AuthTransactionsRoute
+  '/_auth/transactions': typeof AuthTransactionsRouteWithChildren
   '/_auth/transactions_/create': typeof AuthTransactionsCreateRoute
-  '/_auth/transactions_/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
+  '/_auth/transactions/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
 }
 
 export interface FileRouteTypes {
@@ -194,7 +203,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_auth/transactions'
     | '/_auth/transactions_/create'
-    | '/_auth/transactions_/edit/$transactionId'
+    | '/_auth/transactions/edit/$transactionId'
   fileRoutesById: FileRoutesById
 }
 
@@ -235,8 +244,7 @@ export const routeTree = rootRoute
       "filePath": "_auth.tsx",
       "children": [
         "/_auth/transactions",
-        "/_auth/transactions_/create",
-        "/_auth/transactions_/edit/$transactionId"
+        "/_auth/transactions_/create"
       ]
     },
     "/about": {
@@ -247,15 +255,18 @@ export const routeTree = rootRoute
     },
     "/_auth/transactions": {
       "filePath": "_auth.transactions.tsx",
-      "parent": "/_auth"
+      "parent": "/_auth",
+      "children": [
+        "/_auth/transactions/edit/$transactionId"
+      ]
     },
     "/_auth/transactions_/create": {
       "filePath": "_auth.transactions_.create.tsx",
       "parent": "/_auth"
     },
-    "/_auth/transactions_/edit/$transactionId": {
-      "filePath": "_auth.transactions_.edit.$transactionId.tsx",
-      "parent": "/_auth"
+    "/_auth/transactions/edit/$transactionId": {
+      "filePath": "_auth.transactions.edit.$transactionId.tsx",
+      "parent": "/_auth/transactions"
     }
   }
 }

@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-table";
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
-import { useState } from "react";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -41,9 +40,12 @@ export default function Table<T extends Record<string, string | number>>({
     columns,
     state: { pagination, sorting },
     onSortingChange,
+    enableMultiSort: true,
+    // Necessary in order for Tanstack sorting behavior to work with null fields
     sortDescFirst: true,
     ...paginationOptions,
     manualFiltering: true,
+    enableColumnFilters: false,
     manualSorting: true,
     manualPagination: true,
     enableSortingRemoval: true,
@@ -80,15 +82,21 @@ export default function Table<T extends Record<string, string | number>>({
                               : undefined,
                           }}
                         >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {{
-                            asc: " 🔼",
-                            desc: " 🔽",
-                            false: " 🔃",
-                          }[header.column.getIsSorted() as string] ?? null}
+                          {
+                            //  Necessary to flexRender since using cell: () => JSX column definition options
+                            flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )
+                          }
+
+                          {(header.column.getCanSort() &&
+                            {
+                              asc: " 🔼",
+                              desc: " 🔽",
+                              false: " 🔃",
+                            }[header.column.getIsSorted() as string]) ??
+                            null}
                         </button>
                         {header.column.getCanFilter() &&
                         fieldMeta?.filterKey !== undefined ? (

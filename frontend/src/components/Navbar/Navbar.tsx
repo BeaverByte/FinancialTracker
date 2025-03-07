@@ -27,11 +27,6 @@ export default function Navbar() {
             Transactions
           </Link>
         </li>{" "}
-        <li className="nav-item">
-          <Link to={APP_ROUTES.CREATE_TRANSACTION} className="nav-link">
-            New Transaction
-          </Link>
-        </li>{" "}
       </div>
     </nav>
   );

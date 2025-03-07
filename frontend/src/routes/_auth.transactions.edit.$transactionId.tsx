@@ -9,14 +9,16 @@ import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
 import { EditTransactionModal } from "../components/Form/EditTransactionModal";
 import { Transaction } from "../types/Transaction";
 
-export const Route = createFileRoute(
-  "/_auth/transactions_/edit/$transactionId"
-)({
-  loader: ({ context: { queryClient }, params: { transactionId } }) => {
-    return queryClient.ensureQueryData(transactionQueryOptions(transactionId));
-  },
-  component: EditTransactionComponent,
-});
+export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
+  {
+    loader: ({ context: { queryClient }, params: { transactionId } }) => {
+      return queryClient.ensureQueryData(
+        transactionQueryOptions(transactionId)
+      );
+    },
+    component: EditTransactionComponent,
+  }
+);
 
 function EditTransactionComponent() {
   const transactionId = Route.useParams().transactionId;
@@ -27,8 +29,6 @@ function EditTransactionComponent() {
   } = useSuspenseQuery(transactionQueryOptions(transactionId));
 
   const navigate = useNavigate();
-
-  const { history } = useRouter();
 
   const editMutation = useUpdateTransaction();
 
@@ -59,7 +59,7 @@ function EditTransactionComponent() {
     <EditTransactionModal
       key={transaction.id}
       transaction={transaction}
-      onClose={() => history.go(-1)}
+      onClose={() => navigate({ to: `/transactions`, search: (prev) => prev })}
       onSave={handleSave}
     />
   );
