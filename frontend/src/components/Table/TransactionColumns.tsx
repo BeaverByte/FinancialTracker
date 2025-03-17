@@ -10,9 +10,10 @@ declare module "@tanstack/react-table" {
   }
 }
 
+// columnHelper returns utility for creating different column definition types for safety
 const columnHelper = createColumnHelper<Transaction>();
 
-export const TRANSACTION_COLUMNS: ColumnDef<Transaction>[] = [
+export const getTransactionColumns: ColumnDef<Transaction>[] = [
   // Display Column
   columnHelper.display({
     id: "actions",

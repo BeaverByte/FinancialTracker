@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAddTransaction } from "../hooks/useAddTransaction";
 import {
   FormSchema,
@@ -10,14 +6,13 @@ import {
 } from "../types/schemas/transactionSchema";
 import { TransactionForm } from "../components/Form/TransactionForm";
 
-export const Route = createFileRoute("/_auth/transactions_/create")({
+export const Route = createFileRoute("/_auth/transactions/create")({
   component: AddTransactionForm,
 });
 
 function AddTransactionForm() {
   const navigate = useNavigate();
   const transactions = useAddTransaction();
-  const { history } = useRouter();
 
   const handleSave = (data: TransactionFormSchema) => {
     const postTransaction = data;
@@ -46,10 +41,15 @@ function AddTransactionForm() {
   };
 
   return (
-    <TransactionForm
-      initialValues={{ initialTransaction }}
-      onSubmit={handleSave}
-      onCancel={() => history.go(-1)}
-    />
+    <>
+      <h2>Create new transaction</h2>
+      <TransactionForm
+        initialValues={{ initialTransaction }}
+        onSubmit={handleSave}
+        onCancel={() =>
+          navigate({ to: `/transactions`, search: (prev) => prev })
+        }
+      />
+    </>
   );
 }

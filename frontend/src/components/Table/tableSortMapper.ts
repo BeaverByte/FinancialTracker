@@ -13,11 +13,17 @@ export const convertStateToSortByInURL = (
   }
 
   // Get first sort
-  const sort = sorting[0];
+  // const sort = sorting[0];
+  const sortParams = sorting
+    .map((sort) => `${sort.id}.${sort.desc ? "desc" : "asc"}`)
+    .join(",");
 
-  console.log("State converted to SortBy for URL " + JSON.stringify(sort));
+  console.log(
+    "State converted to SortBy for URL: " + JSON.stringify(sortParams)
+  );
 
-  return `${sort.id}.${sort.desc ? "desc" : "asc"}` as const;
+  // return `${sort.id}.${sort.desc ? "desc" : "asc"}` as const;
+  return sortParams;
 };
 
 export const convertSortByInURLToState = (
@@ -26,6 +32,11 @@ export const convertSortByInURLToState = (
   console.log("Sortby to State is " + sortBy);
   if (!sortBy) return [];
 
-  const [id, desc] = sortBy.split(".");
-  return [{ id, desc: desc === "desc" }];
+  // const [id, desc] = sortBy.split(".");
+  // return [{ id, desc: desc === "desc" }];
+
+  return sortBy.split(",").map((sort) => {
+    const [id, desc] = sort.split(".");
+    return { id, desc: desc === "desc" };
+  });
 };

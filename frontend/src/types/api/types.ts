@@ -7,4 +7,4 @@ export type PaginatedData<Type> = {
 
 export type PaginationParams = PaginationState;
 export type SortParams = { sortBy: `${string}.${"asc" | "desc"}` };
-export type Filters<T> = Partial<T & PaginationParams & SortParams>;
+export type Filters<Type> = Partial<Type & PaginationParams & SortParams>;

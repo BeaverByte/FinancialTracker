@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { transactionQueryOptions } from "../transactionQueryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
@@ -22,6 +18,7 @@ export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
 
 function EditTransactionComponent() {
   const transactionId = Route.useParams().transactionId;
+
   const {
     data: transaction,
     isLoading,
@@ -30,7 +27,7 @@ function EditTransactionComponent() {
 
   const navigate = useNavigate();
 
-  const editMutation = useUpdateTransaction();
+  const editTransactionMutation = useUpdateTransaction();
 
   const id = Number(transactionId);
 
@@ -40,27 +37,31 @@ function EditTransactionComponent() {
 
   const handleSave = (updatedTransaction: Transaction) => {
     console.log(
-      "Saving transaction," +
-        JSON.stringify(updatedTransaction) +
-        ", to id " +
-        id
+      `Saving transaction, ${JSON.stringify(updatedTransaction)}, to id, ${id}`
     );
-    editMutation.mutate({
+
+    editTransactionMutation.mutate({
       id,
-      updates: updatedTransaction,
+      transaction: updatedTransaction,
     });
-    navigate({ to: "/transactions" });
+
+    navigate({ to: "/transactions", search: (prev) => prev });
   };
 
   if (isLoading) return <p>Loading transaction...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <EditTransactionModal
-      key={transaction.id}
-      transaction={transaction}
-      onClose={() => navigate({ to: `/transactions`, search: (prev) => prev })}
-      onSave={handleSave}
-    />
+    <>
+      <h2>Edit transaction</h2>
+      <EditTransactionModal
+        key={transaction.id}
+        transaction={transaction}
+        onCancel={() =>
+          navigate({ to: `/transactions`, search: (prev) => prev })
+        }
+        onSave={handleSave}
+      />
+    </>
   );
 }

@@ -1,8 +1,12 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
 import { TransactionFilters } from "../types/Transaction";
 import { useFilters } from "../hooks/useFilters";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   fetchTransactions,
   QUERY_KEY_TRANSACTIONS,
@@ -12,11 +16,12 @@ import {
   convertStateToSortByInURL,
 } from "../components/Table/tableSortMapper";
 import { useMemo } from "react";
-import { TRANSACTION_COLUMNS } from "../components/Table/TransactionColumns";
+import { getTransactionColumns } from "../components/Table/TransactionColumns";
 import Table, {
   DEFAULT_PAGE_INDEX,
   DEFAULT_PAGE_SIZE,
 } from "../components/Table/TanstackTable";
+import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 
 export const Route = createFileRoute("/_auth/transactions")({
   loader: ({ context: { queryClient } }) =>
@@ -36,6 +41,7 @@ function TransactionsPage() {
 
   const { data: queriedData } = useQuery({
     queryKey: [QUERY_KEY_TRANSACTIONS, filters],
+    // queryKey: [QUERY_KEY_TRANSACTIONS],
     queryFn: () => fetchTransactions(filters),
     placeholderData: keepPreviousData,
   });
@@ -47,7 +53,7 @@ function TransactionsPage() {
     pageSize: filters.pageSize ?? DEFAULT_PAGE_SIZE,
   };
   const sortingState = convertSortByInURLToState(filters.sortBy);
-  const transactionsColumns = useMemo(() => TRANSACTION_COLUMNS, []);
+  const transactionsColumns = useMemo(() => getTransactionColumns, []);
 
   // Tanstack Updaters can either be raw values or callback functions, parsing is needed
   function handleSortingChange(
@@ -59,28 +65,38 @@ function TransactionsPage() {
         ? updaterOrValue(sortingState)
         : updaterOrValue;
     // Change to sorting will update Filter/URL Params
-
     const internalSortByParam = convertStateToSortByInURL(newSortingState);
     console.log(internalSortByParam);
+
     return setFilters({ sortBy: internalSortByParam });
+  }
+
+  function handlePaginationChange(pagination: Updater<PaginationState>) {
+    console.log("Sort change handler triggered");
+    setFilters(
+      typeof pagination === "function"
+        ? pagination(paginationState)
+        : pagination
+    );
   }
 
   return (
     <div className="flex flex-col gap-2 p-2">
       <h1 className="text-2xl font-semibold mb-1">Transactions</h1>
       <Outlet />
+
+      {/* User Actions */}
+      <Link to="/transactions/create" search={(prev) => prev}>
+        Add Transaction
+      </Link>
+
+      {/* Transactions Table */}
       <Table
         data={transactions ?? []}
         columns={transactionsColumns}
         pagination={paginationState}
         paginationOptions={{
-          onPaginationChange: (pagination) => {
-            setFilters(
-              typeof pagination === "function"
-                ? pagination(paginationState)
-                : pagination
-            );
-          },
+          onPaginationChange: handlePaginationChange,
           rowCount: queriedData?.rowCount,
         }}
         filters={filters}

@@ -6,40 +6,53 @@ import {
 import { Transaction } from "../types/Transaction";
 
 export function useUpdateTransaction() {
+  console.log("useUpdateTransaction hook activated");
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: updateTransaction,
 
     onMutate: async (updatedTransaction) => {
-      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+      // Cancel any outgoing refetches
+      // (so they don't overwrite optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: [
+          QUERY_KEY_TRANSACTIONS,
+          { transactionId: updatedTransaction.id },
+        ],
+      });
 
-      const previousTransactions = queryClient.getQueryData<Transaction[]>([
+      const previousTransaction = queryClient.getQueryData([
         QUERY_KEY_TRANSACTIONS,
+        { transactionId: updatedTransaction.id },
       ]);
 
+      console.log("PreviousTransaction is ", previousTransaction);
+
       queryClient.setQueryData<Transaction[]>(
-        [QUERY_KEY_TRANSACTIONS],
+        [QUERY_KEY_TRANSACTIONS, { transactionId: updatedTransaction.id }],
         (oldTransactions = []) =>
-          oldTransactions.map((oldTransaction) =>
-            oldTransaction.id === updatedTransaction.id
-              ? { ...oldTransaction, ...updatedTransaction.updates }
-              : oldTransaction
+          oldTransactions.map(
+            (transaction) =>
+              transaction.id === updatedTransaction.id
+                ? { ...transaction, ...updatedTransaction } // Replace the updated transaction
+                : transaction // Keep the other transactions unchanged
           )
       );
 
-      return { previousTransactions };
+      return { previousTransaction, updatedTransaction };
     },
-    onError: (_error, _updatedTransaction, context) => {
-      if (context?.previousTransactions) {
-        queryClient.setQueryData(
-          [QUERY_KEY_TRANSACTIONS],
-          context.previousTransactions
-        );
-      }
+    onError: (error, _updatedTransaction, context) => {
+      console.error("Error updating transaction:", error);
+      queryClient.setQueryData(
+        [QUERY_KEY_TRANSACTIONS, context?.updatedTransaction.id],
+        context?.previousTransaction
+      );
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY_TRANSACTIONS],
+      });
     },
   });
 }

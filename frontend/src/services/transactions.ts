@@ -22,20 +22,6 @@ export class NetworkError extends Error {
   }
 }
 
-interface FetchItemOptions {
-  method: string;
-  body?: unknown;
-}
-
-class FetchError extends Error {
-  constructor(
-    public res: Response,
-    message?: string
-  ) {
-    super(message);
-  }
-}
-
 export async function fetchTransactions(
   filtersAndPagination: TransactionFilters
 ): Promise<PaginatedData<Transaction>> {
@@ -171,27 +157,41 @@ export const addTransaction = async (data: TransactionFormSchema) => {
 
 type updateTransactionPayload = {
   id: number;
-  updates: Transaction;
+  transaction: Transaction;
 };
 
 export const updateTransaction = async ({
   id,
-  updates,
+  transaction,
 }: updateTransactionPayload) => {
-  const response = await fetch(
-    `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`,
-    {
+  console.log("updateTransactions activated");
+  try {
+    const url = `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`;
+    console.log(`Update sending to ${url}`);
+    const response = await fetch(url, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(updates),
-    }
-  );
+      body: JSON.stringify(transaction),
+    });
 
-  if (!response.ok) throw new Error("Failed to update transaction");
-  return response.json();
+    if (!response.ok) throw new Error("Failed to update transaction");
+
+    const updatedTransaction = await response.json();
+
+    return updatedTransaction;
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
+  }
 };
 
 export const deleteTransaction = async (id: number) => {
