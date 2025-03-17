@@ -17,9 +17,9 @@ export type TransactionFilters = Filters<Transaction>;
 export type Transaction = {
   id: number | string;
   date: string;
-  merchant: string;
-  account: string;
-  category: string;
+  merchant?: string;
+  account?: string;
+  category?: string;
   amount: number | string;
-  note: string;
+  note?: string;
 };
