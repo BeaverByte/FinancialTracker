@@ -5,9 +5,10 @@ import {
   TransactionFormSchema,
 } from "../../types/schemas/transactionSchema";
 import { ZodObject, ZodRawShape } from "zod";
-import { Input, InputField, InputFieldErrorMessage } from "./Input";
+import { InputField, InputFieldErrorMessage } from "./Input";
 import Button from "../Button/Button";
 import { Transaction } from "../../types/Transaction";
+import { Input } from "../ui/input";
 
 export type TransactionFormProps = {
   initialValues: object | Transaction;
@@ -45,14 +46,14 @@ function TransactionForm({
             name={key as keyof TransactionFormSchema}
             control={control}
             render={({ field }) => (
-              <Input>
+              <>
                 <InputField
                   name={key}
                   value={field.value}
                   onChange={field.onChange}
                 />
                 <InputFieldErrorMessage name={key} errors={errors} />
-              </Input>
+              </>
             )}
           />
         ))}

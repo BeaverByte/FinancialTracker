@@ -5,6 +5,15 @@ import {
   TransactionFormSchema,
 } from "../types/schemas/transactionSchema";
 import { TransactionForm } from "../components/Form/TransactionForm";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions/create")({
   component: AddTransactionForm,
@@ -41,15 +50,24 @@ function AddTransactionForm() {
   };
 
   return (
-    <>
-      <h2>Create new transaction</h2>
-      <TransactionForm
-        initialValues={{ initialTransaction }}
-        onSubmit={handleSave}
-        onCancel={() =>
-          navigate({ to: `/transactions`, search: (prev) => prev })
-        }
-      />
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>Add Transaction</CardTitle>
+        <CardDescription>Enter in transaction below</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <TransactionForm
+          initialValues={{ initialTransaction }}
+          onSubmit={handleSave}
+          onCancel={() =>
+            navigate({ to: `/transactions`, search: (prev) => prev })
+          }
+        />
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline">Cancel</Button>
+        <Button>Deploy</Button>
+      </CardFooter>
+    </Card>
   );
 }

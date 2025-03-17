@@ -30,6 +30,8 @@ export function CardWithForm() {
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Name</Label>
               <Input id="name" placeholder="Name of your project" />
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" placeholder="Name of your project" />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="framework">Framework</Label>

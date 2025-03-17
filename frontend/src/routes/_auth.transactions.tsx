@@ -92,7 +92,11 @@ function TransactionsPage() {
 
       {/* User Actions */}
       {matchesTransactionsRoute && (
-        <Link to="/transactions/create" search={(prev) => prev}>
+        <Link
+          to="/transactions/create"
+          search={(prev) => prev}
+          className="inline-block px-6 py-3 text-white font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none"
+        >
           Add Transaction
         </Link>
       )}
