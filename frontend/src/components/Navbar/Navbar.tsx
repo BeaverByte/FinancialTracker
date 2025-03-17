@@ -1,5 +1,4 @@
 import { APP_ROUTES } from "../../pages/routes";
-import { useAuth } from "../../context/AuthContext";
 import { Link } from "@tanstack/react-router";
 
 /**

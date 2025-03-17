@@ -3,6 +3,7 @@ import { worker } from "./browser.js";
 
 export const test = testBase.extend({
   worker: [
+    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       // Start the worker before the test.
       await worker.start();

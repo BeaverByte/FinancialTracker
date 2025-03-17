@@ -4,10 +4,12 @@ import {
   updateTransaction,
 } from "../services/transactions";
 import { Transaction } from "../types/Transaction";
+import { useNavigate } from "@tanstack/react-router";
 
 export function useUpdateTransaction() {
   console.log("useUpdateTransaction hook activated");
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: updateTransaction,
@@ -35,8 +37,8 @@ export function useUpdateTransaction() {
           oldTransactions.map(
             (transaction) =>
               transaction.id === updatedTransaction.id
-                ? { ...transaction, ...updatedTransaction } // Replace the updated transaction
-                : transaction // Keep the other transactions unchanged
+                ? { ...transaction, ...updatedTransaction } // Replace updated transaction
+                : transaction // Keep other transactions unchanged
           )
       );
 
@@ -53,6 +55,8 @@ export function useUpdateTransaction() {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY_TRANSACTIONS],
       });
+
+      navigate({ to: "/transactions", search: (prev) => prev });
     },
   });
 }

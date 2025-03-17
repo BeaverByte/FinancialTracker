@@ -8,7 +8,7 @@ const Banner = () => {
 
   return (
     <div className={styles.banner}>
-      <span className="banner-text">Cool Banner</span>
+      <span className="banner-text">Banner</span>
       <button className="banner-close" onClick={() => setVisible(false)}>
         X
       </button>
