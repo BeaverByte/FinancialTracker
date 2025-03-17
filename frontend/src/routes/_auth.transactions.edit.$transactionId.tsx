@@ -40,13 +40,22 @@ function EditTransactionComponent() {
       `Saving transaction, ${JSON.stringify(updatedTransaction)}, to id, ${id}`
     );
 
-    editTransactionMutation.mutate({
-      id,
-      transaction: updatedTransaction,
-    });
-
-    navigate({ to: "/transactions", search: (prev) => prev });
+    editTransactionMutation.mutate(
+      {
+        id,
+        transaction: updatedTransaction,
+      },
+      {
+        onSettled() {
+          navigate({ to: "/transactions", search: (prev) => prev });
+        },
+      }
+    );
   };
+
+  console.log(
+    `Transaction Data inside Edit Modal should be ${JSON.stringify(transaction)}`
+  );
 
   if (isLoading) return <p>Loading transaction...</p>;
   if (error) return <p>Error: {error.message}</p>;
