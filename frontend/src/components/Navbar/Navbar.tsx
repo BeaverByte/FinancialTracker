@@ -12,7 +12,7 @@ export default function Navbar() {
       <div>
         <li className="nav-item">
           <Link
-            to={APP_ROUTES.ROOT}
+            to="/"
             activeProps={{
               className: "font-bold",
             }}
@@ -20,12 +20,12 @@ export default function Navbar() {
           >
             Home
           </Link>
-        </li>{" "}
+        </li>
         <li className="nav-item">
-          <Link to={APP_ROUTES.TRANSACTIONS_LIST} className="nav-link">
+          <Link to="/transactions" className="nav-link">
             Transactions
           </Link>
-        </li>{" "}
+        </li>
       </div>
     </nav>
   );

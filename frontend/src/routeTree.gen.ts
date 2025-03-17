@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as TestImport } from './routes/test'
 import { Route as LoginImport } from './routes/login'
 import { Route as AboutImport } from './routes/about'
 import { Route as AuthImport } from './routes/_auth'
@@ -20,6 +21,12 @@ import { Route as AuthTransactionsCreateImport } from './routes/_auth.transactio
 import { Route as AuthTransactionsEditTransactionIdImport } from './routes/_auth.transactions.edit.$transactionId'
 
 // Create/Update Routes
+
+const TestRoute = TestImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const LoginRoute = LoginImport.update({
   id: '/login',
@@ -95,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestImport
+      parentRoute: typeof rootRoute
+    }
     '/_auth/transactions': {
       id: '/_auth/transactions'
       path: '/transactions'
@@ -150,6 +164,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/test': typeof TestRoute
   '/transactions': typeof AuthTransactionsRouteWithChildren
   '/transactions/create': typeof AuthTransactionsCreateRoute
   '/transactions/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
@@ -160,6 +175,7 @@ export interface FileRoutesByTo {
   '': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/test': typeof TestRoute
   '/transactions': typeof AuthTransactionsRouteWithChildren
   '/transactions/create': typeof AuthTransactionsCreateRoute
   '/transactions/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
@@ -171,6 +187,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/test': typeof TestRoute
   '/_auth/transactions': typeof AuthTransactionsRouteWithChildren
   '/_auth/transactions/create': typeof AuthTransactionsCreateRoute
   '/_auth/transactions/edit/$transactionId': typeof AuthTransactionsEditTransactionIdRoute
@@ -183,6 +200,7 @@ export interface FileRouteTypes {
     | ''
     | '/about'
     | '/login'
+    | '/test'
     | '/transactions'
     | '/transactions/create'
     | '/transactions/edit/$transactionId'
@@ -192,6 +210,7 @@ export interface FileRouteTypes {
     | ''
     | '/about'
     | '/login'
+    | '/test'
     | '/transactions'
     | '/transactions/create'
     | '/transactions/edit/$transactionId'
@@ -201,6 +220,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/about'
     | '/login'
+    | '/test'
     | '/_auth/transactions'
     | '/_auth/transactions/create'
     | '/_auth/transactions/edit/$transactionId'
@@ -212,6 +232,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
+  TestRoute: typeof TestRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -219,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
+  TestRoute: TestRoute,
 }
 
 export const routeTree = rootRoute
@@ -234,7 +256,8 @@ export const routeTree = rootRoute
         "/",
         "/_auth",
         "/about",
-        "/login"
+        "/login",
+        "/test"
       ]
     },
     "/": {
@@ -251,6 +274,9 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/test": {
+      "filePath": "test.tsx"
     },
     "/_auth/transactions": {
       "filePath": "_auth.transactions.tsx",

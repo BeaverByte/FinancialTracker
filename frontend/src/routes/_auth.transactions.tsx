@@ -1,12 +1,14 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useLocation,
+  useMatchRoute,
+} from "@tanstack/react-router";
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
 import { TransactionFilters } from "../types/Transaction";
 import { useFilters } from "../hooks/useFilters";
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   fetchTransactions,
   QUERY_KEY_TRANSACTIONS,
@@ -36,8 +38,10 @@ function TransactionsPage() {
   const { filters, resetFilters, setFilters } = useFilters(
     "/_auth/transactions"
   );
-
   console.log("Filters are " + JSON.stringify(filters));
+
+  const matchRoute = useMatchRoute();
+  const matchesTransactionsRoute = matchRoute({ to: "/transactions" });
 
   const { data: queriedData } = useQuery({
     queryKey: [QUERY_KEY_TRANSACTIONS, filters],
@@ -82,13 +86,16 @@ function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-2 p-2">
+      {/* <div> */}
       <h1 className="text-2xl font-semibold mb-1">Transactions</h1>
       <Outlet />
 
       {/* User Actions */}
-      <Link to="/transactions/create" search={(prev) => prev}>
-        Add Transaction
-      </Link>
+      {matchesTransactionsRoute && (
+        <Link to="/transactions/create" search={(prev) => prev}>
+          Add Transaction
+        </Link>
+      )}
 
       {/* Transactions Table */}
       <Table
@@ -104,17 +111,17 @@ function TransactionsPage() {
         sorting={sortingState}
         onSortingChange={handleSortingChange}
       />
-      <div className="flex items-center gap-2">
-        {queriedData?.rowCount} users found
+      <div>
+        {queriedData?.rowCount} transactions found
         <button
           className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={resetFilters}
-          disabled={Object.keys(filters).length === 0}
+          disabled={Object.keys(filters).length === 1}
         >
           Reset Filters
         </button>
       </div>
-      <pre>{JSON.stringify(filters, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(filters, null, 2)}</pre> */}
     </div>
   );
 }

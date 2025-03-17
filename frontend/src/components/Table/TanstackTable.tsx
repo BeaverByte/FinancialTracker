@@ -145,28 +145,24 @@ export default function Table<T extends Record<string, string | number>>({
       </table>
       <div className="flex items-center gap-2 my-2">
         <button
-          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
           {"<<"}
         </button>
         <button
-          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           {"<"}
         </button>
         <button
-          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           {">"}
         </button>
         <button
-          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
