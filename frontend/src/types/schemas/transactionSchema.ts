@@ -8,9 +8,9 @@ export const FormSchema: ZodType<TransactionFormData> = z.object({
     .string()
     .date("Date not recognized")
     .nonempty({ message: "Date is required" }),
-  merchant: z.string().nonempty({ message: "Merchant is required" }),
-  account: z.string(),
-  category: z.string(),
+  merchant: z.string().optional(),
+  account: z.string().optional(),
+  category: z.string().optional(),
   amount: z
     .union([z.string(), z.number()])
     .transform((value) => {
@@ -23,7 +23,7 @@ export const FormSchema: ZodType<TransactionFormData> = z.object({
     .refine((value) => !isNaN(value), {
       message: "Amount must be a valid number",
     }),
-  note: z.string(),
+  note: z.string().optional(),
 });
 
 export type TransactionFormSchema = z.infer<typeof FormSchema>;

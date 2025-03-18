@@ -1,3 +1,5 @@
+import { Filters } from "./api/types";
+
 export type TableProps = {
   data: Transaction[];
   headers?: TableHeaderConfig[];
@@ -10,12 +12,14 @@ export type TableHeaderConfig = {
   visible: boolean;
 };
 
+export type TransactionFilters = Filters<Transaction>;
+
 export type Transaction = {
   id: number | string;
   date: string;
-  merchant: string;
-  account: string;
-  category: string;
+  merchant?: string;
+  account?: string;
+  category?: string;
   amount: number | string;
-  note: string;
+  note?: string;
 };

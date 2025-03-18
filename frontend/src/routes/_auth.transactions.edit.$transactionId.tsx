@@ -1,25 +1,24 @@
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { transactionQueryOptions } from "../transactionQueryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
 import { EditTransactionModal } from "../components/Form/EditTransactionModal";
 import { Transaction } from "../types/Transaction";
 
-export const Route = createFileRoute(
-  "/_auth/transactions_/edit/$transactionId"
-)({
-  loader: ({ context: { queryClient }, params: { transactionId } }) => {
-    return queryClient.ensureQueryData(transactionQueryOptions(transactionId));
-  },
-  component: EditTransactionComponent,
-});
+export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
+  {
+    loader: ({ context: { queryClient }, params: { transactionId } }) => {
+      return queryClient.ensureQueryData(
+        transactionQueryOptions(transactionId)
+      );
+    },
+    component: EditTransactionComponent,
+  }
+);
 
 function EditTransactionComponent() {
   const transactionId = Route.useParams().transactionId;
+
   const {
     data: transaction,
     isLoading,
@@ -28,9 +27,7 @@ function EditTransactionComponent() {
 
   const navigate = useNavigate();
 
-  const { history } = useRouter();
-
-  const editMutation = useUpdateTransaction();
+  const editTransactionMutation = useUpdateTransaction();
 
   const id = Number(transactionId);
 
@@ -40,27 +37,29 @@ function EditTransactionComponent() {
 
   const handleSave = (updatedTransaction: Transaction) => {
     console.log(
-      "Saving transaction," +
-        JSON.stringify(updatedTransaction) +
-        ", to id " +
-        id
+      `Saving transaction, ${JSON.stringify(updatedTransaction)}, to id, ${id}`
     );
-    editMutation.mutate({
+
+    editTransactionMutation.mutate({
       id,
-      updates: updatedTransaction,
+      transaction: updatedTransaction,
     });
-    navigate({ to: "/transactions" });
   };
 
   if (isLoading) return <p>Loading transaction...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <EditTransactionModal
-      key={transaction.id}
-      transaction={transaction}
-      onClose={() => history.go(-1)}
-      onSave={handleSave}
-    />
+    <>
+      <h2>Edit transaction</h2>
+      <EditTransactionModal
+        key={transaction.id}
+        transaction={transaction}
+        onCancel={() =>
+          navigate({ to: `/transactions`, search: (prev) => prev })
+        }
+        onSave={handleSave}
+      />
+    </>
   );
 }

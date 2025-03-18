@@ -34,17 +34,34 @@ public class TransactionService {
 
 	public List<TransactionDTO> findAll(int page, int size) {
 		List<Transaction> transactions;
+
 		if (size == 0) {
 			transactions = transactionRepository.findAll();
-		} else {
-			Pageable pageable = PageRequest.of(page - 1, size);
-			Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
-			transactions = transactionPage.stream().toList();
+			return transactions.stream()
+					.map(transactionMapper::transactionToTransactionDTO)
+					.toList();
 		}
+
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
+		transactions = transactionPage.stream().toList();
 
 		return transactions.stream()
 				.map(transactionMapper::transactionToTransactionDTO)
 				.toList();
+	}
+
+	public Page<TransactionDTO> findByFilter(Pageable pageable) {
+		log.info("Initial pageable is {}", pageable);
+		log.info("Pageable sorts are {}", pageable.getSort());
+
+		Page<Transaction> requestedTransactions = transactionRepository.findAll(pageable);
+		Page<TransactionDTO> transactions = requestedTransactions
+				.map(transactionMapper::transactionToTransactionDTO);
+
+		log.info("Page of TransactionsDTO are {}", transactions);
+
+		return transactions;
 	}
 
 	public TransactionDTO findById(long id) {
@@ -68,6 +85,8 @@ public class TransactionService {
 	}
 
 	public TransactionDTO update(TransactionRequest transactionRequest, long id) {
+		log.info("update() called with ID: {}", id);
+
 		if (!transactionRepository.findById(id).isPresent()) {
 			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
 		}

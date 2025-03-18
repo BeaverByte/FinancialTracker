@@ -1,4 +1,4 @@
-import { API_ROUTES } from "../utility/API_ROUTES";
+import { API_ROUTES } from "../utils/API_ROUTES";
 
 // HTTP Request to login and authenticate an user
 export const loginUser = async (username: string, password: string) => {

@@ -3,13 +3,25 @@ import {
   Link,
   Outlet,
   createRootRouteWithContext,
+  retainSearchParams,
 } from "@tanstack/react-router";
 import AuthLayout from "../components/AuthLayout";
 import { MyRouterContext } from "../router";
 import { NetworkError } from "../services/transactions";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { z } from "zod";
+import { zodValidator } from "@tanstack/zod-adapter";
+
+const searchSchema = z.object({
+  rootValue: z.string().optional(),
+});
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootComponent,
+  validateSearch: zodValidator(searchSchema),
+  search: {
+    middlewares: [retainSearchParams(["rootValue"])],
+  },
   errorComponent: ({ error }) => {
     if (error instanceof NetworkError) {
       // Render a custom error message
@@ -45,6 +57,7 @@ function RootComponent() {
       <AuthLayout />
       <main>
         <Outlet />
+        <ReactQueryDevtools initialIsOpen={false} />
       </main>
     </>
   );

@@ -4,7 +4,7 @@ import { useGetTransactions } from "../../src/hooks/useGetTransactions";
 
 import { test } from "../../src/mocks/test-extend";
 import { http, HttpResponse } from "msw";
-import { API_ROUTES } from "../../src/utility/API_ROUTES";
+import { API_ROUTES } from "../../src/utils/API_ROUTES";
 import { worker } from "../../src/mocks/browser";
 import { NetworkError } from "../../src/services/transactions";
 import { createTestQueryWrapper } from "./utility/TestQueryWrapper";

@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useGetTransactions } from "../hooks/useGetTransactions";
 import { loginUser, logoutUser } from "../services/auth";
 import { redirect } from "@tanstack/react-router";
-import { APP_ROUTES } from "../pages/routes";
 
 export interface AuthContextType {
   isAuthenticated: boolean;
@@ -34,7 +33,8 @@ export function AuthProvider({
       const { user } = await loginUser(username, password);
       setIsAuthenticated(true);
       redirect({
-        to: APP_ROUTES.LOGIN,
+        // to: APP_ROUTES.LOGIN,
+        to: "/login",
       });
       console.log("User has logged in: " + user);
       return user;

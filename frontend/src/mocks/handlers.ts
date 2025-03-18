@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
-import { API_ROUTES } from "../utility/API_ROUTES";
+import { API_ROUTES } from "../utils/API_ROUTES";
 
-const allTransactions = new Map();
+// const allTransactions = new Map();
 
 const transactionMock = {
   id: 1234,

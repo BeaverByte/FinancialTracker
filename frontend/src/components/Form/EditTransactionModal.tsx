@@ -3,20 +3,20 @@ import { TransactionForm } from "./TransactionForm";
 
 type EditTransactionModal = {
   transaction: Transaction | undefined;
-  onClose: () => void;
+  onCancel: () => void;
   onSave: (updatedTransaction: Transaction) => void;
 };
 
 export function EditTransactionModal({
   transaction,
   onSave,
-  onClose,
+  onCancel,
 }: Readonly<EditTransactionModal>) {
   return (
     <TransactionForm
       initialValues={transaction}
       onSubmit={onSave}
-      onCancel={onClose}
+      onCancel={onCancel}
     />
   );
 }

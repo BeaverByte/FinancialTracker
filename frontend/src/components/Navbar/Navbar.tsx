@@ -1,5 +1,4 @@
 import { APP_ROUTES } from "../../pages/routes";
-import { useAuth } from "../../context/AuthContext";
 import { Link } from "@tanstack/react-router";
 
 /**
@@ -13,7 +12,7 @@ export default function Navbar() {
       <div>
         <li className="nav-item">
           <Link
-            to={APP_ROUTES.ROOT}
+            to="/"
             activeProps={{
               className: "font-bold",
             }}
@@ -21,17 +20,12 @@ export default function Navbar() {
           >
             Home
           </Link>
-        </li>{" "}
+        </li>
         <li className="nav-item">
-          <Link to={APP_ROUTES.TRANSACTIONS_LIST} className="nav-link">
+          <Link to="/transactions" className="nav-link">
             Transactions
           </Link>
-        </li>{" "}
-        <li className="nav-item">
-          <Link to={APP_ROUTES.CREATE_TRANSACTION} className="nav-link">
-            New Transaction
-          </Link>
-        </li>{" "}
+        </li>
       </div>
     </nav>
   );

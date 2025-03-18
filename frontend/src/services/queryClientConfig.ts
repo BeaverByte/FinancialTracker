@@ -30,17 +30,17 @@ export const globalQueryClient = new QueryClient({
       const failureMessage = `Global Query Client caught error in NON-Mutation Query named "${query.queryKey}": 
       (${error})`;
 
-      // console.log(failureMessage, query);
+      console.error(failureMessage, query);
 
       if (error instanceof UnauthorizedError) {
-        console.log(
+        console.error(
           failureMessage,
           query,
           `Query error due to Unauthorized user status`
         );
       }
       if (error instanceof NetworkError) {
-        console.log(
+        console.error(
           failureMessage,
           query,
           `Query error due to server connection failures`
@@ -53,17 +53,17 @@ export const globalQueryClient = new QueryClient({
       const failureMessage = `Global Query Client caught error in MUTATION Query named "${query.queryKey}": 
       (${error})`;
 
-      // console.log(failureMessage, query);
+      console.error(failureMessage, query);
 
       if (error instanceof UnauthorizedError) {
-        console.log(
+        console.error(
           failureMessage,
           query,
           `Query error due to Unauthorized user status`
         );
       }
       if (error instanceof NetworkError) {
-        console.log(
+        console.error(
           failureMessage,
           query,
           `Query error due to server connection failures`

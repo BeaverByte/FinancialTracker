@@ -1,8 +1,12 @@
 import { TransactionFormSchema } from "../types/schemas/transactionSchema";
-import { API_ROUTES } from "../utility/API_ROUTES";
-import { Transaction } from "../types/Transaction";
+import { API_ROUTES } from "../utils/API_ROUTES";
+import { Transaction, TransactionFilters } from "../types/Transaction";
+import { PaginatedData } from "../types/api/types";
 
 export const QUERY_KEY_TRANSACTIONS = "transactions";
+
+const DEFAULT_PAGE = 0;
+const DEFAULT_PAGE_SIZE = 10;
 
 export class UnauthorizedError extends Error {
   constructor(message) {
@@ -18,17 +22,71 @@ export class NetworkError extends Error {
   }
 }
 
-interface FetchItemOptions {
-  method: string;
-  body?: unknown;
-}
+export async function fetchTransactions(
+  filtersAndPagination: TransactionFilters
+): Promise<PaginatedData<Transaction>> {
+  console.log("fetchTransactions", filtersAndPagination);
 
-class FetchError extends Error {
-  constructor(
-    public res: Response,
-    message?: string
-  ) {
-    super(message);
+  const {
+    pageIndex = DEFAULT_PAGE,
+    pageSize = DEFAULT_PAGE_SIZE,
+    sortBy,
+    ...filters
+  } = filtersAndPagination;
+
+  const searchParams = new URLSearchParams();
+
+  if (sortBy) {
+    const [field, order] = sortBy.split(".");
+    const sort = `${field},${order}`;
+    searchParams.append("sort", sort);
+  }
+
+  searchParams.append("page", pageIndex.toString());
+  searchParams.append("size", pageSize.toString());
+
+  // Appending filter property to url
+  Object.keys(filters).forEach((key) => {
+    const filterValue = filters[key as keyof Transaction];
+    if (filterValue !== undefined && filterValue !== "") {
+      searchParams.append(key, filterValue.toString());
+    }
+  });
+
+  const url = `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}?${searchParams.toString()}`;
+  console.log(`Final URL: ${url}`);
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new UnauthorizedError("Session expired. Please log in again: ");
+      }
+      throw new Error(`Failed to get transactions: ${response.status}`);
+    }
+
+    const transactions = await response.json();
+
+    return {
+      result: transactions.content,
+      rowCount: transactions.totalElements,
+    };
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
   }
 }
 
@@ -48,7 +106,13 @@ export const getTransactions = async () => {
       }
       throw new Error(`Failed to get transactions: ${response.status}`);
     }
-    return response.json();
+
+    const transactions = await response.json();
+
+    return {
+      result: transactions.content,
+      rowCount: transactions.totalElements,
+    };
   } catch (error) {
     console.error(`Response not returned in fetch:
     (${error})`);
@@ -84,42 +148,70 @@ export const getTransactionById = async (id: string) => {
 };
 
 export const addTransaction = async (data: TransactionFormSchema) => {
-  const response = await fetch(API_ROUTES.TRANSACTIONS.POST_TRANSACTION, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch(API_ROUTES.TRANSACTIONS.POST_TRANSACTION, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
 
-  if (!response.ok) throw new Error("Failed to add transaction");
-  return response.json();
+    if (!response.ok) throw new Error("Failed to add transaction");
+
+    const addedTransaction = await response.json();
+
+    return addedTransaction;
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
+  }
 };
 
 type updateTransactionPayload = {
   id: number;
-  updates: Transaction;
+  transaction: Transaction;
 };
 
 export const updateTransaction = async ({
   id,
-  updates,
+  transaction,
 }: updateTransactionPayload) => {
-  const response = await fetch(
-    `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`,
-    {
+  console.log("updateTransactions activated");
+  try {
+    const url = `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`;
+    console.log(`Update sending to ${url}`);
+    const response = await fetch(url, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(updates),
-    }
-  );
+      body: JSON.stringify(transaction),
+    });
 
-  if (!response.ok) throw new Error("Failed to update transaction");
-  return response.json();
+    if (!response.ok) throw new Error("Failed to update transaction");
+
+    const updatedTransaction = await response.json();
+
+    return updatedTransaction;
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
+  }
 };
 
 export const deleteTransaction = async (id: number) => {
