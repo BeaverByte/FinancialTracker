@@ -50,7 +50,7 @@ function TransactionsPage() {
     placeholderData: keepPreviousData,
   });
 
-  const transactions = queriedData?.result;
+  const transactions = queriedData?.content;
 
   const paginationState = {
     pageIndex: filters.pageIndex ?? DEFAULT_PAGE_INDEX,
@@ -108,7 +108,7 @@ function TransactionsPage() {
         pagination={paginationState}
         paginationOptions={{
           onPaginationChange: handlePaginationChange,
-          rowCount: queriedData?.rowCount,
+          rowCount: queriedData?.totalElements,
         }}
         filters={filters}
         onFilterChange={(filters) => setFilters(filters)}
@@ -116,7 +116,7 @@ function TransactionsPage() {
         onSortingChange={handleSortingChange}
       />
       <div>
-        {queriedData?.rowCount} transactions found
+        {queriedData?.totalElements} transactions found
         <button
           className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={resetFilters}

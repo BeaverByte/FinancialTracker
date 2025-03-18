@@ -9,18 +9,54 @@ const DEFAULT_PAGE = 0;
 const DEFAULT_PAGE_SIZE = 10;
 
 export class UnauthorizedError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
     this.name = "UnauthorizedError";
   }
 }
 
 export class NetworkError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
     this.name = "NetworkError";
   }
 }
+
+const fetchData = async <Type>(
+  url: string,
+  options: RequestInit = {}
+): Promise<Type> => {
+  try {
+    console.log(
+      `Fetching Data at ${url} with options of ${JSON.stringify(options)}`
+    );
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new UnauthorizedError("Session expired. Please log in again.");
+      }
+      throw new Error(`Failed to fetch: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching data: ${error}`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection."
+      );
+    }
+    throw error;
+  }
+};
 
 export async function fetchTransactions(
   filtersAndPagination: TransactionFilters
@@ -56,123 +92,47 @@ export async function fetchTransactions(
   const url = `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}?${searchParams.toString()}`;
   console.log(`Final URL: ${url}`);
 
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+  const transactions = await fetchData<PaginatedData<Transaction>>(url, {
+    method: "GET",
+  });
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new UnauthorizedError("Session expired. Please log in again: ");
-      }
-      throw new Error(`Failed to get transactions: ${response.status}`);
-    }
+  console.log(`Fetched Data is ${JSON.stringify(transactions)}`);
 
-    const transactions = await response.json();
-
-    return {
-      result: transactions.content,
-      rowCount: transactions.totalElements,
-    };
-  } catch (error) {
-    console.error(`Response not returned in fetch:
-    (${error})`);
-    if (error instanceof TypeError) {
-      throw new NetworkError(
-        "Could not connect to server. Please check your internet connection"
-      );
-    }
-    throw error;
-  }
+  return {
+    content: transactions.content,
+    totalElements: transactions.totalElements,
+  };
 }
 
-export const getTransactions = async () => {
-  try {
-    const response = await fetch(API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new UnauthorizedError("Session expired. Please log in again: ");
-      }
-      throw new Error(`Failed to get transactions: ${response.status}`);
-    }
-
-    const transactions = await response.json();
-
-    return {
-      result: transactions.content,
-      rowCount: transactions.totalElements,
-    };
-  } catch (error) {
-    console.error(`Response not returned in fetch:
-    (${error})`);
-    if (error instanceof TypeError) {
-      throw new NetworkError(
-        "Could not connect to server. Please check your internet connection"
-      );
-    }
-    throw error;
-  }
+export const getTransactions = async (): Promise<
+  PaginatedData<Transaction>
+> => {
+  const url = API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS;
+  return await fetchData<PaginatedData<Transaction>>(url, { method: "GET" });
 };
 
 export class TransactionNotFoundError extends Error {}
 
-export const getTransactionById = async (id: string) => {
-  const response = await fetch(
-    `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}/${id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    }
-  );
-
-  if (!response.ok)
+export const getTransactionById = async (id: string): Promise<Transaction> => {
+  const url = `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}/${id}`;
+  const transaction = await fetchData<Transaction>(url, { method: "GET" });
+  if (!transaction) {
     throw new TransactionNotFoundError(
       `Transaction with id "${id}" not found!`
     );
-
-  return response.json();
+  }
+  return transaction;
 };
 
-export const addTransaction = async (data: TransactionFormSchema) => {
-  try {
-    const response = await fetch(API_ROUTES.TRANSACTIONS.POST_TRANSACTION, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) throw new Error("Failed to add transaction");
-
-    const addedTransaction = await response.json();
-
-    return addedTransaction;
-  } catch (error) {
-    console.error(`Response not returned in fetch:
-    (${error})`);
-    if (error instanceof TypeError) {
-      throw new NetworkError(
-        "Could not connect to server. Please check your internet connection"
-      );
-    }
-    throw error;
-  }
+export const addTransaction = async (
+  data: TransactionFormSchema
+): Promise<Transaction> => {
+  const url = API_ROUTES.TRANSACTIONS.POST_TRANSACTION;
+  const options = {
+    method: "POST",
+    body: JSON.stringify(data),
+  };
+  return await fetchData<Transaction>(url, options);
 };
 
 type updateTransactionPayload = {
@@ -183,48 +143,16 @@ type updateTransactionPayload = {
 export const updateTransaction = async ({
   id,
   transaction,
-}: updateTransactionPayload) => {
-  console.log("updateTransactions activated");
-  try {
-    const url = `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`;
-    console.log(`Update sending to ${url}`);
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(transaction),
-    });
-
-    if (!response.ok) throw new Error("Failed to update transaction");
-
-    const updatedTransaction = await response.json();
-
-    return updatedTransaction;
-  } catch (error) {
-    console.error(`Response not returned in fetch:
-    (${error})`);
-    if (error instanceof TypeError) {
-      throw new NetworkError(
-        "Could not connect to server. Please check your internet connection"
-      );
-    }
-    throw error;
-  }
+}: updateTransactionPayload): Promise<Transaction> => {
+  const url = `${API_ROUTES.TRANSACTIONS.PUT_TRANSACTION}/${id}`;
+  const options = {
+    method: "PUT",
+    body: JSON.stringify(transaction),
+  };
+  return await fetchData<Transaction>(url, options);
 };
 
 export const deleteTransaction = async (id: number) => {
-  const response = await fetch(
-    `${API_ROUTES.TRANSACTIONS.DELETE_TRANSACTION}/${id}`,
-    {
-      method: "DELETE",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-    }
-  );
-
-  if (!response.ok) throw new Error("Failed to delete transaction");
+  const url = `${API_ROUTES.TRANSACTIONS.DELETE_TRANSACTION}/${id}`;
+  await fetchData<void>(url, { method: "DELETE" });
 };
