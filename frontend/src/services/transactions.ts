@@ -106,7 +106,13 @@ export const getTransactions = async () => {
       }
       throw new Error(`Failed to get transactions: ${response.status}`);
     }
-    return response.json();
+
+    const transactions = await response.json();
+
+    return {
+      result: transactions.content,
+      rowCount: transactions.totalElements,
+    };
   } catch (error) {
     console.error(`Response not returned in fetch:
     (${error})`);
@@ -142,17 +148,31 @@ export const getTransactionById = async (id: string) => {
 };
 
 export const addTransaction = async (data: TransactionFormSchema) => {
-  const response = await fetch(API_ROUTES.TRANSACTIONS.POST_TRANSACTION, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch(API_ROUTES.TRANSACTIONS.POST_TRANSACTION, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
 
-  if (!response.ok) throw new Error("Failed to add transaction");
-  return response.json();
+    if (!response.ok) throw new Error("Failed to add transaction");
+
+    const addedTransaction = await response.json();
+
+    return addedTransaction;
+  } catch (error) {
+    console.error(`Response not returned in fetch:
+    (${error})`);
+    if (error instanceof TypeError) {
+      throw new NetworkError(
+        "Could not connect to server. Please check your internet connection"
+      );
+    }
+    throw error;
+  }
 };
 
 type updateTransactionPayload = {

@@ -51,6 +51,7 @@ export function useUpdateTransaction() {
         context?.previousTransaction
       );
     },
+
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY_TRANSACTIONS],

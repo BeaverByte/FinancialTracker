@@ -1,71 +1,89 @@
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FormSchema,
   TransactionFormSchema,
 } from "../../types/schemas/transactionSchema";
-import { ZodObject, ZodRawShape } from "zod";
-import { InputField, InputFieldErrorMessage } from "./Input";
-import Button from "../Button/Button";
-import { Transaction } from "../../types/Transaction";
 import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { capitalizeFirstLetter } from "../../utils/stringUtils";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
 
 export type TransactionFormProps = {
-  initialValues: object | Transaction;
   onSubmit: (data: TransactionFormSchema) => void;
   onCancel: () => void;
 };
 
 function TransactionForm({
-  initialValues,
   onSubmit,
   onCancel,
 }: Readonly<TransactionFormProps>) {
-  const {
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors },
-  } = useForm<TransactionFormSchema>({
+  const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(FormSchema),
-    defaultValues: initialValues || {},
+    defaultValues: {
+      date: "",
+      merchant: "",
+      account: "",
+      category: "",
+      amount: "",
+      note: "",
+    },
   });
+
+  const transactionFormKeys: (keyof TransactionFormSchema)[] = [
+    "account",
+    "amount",
+    "category",
+    "date",
+    "merchant",
+    "note",
+  ];
 
   const setDateToToday = () => {
     const today = new Date().toISOString().split("T")[0];
-    setValue("date", today);
+    form.setValue("date", today);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {Object.keys((FormSchema as unknown as ZodObject<ZodRawShape>).shape)
-        .filter((key) => key !== "id") // Exclude id field
-        .map((key) => (
-          <Controller
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {transactionFormKeys.map((key) => (
+          <FormField
             key={key}
-            name={key as keyof TransactionFormSchema}
-            control={control}
+            control={form.control}
+            name={key}
             render={({ field }) => (
-              <>
-                <InputField
-                  name={key}
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-                <InputFieldErrorMessage name={key} errors={errors} />
-              </>
+              <FormItem>
+                <FormLabel>{capitalizeFirstLetter(field.name)}</FormLabel>
+                <FormControl>
+                  <Input
+                    type={key === "amount" ? "number" : "text"}
+                    placeholder={field.name}
+                    // value={field.value ?? ""}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
         ))}
-
-      <Button type={"button"} onClick={setDateToToday}>
-        Set to Today
-      </Button>
-      <Button type={"button"} onClick={onCancel}>
-        Cancel
-      </Button>
-      <Button type={"submit"}>Save</Button>
-    </form>
+        <Button type={"button"} onClick={setDateToToday}>
+          Set to Today
+        </Button>
+        <Button type={"button"} onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type={"submit"}>Save</Button>
+      </form>
+    </Form>
   );
 }
 

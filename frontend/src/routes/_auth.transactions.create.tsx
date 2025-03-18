@@ -12,8 +12,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions/create")({
   component: AddTransactionForm,
@@ -37,17 +37,16 @@ function AddTransactionForm() {
     }
 
     transactions.mutate(postTransaction);
-    navigate({ to: "/transactions" });
   };
 
-  const initialTransaction: TransactionFormSchema = {
-    date: "",
-    merchant: "",
-    account: "",
-    category: "",
-    amount: "",
-    note: "",
-  };
+  // const initialTransaction: TransactionFormSchema = {
+  //   date: "",
+  //   merchant: "",
+  //   account: "",
+  //   category: "",
+  //   amount: "",
+  //   note: "",
+  // };
 
   return (
     <Card>
@@ -57,7 +56,7 @@ function AddTransactionForm() {
       </CardHeader>
       <CardContent>
         <TransactionForm
-          initialValues={{ initialTransaction }}
+          // initialValues={{ initialTransaction }}
           onSubmit={handleSave}
           onCancel={() =>
             navigate({ to: `/transactions`, search: (prev) => prev })

@@ -18,8 +18,12 @@ export function InputField({
   return (
     <>
       <Label htmlFor={name}>{capitalizeFirstLetter(name)}</Label>
-      <Input id={name} placeholder="Test" value={value} onChange={onChange} />
-      {/* <input name={name} value={value} onChange={onChange} /> */}
+      <Input
+        id={name}
+        placeholder={`Enter ${name} here`}
+        value={value}
+        onChange={onChange}
+      />
     </>
   );
 }

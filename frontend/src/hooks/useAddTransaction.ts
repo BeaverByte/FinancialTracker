@@ -4,26 +4,30 @@ import {
   QUERY_KEY_TRANSACTIONS,
 } from "../services/transactions";
 import { Transaction } from "../types/Transaction";
+import { useNavigate } from "@tanstack/react-router";
 
 export function useAddTransaction() {
   const queryClient = useQueryClient();
-  const queryKey = [QUERY_KEY_TRANSACTIONS];
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: addTransaction,
 
     onMutate: async (newTransaction) => {
-      await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
 
-      const previousTransactions =
-        queryClient.getQueryData<Transaction[]>(queryKey);
+      const previousTransactions = queryClient.getQueryData<Transaction[]>([
+        QUERY_KEY_TRANSACTIONS,
+      ]);
 
       queryClient.setQueryData<Transaction[]>(
-        queryKey,
-        (oldTransactions = []) => [
+        [QUERY_KEY_TRANSACTIONS],
+        (oldTransactions = []) => ({
           ...oldTransactions,
-          { ...newTransaction, id: Math.random() },
-        ]
+          newTransaction,
+          // TODO: This works for now but has indirection, need to refactor pagination
+          // content: [[...(oldTransactions?.content || []), newTransaction]],
+        })
       );
 
       return { previousTransactions }; //  This is considered 'context' for Tanstack Query, for rollback
@@ -34,15 +38,20 @@ export function useAddTransaction() {
       console.log("Error with add query");
       if (queryExists) {
         console.log(
-          `Rolling back query to ${queryKey}: ${context.previousTransactions}`
+          `Rolling back query to ${[QUERY_KEY_TRANSACTIONS]}: ${context.previousTransactions}`
         );
-        queryClient.setQueryData(queryKey, context.previousTransactions);
+        queryClient.setQueryData(
+          [QUERY_KEY_TRANSACTIONS],
+          context.previousTransactions
+        );
       }
     },
 
     onSettled: () => {
       console.log("Add query settled");
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
+
+      navigate({ to: "/transactions", search: (prev) => prev });
     },
   });
 }
