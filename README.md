@@ -61,11 +61,11 @@ A project designed to help users track profits and expenses. **Spring Boot** is 
    JWT_REFRESH_EXPIRATION_MS=
    ```
 
-- Run command to start the backend:
+   - Run command to start the backend:
 
-```bash
-npm run backend
-```
+   ```bash
+   npm run backend
+   ```
 
 4. Frontend Setup (React and Vite):
 
