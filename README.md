@@ -51,7 +51,7 @@ A project designed to help users track profits and expenses. **Spring Boot** is 
    DATABASE_PASSWORD= your_database_password
    ```
 
-   The JWT Cookie Name should be different from the JWT Refresh Cookie Name.
+   - The JWT Cookie Name should be different from the JWT Refresh Cookie Name.
 
    ```
    JWT_COOKIE_NAME=
