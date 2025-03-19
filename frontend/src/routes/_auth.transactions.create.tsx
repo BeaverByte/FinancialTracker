@@ -39,15 +39,6 @@ function AddTransactionForm() {
     transactions.mutate(postTransaction);
   };
 
-  // const initialTransaction: TransactionFormSchema = {
-  //   date: "",
-  //   merchant: "",
-  //   account: "",
-  //   category: "",
-  //   amount: "",
-  //   note: "",
-  // };
-
   return (
     <Card>
       <CardHeader>
@@ -56,7 +47,6 @@ function AddTransactionForm() {
       </CardHeader>
       <CardContent>
         <TransactionForm
-          // initialValues={{ initialTransaction }}
           onSubmit={handleSave}
           onCancel={() =>
             navigate({ to: `/transactions`, search: (prev) => prev })
