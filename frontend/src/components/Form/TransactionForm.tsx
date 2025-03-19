@@ -51,6 +51,11 @@ function TransactionForm({
     form.setValue("date", today);
   };
 
+  const inputTypes: Record<string, string> = {
+    amount: "number",
+    date: "date",
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -64,7 +69,7 @@ function TransactionForm({
                 <FormLabel>{capitalizeFirstLetter(field.name)}</FormLabel>
                 <FormControl>
                   <Input
-                    type={key === "amount" ? "number" : "text"}
+                    type={inputTypes[key] ?? "text"}
                     placeholder={field.name}
                     // value={field.value ?? ""}
                     {...field}
