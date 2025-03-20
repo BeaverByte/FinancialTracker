@@ -19,11 +19,13 @@ import {
 export type TransactionFormProps = {
   onSubmit: (data: TransactionFormSchema) => void;
   onCancel: () => void;
+  formValues?: Partial<TransactionFormSchema>;
 };
 
 function TransactionForm({
   onSubmit,
   onCancel,
+  formValues,
 }: Readonly<TransactionFormProps>) {
   const form = useForm<TransactionFormSchema>({
     resolver: zodResolver(FormSchema),
@@ -34,6 +36,7 @@ function TransactionForm({
       category: "",
       amount: "",
       note: "",
+      ...formValues,
     },
   });
 

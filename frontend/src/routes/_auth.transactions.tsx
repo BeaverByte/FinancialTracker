@@ -2,7 +2,6 @@ import {
   createFileRoute,
   Link,
   Outlet,
-  useLocation,
   useMatchRoute,
 } from "@tanstack/react-router";
 import { transactionsQueryOptions } from "../transactionsQueryOptions";

@@ -7,6 +7,7 @@ declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
     filterKey?: keyof TData;
     filterVariant?: "text" | "number";
+    className?: React.HTMLAttributes<HTMLElement>["className"];
   }
 }
 
@@ -34,7 +35,7 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
         </Link>
       </>
     ),
-    enableSorting: false,
+    // enableSorting: false,
   }),
   {
     accessorKey: "id",

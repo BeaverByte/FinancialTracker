@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
+import { MoveDown, MoveUp } from "lucide-react";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -50,7 +51,7 @@ export default function Table<T extends Record<string, string | number>>({
     manualPagination: true,
     enableSortingRemoval: true,
     getCoreRowModel: getCoreRowModel(),
-    debugTable: true,
+    // debugTable: true,
   });
 
   return (
@@ -89,12 +90,11 @@ export default function Table<T extends Record<string, string | number>>({
                               header.getContext()
                             )
                           }
-
                           {(header.column.getCanSort() &&
                             {
-                              asc: " 🔼",
-                              desc: " 🔽",
-                              false: " 🔃",
+                              asc: <MoveUp size={20} />,
+                              desc: <MoveDown size={20} />,
+                              // false: " 🔃",
                             }[header.column.getIsSorted() as string]) ??
                             null}
                         </button>

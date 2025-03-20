@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions/create")({
   component: AddTransactionForm,
@@ -53,10 +52,7 @@ function AddTransactionForm() {
           }
         />
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline">Cancel</Button>
-        <Button>Deploy</Button>
-      </CardFooter>
+      <CardFooter />
     </Card>
   );
 }
