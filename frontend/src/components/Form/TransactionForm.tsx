@@ -49,11 +49,6 @@ function TransactionForm({
     "note",
   ];
 
-  const setDateToToday = () => {
-    const today = new Date().toISOString().split("T")[0];
-    form.setValue("date", today);
-  };
-
   const inputTypes: Record<string, string> = {
     amount: "number",
     date: "date",
@@ -83,13 +78,14 @@ function TransactionForm({
             )}
           />
         ))}
-        <Button type={"button"} onClick={setDateToToday}>
-          Set to Today
-        </Button>
-        <Button type={"button"} onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type={"submit"}>Save</Button>
+        <div className="mt-6 flex items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            <Button type={"button"} variant={"outline"} onClick={onCancel}>
+              Cancel
+            </Button>
+          </div>
+          <Button type={"submit"}>Save</Button>
+        </div>
       </form>
     </Form>
   );
