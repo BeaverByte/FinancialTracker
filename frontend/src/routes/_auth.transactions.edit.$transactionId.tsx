@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
   {
@@ -22,11 +21,11 @@ export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
         transactionQueryOptions(transactionId)
       );
     },
-    component: EditTransactionComponent,
+    component: EditTransactionForm,
   }
 );
 
-function EditTransactionComponent() {
+function EditTransactionForm() {
   const transactionId = Route.useParams().transactionId;
 
   const {
@@ -75,6 +74,7 @@ function EditTransactionComponent() {
       </CardHeader>
       <CardContent>
         <TransactionForm
+          key={id}
           onSubmit={handleEdit}
           formValues={transaction}
           onCancel={() =>

@@ -15,6 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { CustomCurrencyInput } from "../ui/currencyInput";
 
 export type TransactionFormProps = {
   onSubmit: (data: TransactionFormSchema) => void;
@@ -63,15 +64,24 @@ function TransactionForm({
             control={form.control}
             name={key}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="mb-4">
                 <FormLabel>{capitalizeFirstLetter(field.name)}</FormLabel>
                 <FormControl>
-                  <Input
-                    type={inputTypes[key] ?? "text"}
-                    placeholder={field.name}
-                    // value={field.value ?? ""}
-                    {...field}
-                  />
+                  {key === "amount" ? (
+                    <CustomCurrencyInput
+                      id="amount-input"
+                      name={key}
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      decimalsLimit={2}
+                      prefix="$"
+                      step={1}
+                    />
+                  ) : (
+                    <Input type={inputTypes[key] ?? "text"} {...field} />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>

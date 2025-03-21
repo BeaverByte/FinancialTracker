@@ -19,22 +19,38 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
   columnHelper.display({
     id: "actions",
     header: () => <span>Actions</span>,
-    cell: (cell) => (
-      <>
-        <Link
-          to={`/transactions/edit/${cell.row.original.id}`}
-          search={(prev) => prev}
-        >
-          Edit
-        </Link>{" "}
-        <Link
-          to={`/transactions/delete/${cell.row.original.id}`}
-          search={(prev) => prev}
-        >
-          Delete
-        </Link>
-      </>
-    ),
+    cell: (cell) => {
+      const transactionId = cell.row.original.id;
+      const transactionIdParam = String(transactionId);
+
+      const handleDelete = () => {
+        if (
+          window.confirm(
+            `Are you sure you want to delete transaction ${transactionId}?`
+          )
+        ) {
+          console.log(`Deleting transaction with id: ${transactionId}`);
+        }
+      };
+
+      return (
+        <>
+          <Link
+            to={`/transactions/edit/$transactionId`}
+            params={{ transactionId: transactionIdParam }}
+            search={(prev) => prev}
+          >
+            Edit
+          </Link>
+          <button
+            onClick={handleDelete}
+            className="text-red-600 hover:text-red-800 focus:outline-none"
+          >
+            Delete
+          </button>
+        </>
+      );
+    },
     // enableSorting: false,
   }),
   {
