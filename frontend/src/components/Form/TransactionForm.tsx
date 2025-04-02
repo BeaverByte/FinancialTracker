@@ -1,12 +1,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  FormSchema,
+  TransactionFormValidationSchema,
   TransactionFormSchema,
 } from "../../types/schemas/transactionSchema";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { capitalizeFirstLetter } from "../../utils/stringUtils";
 import {
   Form,
   FormControl,
@@ -15,9 +14,10 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { CustomCurrencyInput } from "../ui/currencyInput";
+import { CustomCurrencyInput } from "../ui/currency-input";
+import { capitalizeFirstLetter } from "../../utils/stringUtils";
 
-export type TransactionFormProps = {
+type TransactionFormProps = {
   onSubmit: (data: TransactionFormSchema) => void;
   onCancel: () => void;
   formValues?: Partial<TransactionFormSchema>;
@@ -29,7 +29,7 @@ function TransactionForm({
   formValues,
 }: Readonly<TransactionFormProps>) {
   const form = useForm<TransactionFormSchema>({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(TransactionFormValidationSchema),
     defaultValues: {
       date: "",
       merchant: "",

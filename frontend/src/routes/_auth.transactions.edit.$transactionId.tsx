@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import { TransactionCard } from "../components/ui/transaction-card";
 
 export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
   {
@@ -67,22 +68,12 @@ function EditTransactionForm() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Edit Transaction</CardTitle>
-        <CardDescription>Makes changes to transaction below</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <TransactionForm
-          key={id}
-          onSubmit={handleEdit}
-          formValues={transaction}
-          onCancel={() =>
-            navigate({ to: `/transactions`, search: (prev) => prev })
-          }
-        />
-      </CardContent>
-      <CardFooter />
-    </Card>
+    <TransactionCard
+      title="Edit Transaction"
+      description="Makes changes to transaction below"
+      onSubmit={handleEdit}
+      formValues={transaction}
+      onCancel={() => navigate({ to: `/transactions`, search: (prev) => prev })}
+    />
   );
 }

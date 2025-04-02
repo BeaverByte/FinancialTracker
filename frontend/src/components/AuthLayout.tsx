@@ -11,7 +11,7 @@ const AuthLayout = () => {
   return (
     <div>
       <Navbar />
-      <Banner />
+      {/* <Banner /> */}
     </div>
   );
 };

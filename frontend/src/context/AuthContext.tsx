@@ -33,13 +33,12 @@ export function AuthProvider({
       const { user } = await loginUser(username, password);
       setIsAuthenticated(true);
       redirect({
-        // to: APP_ROUTES.LOGIN,
         to: "/login",
       });
       console.log("User has logged in: " + user);
       return user;
     } catch (err) {
-      throw new Error("Login failed.");
+      throw new Error("Login failed. Please check credentials");
     }
   };
 

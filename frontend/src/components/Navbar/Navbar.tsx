@@ -1,4 +1,3 @@
-import { APP_ROUTES } from "../../pages/routes";
 import { Link } from "@tanstack/react-router";
 
 /**
@@ -8,7 +7,7 @@ import { Link } from "@tanstack/react-router";
  */
 export default function Navbar() {
   return (
-    <nav>
+    <nav className="border border-yellow-500">
       <div>
         <li className="nav-item">
           <Link
