@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import MainLayout from "../components/MainLayout";
 import { MyRouterContext } from "../router";
-import { NetworkError } from "../services/transactions";
+import { NetworkError } from "../services/errors";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";

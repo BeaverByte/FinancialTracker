@@ -1,9 +1,11 @@
+import { User } from "../types/User";
 import { API_ROUTES } from "../utils/API_ROUTES";
+import { fetchData } from "./fetch";
 
 // HTTP Request to login and authenticate an user
 export const loginUser = async (username: string, password: string) => {
   try {
-    const response = await fetch(`${API_ROUTES.AUTH.SIGN_IN}`, {
+    const response = await fetchData<User>(`${API_ROUTES.AUTH.SIGN_IN}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -12,15 +14,10 @@ export const loginUser = async (username: string, password: string) => {
       body: JSON.stringify({ username, password }),
     });
 
-    if (!response.ok) {
-      throw new Error("Invalid credentials");
-    }
-
-    const data = await response.json();
-
     console.log("User Login success");
+    const user = response.username;
 
-    return { user: data.username };
+    return { user };
   } catch (error) {
     console.error("Login error:", error);
     throw error;

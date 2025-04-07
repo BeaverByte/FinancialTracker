@@ -2,61 +2,12 @@ import { TransactionFormSchema } from "../types/schemas/transactionSchema";
 import { API_ROUTES } from "../utils/API_ROUTES";
 import { Transaction, TransactionFilters } from "../types/Transaction";
 import { PaginatedData } from "../types/api/types";
+import { fetchData } from "./fetch";
 
 export const QUERY_KEY_TRANSACTIONS = "transactions";
 
 const DEFAULT_PAGE = 0;
 const DEFAULT_PAGE_SIZE = 10;
-
-export class UnauthorizedError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "UnauthorizedError";
-  }
-}
-
-export class NetworkError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NetworkError";
-  }
-}
-
-const fetchData = async <Type>(
-  url: string,
-  options: RequestInit = {}
-): Promise<Type> => {
-  try {
-    console.log(
-      `Fetching Data at ${url} with options of ${JSON.stringify(options)}`
-    );
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new UnauthorizedError("Session expired. Please log in again.");
-      }
-      throw new Error(`Failed to fetch: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching data: ${error}`);
-    if (error instanceof TypeError) {
-      throw new NetworkError(
-        "Could not connect to server. Please check your internet connection."
-      );
-    }
-    throw error;
-  }
-};
 
 export async function fetchTransactions(
   filtersAndPagination: TransactionFilters
