@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   TransactionFormValidationSchema,
   TransactionFormSchema,
-} from "../../types/schemas/transactionSchema";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+} from "../types/schemas/transactionSchema";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
@@ -13,9 +13,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
-import { CustomCurrencyInput } from "../ui/currency-input";
-import { capitalizeFirstLetter } from "../../utils/stringUtils";
+} from "./ui/form";
+import { CustomCurrencyInput } from "./ui/currency-input";
+import { capitalizeFirstLetter } from "../utils/stringUtils";
 
 type TransactionFormProps = {
   onSubmit: (data: TransactionFormSchema) => void;

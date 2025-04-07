@@ -4,7 +4,10 @@ import {
   RouteIds,
   useNavigate,
 } from "@tanstack/react-router";
-import { cleanEmptyParams } from "../components/Table/cleanEmptyParams";
+import {
+  DEFAULT_PAGE_INDEX,
+  DEFAULT_PAGE_SIZE,
+} from "../components/Table/TransactionsDataTable";
 
 // Hook to update params
 export function useFilters<
@@ -31,3 +34,27 @@ export function useFilters<
 
   return { filters, setFilters, resetFilters };
 }
+
+const cleanEmptyParams = <T extends Record<string, unknown>>(search: T) => {
+  const newSearch = { ...search };
+
+  console.log("Evaluating params " + JSON.stringify(newSearch));
+
+  Object.keys(newSearch).forEach((key) => {
+    const value = newSearch[key];
+    if (
+      value === undefined ||
+      value === "" ||
+      (typeof value === "number" && isNaN(value))
+    ) {
+      delete newSearch[key];
+    }
+  });
+
+  if (search.pageIndex === DEFAULT_PAGE_INDEX) delete newSearch.pageIndex;
+  if (search.pageSize === DEFAULT_PAGE_SIZE) delete newSearch.pageSize;
+
+  console.log("Cleaned params are now " + JSON.stringify(newSearch));
+
+  return newSearch;
+};

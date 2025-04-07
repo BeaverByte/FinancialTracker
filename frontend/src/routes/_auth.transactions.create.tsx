@@ -4,15 +4,6 @@ import {
   TransactionFormValidationSchema,
   TransactionFormSchema,
 } from "../types/schemas/transactionSchema";
-import { TransactionForm } from "../components/Form/TransactionForm";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import { TransactionCard } from "../components/ui/transaction-card";
 
 export const Route = createFileRoute("/_auth/transactions/create")({

@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   LoginFormSchema,
   LoginFormValidationSchema,
-} from "../../types/schemas/loginSchema";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+} from "../types/schemas/loginSchema";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
@@ -13,8 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
-import { capitalizeFirstLetter } from "../../utils/stringUtils";
+} from "./ui/form";
+import { capitalizeFirstLetter } from "../utils/stringUtils";
 
 type LoginFormProps = {
   onSubmit: (data: LoginFormSchema) => void;

@@ -7,7 +7,7 @@ import {
   CardFooter,
 } from "./card";
 import { LoginFormSchema } from "../../types/schemas/loginSchema";
-import { LoginForm } from "../Form/LoginForm";
+import { LoginForm } from "../LoginForm";
 
 type LoginCardProps = {
   onSubmit: (data: LoginFormSchema) => void;

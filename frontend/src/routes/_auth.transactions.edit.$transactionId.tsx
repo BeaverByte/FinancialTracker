@@ -3,7 +3,7 @@ import { transactionQueryOptions } from "../transactionQueryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
 import { Transaction } from "../types/Transaction";
-import { TransactionForm } from "../components/Form/TransactionForm";
+import { TransactionForm } from "../components/TransactionForm";
 import { TransactionFormSchema } from "../types/schemas/transactionSchema";
 import {
   Card,

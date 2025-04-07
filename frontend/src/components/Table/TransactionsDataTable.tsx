@@ -26,7 +26,9 @@ type Props<T extends Record<string, string | number>> = {
   onSortingChange: OnChangeFn<SortingState>;
 };
 
-export default function Table<T extends Record<string, string | number>>({
+export default function TransactionsDataTable<
+  T extends Record<string, string | number>,
+>({
   data,
   columns,
   pagination,

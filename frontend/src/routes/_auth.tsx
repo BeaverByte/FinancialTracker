@@ -1,10 +1,4 @@
-import {
-  Outlet,
-  createFileRoute,
-  redirect,
-  useRouter,
-} from "@tanstack/react-router";
-import { useAuth } from "../context/AuthContext";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context, location }) => {
@@ -25,26 +19,8 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function AuthLayout() {
-  const router = useRouter();
-  const navigate = Route.useNavigate();
-  const auth = useAuth();
-
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      auth.logout().then(() => {
-        // Invalidate the route to reload the loader, which will also reset the error boundary
-        router.invalidate().finally(() => {
-          navigate({ to: "/" });
-        });
-      });
-    }
-  };
-
   return (
     <div>
-      <button type="button" onClick={handleLogout}>
-        Logout
-      </button>
       <Outlet />
     </div>
   );

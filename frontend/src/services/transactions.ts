@@ -92,15 +92,18 @@ export async function fetchTransactions(
   const url = `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}?${searchParams.toString()}`;
   console.log(`Final URL: ${url}`);
 
-  const transactions = await fetchData<PaginatedData<Transaction>>(url, {
+  const response = await fetchData<PaginatedData<Transaction>>(url, {
     method: "GET",
   });
 
-  console.log(`Fetched Data is ${JSON.stringify(transactions)}`);
+  console.log(`Fetched Data is ${JSON.stringify(response)}`);
+
+  const transactions = response.content;
+  const totalElements = response.totalElements;
 
   return {
-    content: transactions.content,
-    totalElements: transactions.totalElements,
+    content: transactions,
+    totalElements,
   };
 }
 

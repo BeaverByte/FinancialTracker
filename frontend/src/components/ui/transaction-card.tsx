@@ -2,7 +2,7 @@ import {
   TransactionFormData,
   TransactionFormSchema,
 } from "../../types/schemas/transactionSchema";
-import { TransactionForm } from "../Form/TransactionForm";
+import { TransactionForm } from "../TransactionForm";
 import {
   Card,
   CardContent,

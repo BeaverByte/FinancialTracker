@@ -6,13 +6,13 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { z } from "zod";
 import { LoginCard } from "../components/ui/login-card";
 import {
   LoginFormSchema,
   LoginFormValidationSchema,
 } from "../types/schemas/loginSchema";
+import { useAuth } from "../hooks/useAuth";
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const fallback = "/" as const;
@@ -73,7 +73,7 @@ function LoginComponent() {
     <LoginCard
       onSubmit={handleLogin}
       isLoggingIn={isLoggingIn}
-      onCancel={() => navigate({ to: "/login" })}
+      onCancel={() => navigate({ to: "/" })}
       error={error}
       showRedirectMessage={!!search.redirect}
     />
