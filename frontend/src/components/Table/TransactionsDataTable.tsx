@@ -11,6 +11,11 @@ import {
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
 import { MoveDown, MoveUp } from "lucide-react";
+import { Button } from "../ui/button";
+import { Select } from "../ui/select";
+import { TransactionsDataTableSelect } from "./TransactionsDataTableSelect";
+import { Input } from "../ui/input";
+import { PageInfo } from "./PageInfo";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -68,7 +73,7 @@ export default function TransactionsDataTable<
                   <th key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <>
-                        <button
+                        <Button
                           {...{
                             className: header.column.getCanSort()
                               ? "cursor-pointer select-none"
@@ -99,7 +104,7 @@ export default function TransactionsDataTable<
                               // false: " 🔃",
                             }[header.column.getIsSorted() as string]) ??
                             null}
-                        </button>
+                        </Button>
                         {header.column.getCanFilter() &&
                         fieldMeta?.filterKey !== undefined ? (
                           <DebouncedInput
@@ -146,40 +151,41 @@ export default function TransactionsDataTable<
         </tbody>
       </table>
       <div className="flex items-center gap-2 my-2">
-        <button
+        <Button
+          className="cursor-pointer select-none"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
           {"<<"}
-        </button>
-        <button
+        </Button>
+        <Button
+          className="cursor-pointer select-none"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           {"<"}
-        </button>
-        <button
+        </Button>
+        <Button
+          className="cursor-pointer select-none"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           {">"}
-        </button>
-        <button
+        </Button>
+        <Button
+          className="cursor-pointer select-none"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
           {">>"}
-        </button>
-        <span className="flex items-center gap-1">
-          <div>Page</div>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
-          </strong>
-        </span>
+        </Button>
+        <PageInfo
+          currentPage={table.getState().pagination.pageIndex + 1}
+          totalPages={table.getPageCount()}
+        />
         <span className="flex items-center gap-1">
           | Go to page:
-          <input
+          <Input
             type="number"
             value={table.getState().pagination.pageIndex + 1}
             onChange={(e) => {
@@ -189,18 +195,13 @@ export default function TransactionsDataTable<
             className="border p-1 rounded w-16"
           />
         </span>
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            table.setPageSize(Number(e.target.value));
+        <TransactionsDataTableSelect
+          value={table.getState().pagination.pageSize.toString()}
+          pageSize={[10, 20, 30, 40, 50]}
+          onChange={(value: string) => {
+            table.setPageSize(Number(value));
           }}
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
+        />
       </div>
     </div>
   );

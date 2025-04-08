@@ -43,7 +43,6 @@ A project designed to help users track profits and expenses. **Spring Boot** is 
    ```
 
    - Create `.env` in src/main/resources with your database credentials and JWT properties.
-     (Ideally, plain .env is not used in production. Instead prefer Docker secrets, Kubernetes Secrets, etc.):
 
    ```
    DATABASE_URL=jdbc:postgresql://localhost:5432/financial_transactions
