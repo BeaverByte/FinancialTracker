@@ -2,6 +2,14 @@ import { ColumnDef, createColumnHelper, RowData } from "@tanstack/react-table";
 import { Transaction } from "../../types/Transaction";
 import { Link } from "@tanstack/react-router";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { CircleEllipsis } from "lucide-react";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,27 +43,32 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
       };
 
       return (
-        <>
-          <Button variant={"secondary"} asChild>
-            <Link
-              to={`/transactions/edit/$transactionId`}
-              params={{ transactionId: transactionIdParam }}
-              search={(prev) => prev}
-            >
-              Edit
-            </Link>
-          </Button>
-          <Button
-            variant={"destructive"}
-            onClick={handleDelete}
-            className="text-white hover:text-red-800 focus:outline-none"
-          >
-            Delete
-          </Button>
-        </>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={"outline"}>
+              <CircleEllipsis />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link
+                  className="text-primary"
+                  to={`/transactions/edit/$transactionId`}
+                  params={{ transactionId: transactionIdParam }}
+                  search={(prev) => prev}
+                >
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={handleDelete}>
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
-    // enableSorting: false,
   }),
   {
     accessorKey: "id",

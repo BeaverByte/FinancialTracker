@@ -62,11 +62,11 @@ export default function TransactionsDataTable<
   });
 
   return (
-    <div className="h-min max-h-screen max-w-full overflow-auto">
-      <table className="border-separate">
+    <div>
+      <table className="border-separate border-spacing-2">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <tr className="grid-cols-8" key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const fieldMeta = header.column.columnDef.meta;
 

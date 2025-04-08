@@ -53,7 +53,7 @@ function NotFound() {
 
 function RootComponent() {
   return (
-    <div className="border-8">
+    <div>
       <MainLayout />
       <main>
         <Outlet />

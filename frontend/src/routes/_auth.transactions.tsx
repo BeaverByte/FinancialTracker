@@ -85,19 +85,21 @@ function TransactionsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-2 p-2">
+    // <div className="flex flex-col gap-2 p-2">
+    <div>
       {/* <div> */}
-      <h1 className="text-2xl font-semibold mb-1">Transactions</h1>
+      <h1>Transactions</h1>
       <Outlet />
 
       {matchesTransactionsRoute && (
-        <Button className="max-w-1/8" asChild>
+        // <Button className="max-w-1/8 bg-white text-primary" asChild>
+        <Button variant={"outline"} className="w-2/3 justify-center" asChild>
           <Link
             to="/transactions/create"
             search={(prev) => prev}
-            className="inline-block px-6 py-3 text-white font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none"
+            className="inline-block px-6 py-3 text-black font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-102 focus:outline-none"
           >
-            Add Transaction
+            + Transaction
           </Link>
         </Button>
       )}
