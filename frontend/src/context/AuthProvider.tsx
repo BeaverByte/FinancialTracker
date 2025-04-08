@@ -1,22 +1,27 @@
 import { redirect } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useGetTransactions } from "../hooks/useGetTransactions";
 import { loginUser, logoutUser } from "../services/auth";
-import { AuthContext } from "./AuthContext";
+import { AuthContext, AuthContextType } from "./AuthContext";
+import { NetworkError } from "../services/errors";
 
 export function AuthProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const { error, isLoading, isError } = useGetTransactions();
+  const isLoggedIn = !isError;
+  const hasConnectionError = error instanceof NetworkError;
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
+  console.log(`AuthProvider error is ${error}`);
+  console.log(`hasConnectionError is currently ${hasConnectionError}`);
   useEffect(() => {
     if (!isLoading) {
-      setIsAuthenticated(!isError); // If there's an error fetching transactions, assume not logged in
+      setIsAuthenticated(isLoggedIn);
     }
-  }, [isLoading, isError]);
+  }, [isLoading, isLoggedIn, hasConnectionError]);
 
-  const login = async (username: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
     try {
       const { user } = await loginUser(username, password);
       setIsAuthenticated(true);
@@ -28,9 +33,9 @@ export function AuthProvider({
     } catch (error) {
       throw new Error(`Login failed. Please check credentials: ${error}`);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     console.log("Logging out...");
 
     try {
@@ -40,12 +45,22 @@ export function AuthProvider({
     } catch (error) {
       throw new Error(`Error without user logout: ${error}`);
     }
-  };
+  }, []);
 
-  const contextValue = { isAuthenticated, isLoading, logout, login, error };
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      isAuthenticated,
+      hasConnectionError,
+      isLoading,
+      logout,
+      login,
+      error,
+    }),
+    [isAuthenticated, hasConnectionError, isLoading, logout, login, error]
+  );
 
   return (
-    <AuthContext.Provider value={{ ...contextValue }}>
+    <AuthContext.Provider value={contextValue}>
       {isLoading ? null : children}
     </AuthContext.Provider>
   );

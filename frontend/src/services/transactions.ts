@@ -3,6 +3,7 @@ import { API_ROUTES } from "../utils/API_ROUTES";
 import { Transaction, TransactionFilters } from "../types/Transaction";
 import { PaginatedData } from "../types/api/types";
 import { fetchData } from "./fetch";
+import { NetworkError } from "./errors";
 
 export const QUERY_KEY_TRANSACTIONS = "transactions";
 
@@ -62,6 +63,7 @@ export const getTransactions = async (): Promise<
   PaginatedData<Transaction>
 > => {
   const url = API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS;
+  throw new NetworkError("Intentional Error");
   return await fetchData<PaginatedData<Transaction>>(url, { method: "GET" });
 };
 

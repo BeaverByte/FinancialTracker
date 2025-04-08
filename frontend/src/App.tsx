@@ -1,7 +1,7 @@
 import "./App.css";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { globalQueryClient as queryClient } from "./services/queryClientConfig";
+import { globalQueryClient } from "./services/queryClientConfig";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./router";
 import { useAuth } from "./hooks/useAuth";
@@ -20,7 +20,7 @@ function InnerApp() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={globalQueryClient}>
       <AuthProvider>
         <InnerApp />
       </AuthProvider>

@@ -1,6 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
-import { NetworkError } from "./errors";
-import { UnauthorizedError } from "./errors";
+import { UnauthorizedError, NetworkError } from "./errors";
 
 // Although Tanstack Query defaults to 3 retries (after 1st failed request), created this variable for config
 const queryRetryCount = 2;
