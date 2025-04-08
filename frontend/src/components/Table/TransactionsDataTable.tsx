@@ -10,9 +10,8 @@ import {
 } from "@tanstack/react-table";
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
-import { MoveDown, MoveUp } from "lucide-react";
+import { ArrowDownUp, MoveDown, MoveUp } from "lucide-react";
 import { Button } from "../ui/button";
-import { Select } from "../ui/select";
 import { TransactionsDataTableSelect } from "./TransactionsDataTableSelect";
 import { Input } from "../ui/input";
 import { PageInfo } from "./PageInfo";
@@ -101,7 +100,7 @@ export default function TransactionsDataTable<
                             {
                               asc: <MoveUp size={20} />,
                               desc: <MoveDown size={20} />,
-                              // false: " 🔃",
+                              false: <ArrowDownUp />,
                             }[header.column.getIsSorted() as string]) ??
                             null}
                         </Button>

@@ -1,5 +1,6 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useAuth } from "../hooks/useAuth";
+import { Button } from "./ui/button";
 
 export function Navbar() {
   const auth = useAuth();
@@ -18,10 +19,28 @@ export function Navbar() {
   return (
     <nav className="flex justify-between p-4">
       <div className="flex gap-4">
-        <Link to="/" className="text-white no-underline hover:text-gray-300">
-          Home
-        </Link>
-        <Link to="/transactions">Transactions</Link>
+        <Button variant="link" asChild>
+          <Link
+            to="/"
+            activeProps={{
+              className: `focus:ring-primary text-decoration-line: underline cursor-default`,
+              onClick: (e) => e.preventDefault(),
+            }}
+          >
+            Home
+          </Link>
+        </Button>
+        <Button variant="link" asChild>
+          <Link
+            to="/transactions"
+            activeProps={{
+              className: `focus:ring-primary text-decoration-line: underline cursor-default`,
+              onClick: (e) => e.preventDefault(),
+            }}
+          >
+            Transactions
+          </Link>
+        </Button>
       </div>
       <div>
         {auth.isAuthenticated ? (
