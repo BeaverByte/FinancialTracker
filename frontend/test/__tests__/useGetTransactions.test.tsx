@@ -6,7 +6,7 @@ import { test } from "../../src/mocks/test-extend";
 import { http, HttpResponse } from "msw";
 import { API_ROUTES } from "../../src/utils/API_ROUTES";
 import { worker } from "../../src/mocks/browser";
-import { NetworkError } from "../../src/services/transactions";
+import { NetworkError } from "../../src/services/errors";
 import { createTestQueryWrapper } from "./utility/TestQueryWrapper";
 
 describe("useGetTransactions", () => {

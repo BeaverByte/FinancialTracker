@@ -6,8 +6,13 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { z } from "zod";
+import { LoginCard } from "../components/ui/login-card";
+import {
+  LoginFormSchema,
+  LoginFormValidationSchema,
+} from "../types/schemas/loginSchema";
+import { useAuth } from "../hooks/useAuth";
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const fallback = "/" as const;
@@ -26,9 +31,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginComponent() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
   const router = useRouter();
 
   const isLoading = useRouterState({ select: (s) => s.isLoading });
@@ -40,9 +43,18 @@ function LoginComponent() {
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleLogin = async (data: LoginFormSchema) => {
+    console.log(`Handling Login, data: ${JSON.stringify(data)}`);
+    const result = LoginFormValidationSchema.safeParse(data);
+
     setIsSubmitting(true);
+
+    if (!result.success) {
+      console.log("Zod Error: " + result.error);
+    }
+
+    const username = data.username ?? "";
+    const password = data.password ?? "";
 
     try {
       await auth.login(username, password);
@@ -50,7 +62,7 @@ function LoginComponent() {
 
       await navigate({ to: search.redirect ?? fallback });
     } catch (err) {
-      setError("Login failed. Please check your credentials: " + err);
+      setError(`${err}`);
       setIsSubmitting(false);
     }
   };
@@ -58,42 +70,12 @@ function LoginComponent() {
   const isLoggingIn = isLoading || isSubmitting;
 
   return (
-    <div>
-      <h1>Login page</h1>
-      {search.redirect ? (
-        <p className="text-red-500">You need to login to access this page.</p>
-      ) : (
-        <p>Please login.</p>
-      )}
-      <form onSubmit={handleLogin}>
-        <fieldset disabled={isLoggingIn}>
-          <div>
-            <label htmlFor="username">Username:</label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Password:</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-        </fieldset>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {isLoggingIn ? <p>"Loading..."</p> : ""}
-        <button type="submit">Login</button>
-      </form>
-    </div>
+    <LoginCard
+      onSubmit={handleLogin}
+      isLoggingIn={isLoggingIn}
+      onCancel={() => navigate({ to: "/" })}
+      error={error}
+      showRedirectMessage={!!search.redirect}
+    />
   );
 }

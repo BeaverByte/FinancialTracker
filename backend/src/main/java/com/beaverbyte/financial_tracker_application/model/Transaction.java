@@ -30,6 +30,7 @@ public class Transaction {
 	private String category;
 
 	// Amount (using Postgresql numeric(19,4))
+	// Most major currencies only require 2 decimal places, but some require 4
 	@Column(name = "amount", precision = 19, scale = 4)
 	private BigDecimal amount;
 

@@ -2,7 +2,6 @@ import {
   createFileRoute,
   Link,
   Outlet,
-  useLocation,
   useMatchRoute,
 } from "@tanstack/react-router";
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
@@ -19,10 +18,10 @@ import {
 } from "../components/Table/tableSortMapper";
 import { useMemo } from "react";
 import { getTransactionColumns } from "../components/Table/TransactionColumns";
-import Table, {
+import TransactionsDataTable, {
   DEFAULT_PAGE_INDEX,
   DEFAULT_PAGE_SIZE,
-} from "../components/Table/TanstackTable";
+} from "../components/Table/TransactionsDataTable";
 import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 
 export const Route = createFileRoute("/_auth/transactions")({
@@ -43,14 +42,14 @@ function TransactionsPage() {
   const matchRoute = useMatchRoute();
   const matchesTransactionsRoute = matchRoute({ to: "/transactions" });
 
-  const { data: queriedData } = useQuery({
+  const { data: transactionsData } = useQuery({
     queryKey: [QUERY_KEY_TRANSACTIONS, filters],
-    // queryKey: [QUERY_KEY_TRANSACTIONS],
     queryFn: () => fetchTransactions(filters),
     placeholderData: keepPreviousData,
   });
 
-  const transactions = queriedData?.content;
+  const transactions = transactionsData?.content;
+  const totalElements = transactionsData?.totalElements;
 
   const paginationState = {
     pageIndex: filters.pageIndex ?? DEFAULT_PAGE_INDEX,
@@ -70,7 +69,7 @@ function TransactionsPage() {
         : updaterOrValue;
     // Change to sorting will update Filter/URL Params
     const internalSortByParam = convertStateToSortByInURL(newSortingState);
-    console.log(internalSortByParam);
+    console.log(`Internal SortByParam is ${internalSortByParam}`);
 
     return setFilters({ sortBy: internalSortByParam });
   }
@@ -90,7 +89,6 @@ function TransactionsPage() {
       <h1 className="text-2xl font-semibold mb-1">Transactions</h1>
       <Outlet />
 
-      {/* User Actions */}
       {matchesTransactionsRoute && (
         <Link
           to="/transactions/create"
@@ -102,13 +100,13 @@ function TransactionsPage() {
       )}
 
       {/* Transactions Table */}
-      <Table
+      <TransactionsDataTable
         data={transactions ?? []}
         columns={transactionsColumns}
         pagination={paginationState}
         paginationOptions={{
           onPaginationChange: handlePaginationChange,
-          rowCount: queriedData?.totalElements,
+          rowCount: totalElements,
         }}
         filters={filters}
         onFilterChange={(filters) => setFilters(filters)}
@@ -116,7 +114,7 @@ function TransactionsPage() {
         onSortingChange={handleSortingChange}
       />
       <div>
-        {queriedData?.totalElements} transactions found
+        {totalElements} transactions found
         <button
           className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
           onClick={resetFilters}

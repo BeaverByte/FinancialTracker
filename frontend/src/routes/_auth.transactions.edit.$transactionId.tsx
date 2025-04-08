@@ -2,8 +2,18 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { transactionQueryOptions } from "../transactionQueryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
-import { EditTransactionModal } from "../components/Form/EditTransactionModal";
 import { Transaction } from "../types/Transaction";
+import { TransactionForm } from "../components/TransactionForm";
+import { TransactionFormSchema } from "../types/schemas/transactionSchema";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { TransactionCard } from "../components/ui/transaction-card";
 
 export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
   {
@@ -12,11 +22,11 @@ export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
         transactionQueryOptions(transactionId)
       );
     },
-    component: EditTransactionComponent,
+    component: EditTransactionForm,
   }
 );
 
-function EditTransactionComponent() {
+function EditTransactionForm() {
   const transactionId = Route.useParams().transactionId;
 
   const {
@@ -35,7 +45,15 @@ function EditTransactionComponent() {
     return <p>Error: "{transactionId}" is not a valid transaction ID</p>;
   }
 
-  const handleSave = (updatedTransaction: Transaction) => {
+  console.log(
+    `Edit transaction form with transaction of ${JSON.stringify(transaction)}`
+  );
+
+  const handleEdit = (data: TransactionFormSchema) => {
+    const updatedTransaction: Transaction = {
+      id,
+      ...data,
+    };
     console.log(
       `Saving transaction, ${JSON.stringify(updatedTransaction)}, to id, ${id}`
     );
@@ -50,16 +68,12 @@ function EditTransactionComponent() {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <>
-      <h2>Edit transaction</h2>
-      <EditTransactionModal
-        key={transaction.id}
-        transaction={transaction}
-        onCancel={() =>
-          navigate({ to: `/transactions`, search: (prev) => prev })
-        }
-        onSave={handleSave}
-      />
-    </>
+    <TransactionCard
+      title="Edit Transaction"
+      description="Makes changes to transaction below"
+      onSubmit={handleEdit}
+      formValues={transaction}
+      onCancel={() => navigate({ to: `/transactions`, search: (prev) => prev })}
+    />
   );
 }
