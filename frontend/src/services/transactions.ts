@@ -63,7 +63,6 @@ export const getTransactions = async (): Promise<
   PaginatedData<Transaction>
 > => {
   const url = API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS;
-  throw new NetworkError("Intentional Error");
   return await fetchData<PaginatedData<Transaction>>(url, { method: "GET" });
 };
 
