@@ -23,6 +23,7 @@ import TransactionsDataTable, {
   DEFAULT_PAGE_SIZE,
 } from "../components/Table/TransactionsDataTable";
 import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
+import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions")({
   loader: ({ context: { queryClient } }) =>
@@ -90,16 +91,17 @@ function TransactionsPage() {
       <Outlet />
 
       {matchesTransactionsRoute && (
-        <Link
-          to="/transactions/create"
-          search={(prev) => prev}
-          className="inline-block px-6 py-3 text-white font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none"
-        >
-          Add Transaction
-        </Link>
+        <Button className="max-w-1/8" asChild>
+          <Link
+            to="/transactions/create"
+            search={(prev) => prev}
+            className="inline-block px-6 py-3 text-white font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none"
+          >
+            Add Transaction
+          </Link>
+        </Button>
       )}
 
-      {/* Transactions Table */}
       <TransactionsDataTable
         data={transactions ?? []}
         columns={transactionsColumns}

@@ -42,11 +42,11 @@ function TransactionForm({
   });
 
   const transactionFormKeys: (keyof TransactionFormSchema)[] = [
-    "account",
-    "amount",
-    "category",
-    "date",
     "merchant",
+    "account",
+    "category",
+    "amount",
+    "date",
     "note",
   ];
 

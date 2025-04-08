@@ -1,6 +1,7 @@
 import { ColumnDef, createColumnHelper, RowData } from "@tanstack/react-table";
 import { Transaction } from "../../types/Transaction";
 import { Link } from "@tanstack/react-router";
+import { Button } from "../ui/button";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,19 +36,22 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
 
       return (
         <>
-          <Link
-            to={`/transactions/edit/$transactionId`}
-            params={{ transactionId: transactionIdParam }}
-            search={(prev) => prev}
-          >
-            Edit
-          </Link>
-          <button
+          <Button variant={"secondary"} asChild>
+            <Link
+              to={`/transactions/edit/$transactionId`}
+              params={{ transactionId: transactionIdParam }}
+              search={(prev) => prev}
+            >
+              Edit
+            </Link>
+          </Button>
+          <Button
+            variant={"destructive"}
             onClick={handleDelete}
-            className="text-red-600 hover:text-red-800 focus:outline-none"
+            className="text-white hover:text-red-800 focus:outline-none"
           >
             Delete
-          </button>
+          </Button>
         </>
       );
     },

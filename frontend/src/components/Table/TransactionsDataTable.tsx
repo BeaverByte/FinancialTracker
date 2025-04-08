@@ -5,6 +5,7 @@ import {
   OnChangeFn,
   PaginationOptions,
   PaginationState,
+  SortDirection,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -61,33 +62,30 @@ export default function TransactionsDataTable<
   });
 
   return (
-    <div>
-      <table>
+    <div className="h-min max-h-screen max-w-full overflow-auto">
+      <table className="border-separate">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const fieldMeta = header.column.columnDef.meta;
+
+                const canSort = header.column.getCanSort();
+                const nextSortOrder = header.column.getNextSortingOrder();
+
                 return (
                   <th key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <>
                         <Button
-                          {...{
-                            className: header.column.getCanSort()
+                          className={
+                            header.column.getCanSort()
                               ? "cursor-pointer select-none"
-                              : "",
-                            // Handler will toggle column sorting state
-                            onClick: header.column.getToggleSortingHandler(),
-                            // onClick: header.column.getToggleSortingHandler(),
-                            title: header.column.getCanSort()
-                              ? header.column.getNextSortingOrder() === "asc"
-                                ? "Sort ascending"
-                                : header.column.getNextSortingOrder() === "desc"
-                                  ? "Sort descending"
-                                  : "Clear sort"
-                              : undefined,
-                          }}
+                              : ""
+                          }
+                          // Handler will toggle column sorting state
+                          onClick={header.column.getToggleSortingHandler()}
+                          title={getSortTitle(canSort, nextSortOrder)}
                         >
                           {
                             //  Necessary to flexRender since using cell: () => JSX column definition options
@@ -149,7 +147,7 @@ export default function TransactionsDataTable<
           })}
         </tbody>
       </table>
-      <div className="flex items-center gap-2 my-2">
+      <div>
         <Button
           className="cursor-pointer select-none"
           onClick={() => table.setPageIndex(0)}
@@ -204,4 +202,18 @@ export default function TransactionsDataTable<
       </div>
     </div>
   );
+}
+
+function getSortTitle(canSort: boolean, nextSortOrder: SortDirection | false) {
+  if (!canSort) {
+    return undefined;
+  }
+
+  if (nextSortOrder === "asc") {
+    return "Sort ascending";
+  } else if (nextSortOrder === "desc") {
+    return "Sort descending";
+  } else {
+    return "Clear sort";
+  }
 }

@@ -44,14 +44,11 @@ export function Navbar() {
       </div>
       <div>
         {auth.isAuthenticated ? (
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 rounded"
-          >
+          <Button onClick={handleLogout} className="bg-red-500 rounded">
             Logout
-          </button>
+          </Button>
         ) : (
-          <Link to="/login" className="px-4 py-2 bg-blue-500 rounded">
+          <Link to="/login" className="bg-blue-500 rounded">
             Login
           </Link>
         )}
