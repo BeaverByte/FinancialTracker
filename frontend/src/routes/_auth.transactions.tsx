@@ -85,12 +85,12 @@ function TransactionsPage() {
   }
 
   return (
-    <div>
-      <h1>Transactions</h1>
+    <div className="max-w-7x1 mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="py-4">Transactions</h1>
       <Outlet />
 
       {matchesTransactionsRoute && (
-        <Button variant={"outline"} className="w-2/3 justify-center" asChild>
+        <Button variant={"outline"} className="w-2/3 justify-center " asChild>
           <Link
             to="/transactions/create"
             search={(prev) => prev}
@@ -101,19 +101,22 @@ function TransactionsPage() {
         </Button>
       )}
 
-      <TransactionsDataTable
-        data={transactions ?? []}
-        columns={transactionsColumns}
-        pagination={paginationState}
-        paginationOptions={{
-          onPaginationChange: handlePaginationChange,
-          rowCount: totalElements,
-        }}
-        filters={filters}
-        onFilterChange={(filters) => setFilters(filters)}
-        sorting={sortingState}
-        onSortingChange={handleSortingChange}
-      />
+      <div className="mt-6">
+        <TransactionsDataTable
+          data={transactions ?? []}
+          columns={transactionsColumns}
+          pagination={paginationState}
+          paginationOptions={{
+            onPaginationChange: handlePaginationChange,
+            rowCount: totalElements,
+          }}
+          filters={filters}
+          onFilterChange={(filters) => setFilters(filters)}
+          sorting={sortingState}
+          onSortingChange={handleSortingChange}
+        />
+      </div>
+
       <div>
         {totalElements} transactions found
         <Button
