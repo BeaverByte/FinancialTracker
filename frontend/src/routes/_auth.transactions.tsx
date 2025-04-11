@@ -24,6 +24,7 @@ import TransactionsDataTable, {
 } from "../components/Table/TransactionsDataTable";
 import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 import { Button } from "../components/ui/button";
+import { DataTableViewOptions } from "@/components/Table/DataTableViewOptions";
 
 export const Route = createFileRoute("/_auth/transactions")({
   loader: ({ context: { queryClient } }) =>

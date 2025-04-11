@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { CircleEllipsis } from "lucide-react";
+import { CircleEllipsis, DollarSign } from "lucide-react";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -97,8 +97,22 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "amount",
-    header: () => "Amount",
+    header: () => (
+      <>
+        <DollarSign />
+        Amount
+      </>
+    ),
     meta: { filterKey: "amount" },
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("amount"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+
+      return <div className="text-right">{formatted}</div>;
+    },
   },
   {
     accessorKey: "note",

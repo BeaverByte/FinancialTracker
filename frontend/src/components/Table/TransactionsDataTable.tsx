@@ -11,11 +11,27 @@ import {
 } from "@tanstack/react-table";
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
-import { ArrowDownUp, MoveDown, MoveUp } from "lucide-react";
+import { ArrowDownUp, EyeOff, Menu, MoveDown, MoveUp } from "lucide-react";
 import { Button } from "../ui/button";
 import { TransactionsDataTableSelect } from "./TransactionsDataTableSelect";
 import { Input } from "../ui/input";
 import { PageInfo } from "./PageInfo";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { DataTableViewOptions } from "./DataTableViewOptions";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -43,7 +59,7 @@ export default function TransactionsDataTable<
   sorting,
   onSortingChange,
 }: Readonly<Props<T>>) {
-  const table = useReactTable({
+  const table = useReactTable<Transaction>({
     data,
     columns,
     state: { pagination, sorting },
@@ -62,11 +78,14 @@ export default function TransactionsDataTable<
   });
 
   return (
-    <div className="overflow-y-auto">
-      <table className="table-fixed border-separate border-spacing-2 min-w-full">
-        <thead>
+    <div>
+      <div className="py-2">
+        <DataTableViewOptions table={table}></DataTableViewOptions>
+      </div>
+      <Table>
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const fieldMeta = header.column.columnDef.meta;
 
@@ -74,7 +93,7 @@ export default function TransactionsDataTable<
                 const nextSortOrder = header.column.getNextSortingOrder();
 
                 return (
-                  <th key={header.id} colSpan={header.colSpan}>
+                  <TableHead key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <>
                         <Button
@@ -102,6 +121,26 @@ export default function TransactionsDataTable<
                             }[header.column.getIsSorted() as string]) ??
                             null}
                         </Button>
+                        {header.column.id !== "actions" && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant={"ghost"} size={"sm"}>
+                                <Menu />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  header.column.toggleVisibility(false)
+                                }
+                              >
+                                <EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                Hide
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+
                         {header.column.getCanFilter() &&
                         fieldMeta?.filterKey !== undefined ? (
                           <DebouncedInput
@@ -122,32 +161,36 @@ export default function TransactionsDataTable<
                         ) : null}
                       </>
                     )}
-                  </th>
+                  </TableHead>
                 );
               })}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => {
-            return (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div>
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           className="cursor-pointer select-none"
           onClick={() => table.setPageIndex(0)}
