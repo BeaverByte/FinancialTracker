@@ -1,18 +1,27 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useAuth } from "../hooks/useAuth";
 import { Button } from "./ui/button";
+import { useState } from "react";
 
 export function Navbar() {
-  const auth = useAuth();
+  const { logout, isPending, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
-  const handleLogout = () => {
+  console.log(`useAuth isLoading is ${isPending}`);
+
+  const handleLogout = async () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      auth.logout().then(() => {
-        router.invalidate().finally(() => {
-          router.navigate({ to: "/" });
-        });
-      });
+      setIsLoggingOut(true);
+      try {
+        await logout();
+        await router.invalidate();
+        router.navigate({ to: "/" });
+      } catch (error) {
+        throw new Error(`Logout failed. ${error}`);
+      } finally {
+        setIsLoggingOut(false);
+      }
     }
   };
 
@@ -43,14 +52,20 @@ export function Navbar() {
         </Button>
       </div>
       <div>
-        {auth.isAuthenticated ? (
-          <Button onClick={handleLogout} className="bg-red-500 rounded">
-            Logout
+        {isAuthenticated ? (
+          <Button
+            onClick={handleLogout}
+            disabled={isPending}
+            className="bg-red-400 rounded"
+          >
+            {isPending || isLoggingOut ? "Logging out..." : "Logout"}
           </Button>
         ) : (
-          <Link to="/login" className="bg-blue-500 rounded">
-            Login
-          </Link>
+          <Button variant="link" asChild>
+            <Link to="/login" className="bg-blue-500 rounded">
+              Login
+            </Link>
+          </Button>
         )}
       </div>
     </nav>

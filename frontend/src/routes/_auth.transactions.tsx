@@ -85,14 +85,11 @@ function TransactionsPage() {
   }
 
   return (
-    // <div className="flex flex-col gap-2 p-2">
     <div>
-      {/* <div> */}
       <h1>Transactions</h1>
       <Outlet />
 
       {matchesTransactionsRoute && (
-        // <Button className="max-w-1/8 bg-white text-primary" asChild>
         <Button variant={"outline"} className="w-2/3 justify-center" asChild>
           <Link
             to="/transactions/create"
@@ -119,13 +116,14 @@ function TransactionsPage() {
       />
       <div>
         {totalElements} transactions found
-        <button
-          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
+        <Button
+          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed transition-all duration-300 hover:scale-102 focus:outline-none"
+          variant="secondary"
           onClick={resetFilters}
           disabled={Object.keys(filters).length === 1}
         >
           Reset Filters
-        </button>
+        </Button>
       </div>
       {/* <pre>{JSON.stringify(filters, null, 2)}</pre> */}
     </div>
