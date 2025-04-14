@@ -18,6 +18,7 @@ import { router } from "../router";
 const fallback = "/" as const;
 
 export const Route = createFileRoute("/login")({
+  component: LoginComponent,
   validateSearch: z.object({
     redirect: z.string().optional().catch(""),
   }),
@@ -27,7 +28,6 @@ export const Route = createFileRoute("/login")({
       throw redirect({ to: search.redirect ?? fallback });
     }
   },
-  component: LoginComponent,
 });
 
 function LoginComponent() {
@@ -60,7 +60,8 @@ function LoginComponent() {
       await router.invalidate();
       await navigate({ to: search.redirect ?? fallback });
     } catch (err) {
-      setError(`${err}`);
+      setError(`${err}. Please try logging in again`);
+    } finally {
       setIsSubmitting(false);
     }
   };

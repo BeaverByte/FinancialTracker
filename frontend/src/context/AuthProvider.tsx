@@ -25,28 +25,17 @@ export function AuthProvider({
   }, [isPending, isError, hasConnectionError]);
 
   const login = useCallback(async (username: string, password: string) => {
-    try {
-      const { user } = await loginUser(username, password);
-      setIsAuthenticated(true);
-      redirect({
-        to: "/login",
-      });
-      console.log("User has logged in: " + user);
-      return user;
-    } catch (error) {
-      throw new Error(`Login failed. Please check credentials: ${error}`);
-    }
+    const { user } = await loginUser(username, password);
+    setIsAuthenticated(true);
+    console.log("User has logged in: " + user);
+    return user;
   }, []);
 
   const logout = useCallback(async () => {
     console.log("Logging out...");
-    try {
-      await logoutUser();
-      setIsAuthenticated(false);
-      console.log("User has logged out");
-    } catch (error) {
-      throw new Error(`Error without user logout: ${error}`);
-    }
+    await logoutUser();
+    setIsAuthenticated(false);
+    console.log("User has logged out");
   }, []);
 
   const contextValue = useMemo<AuthContextType>(
