@@ -21,9 +21,7 @@ export const fetchData = async <Type>(
       console.log(`Fetched data response not OK... ${response.status}`);
       if (response.status === 401) {
         console.error(`Error with Unauthorized User`);
-        throw new UnauthorizedError(
-          "User does not have correct authentication credentials"
-        );
+        throw new UnauthorizedError("User not logged in");
       }
       throw new Error(`Failed to fetch: ${response.status}`);
     }

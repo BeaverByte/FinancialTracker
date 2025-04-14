@@ -26,7 +26,6 @@ import {
 } from "../ui/table";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -58,8 +57,8 @@ export default function TransactionsDataTable<
   onFilterChange,
   sorting,
   onSortingChange,
-}: Readonly<Props<T>>) {
-  const table = useReactTable<Transaction>({
+}: Props<T>) {
+  const table = useReactTable<T>({
     data,
     columns,
     state: { pagination, sorting },

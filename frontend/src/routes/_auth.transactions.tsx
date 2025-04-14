@@ -24,7 +24,6 @@ import TransactionsDataTable, {
 } from "../components/Table/TransactionsDataTable";
 import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 import { Button } from "../components/ui/button";
-import { DataTableViewOptions } from "@/components/Table/DataTableViewOptions";
 
 export const Route = createFileRoute("/_auth/transactions")({
   loader: ({ context: { queryClient } }) =>
@@ -129,7 +128,7 @@ function TransactionsPage() {
           Reset Filters
         </Button>
       </div>
-      {/* <pre>{JSON.stringify(filters, null, 2)}</pre> */}
+      <pre>{JSON.stringify(filters, null, 2)}</pre>
     </div>
   );
 }
