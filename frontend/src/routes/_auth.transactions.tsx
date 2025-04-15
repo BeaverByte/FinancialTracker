@@ -26,8 +26,9 @@ import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions")({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.ensureQueryData(transactionsQueryOptions),
+  loader: async ({ context: { queryClient } }) => {
+    await queryClient.ensureQueryData(transactionsQueryOptions);
+  },
   validateSearch: () => ({}) as TransactionFilters,
   component: TransactionsPage,
 });

@@ -3,7 +3,6 @@ import { API_ROUTES } from "../utils/API_ROUTES";
 import { Transaction, TransactionFilters } from "../types/Transaction";
 import { PaginatedData } from "../types/api/types";
 import { fetchData } from "./fetch";
-import { NetworkError } from "./errors";
 
 export const QUERY_KEY_TRANSACTIONS = "transactions";
 
@@ -25,9 +24,14 @@ export async function fetchTransactions(
   const searchParams = new URLSearchParams();
 
   if (sortBy) {
-    const [field, order] = sortBy.split(".");
-    const sort = `${field},${order}`;
-    searchParams.append("sort", sort);
+    const sortFields = sortBy.split(",");
+
+    sortFields.forEach((fieldOrder) => {
+      const [field, order] = fieldOrder.split(".");
+      if (field && order) {
+        searchParams.append("sort", `${field},${order}`);
+      }
+    });
   }
 
   searchParams.append("page", pageIndex.toString());

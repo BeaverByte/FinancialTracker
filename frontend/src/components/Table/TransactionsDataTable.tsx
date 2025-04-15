@@ -1,7 +1,9 @@
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   OnChangeFn,
   PaginationOptions,
   PaginationState,
@@ -31,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { DataTableViewOptions } from "./DataTableViewOptions";
+import { fuzzyFilter } from "./fuzzyFilter";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -61,18 +64,22 @@ export default function TransactionsDataTable<
   const table = useReactTable<T>({
     data,
     columns,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
     state: { pagination, sorting },
     onSortingChange,
-    enableMultiSort: true,
-    // Necessary in order for Tanstack sorting behavior to work with null fields
-    sortDescFirst: true,
+    sortDescFirst: true, // Starting with Desc Tanstack sorting behavior to work with null fields
     ...paginationOptions,
     manualFiltering: true,
     enableColumnFilters: false,
     manualSorting: true,
     manualPagination: true,
     enableSortingRemoval: true,
+
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+
     // debugTable: true,
   });
 
@@ -90,6 +97,10 @@ export default function TransactionsDataTable<
 
                 const canSort = header.column.getCanSort();
                 const nextSortOrder = header.column.getNextSortingOrder();
+
+                const shouldHaveFilterInput =
+                  header.column.getCanFilter() &&
+                  fieldMeta?.filterKey !== undefined;
 
                 return (
                   <TableHead key={header.id} colSpan={header.colSpan}>
@@ -140,11 +151,11 @@ export default function TransactionsDataTable<
                           </DropdownMenu>
                         )}
 
-                        {header.column.getCanFilter() &&
-                        fieldMeta?.filterKey !== undefined ? (
+                        {shouldHaveFilterInput ? (
                           <DebouncedInput
-                            className="w-36 border shadow rounded"
+                            className="flex w-24 px-1 py-1 border shadow rounded"
                             onChange={(value) => {
+                              header.column.setFilterValue(value);
                               onFilterChange({
                                 [fieldMeta.filterKey as keyof T]: value,
                               } as Partial<T>);
@@ -155,7 +166,9 @@ export default function TransactionsDataTable<
                                 ? "number"
                                 : "text"
                             }
-                            value={filters[fieldMeta.filterKey] ?? ""}
+                            value={
+                              filters?.[fieldMeta.filterKey as keyof T] ?? ""
+                            }
                           />
                         ) : null}
                       </>

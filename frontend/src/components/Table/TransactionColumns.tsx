@@ -1,15 +1,7 @@
 import { ColumnDef, createColumnHelper, RowData } from "@tanstack/react-table";
 import { Transaction } from "../../types/Transaction";
-import { Link } from "@tanstack/react-router";
-import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { CircleEllipsis, DollarSign } from "lucide-react";
+import { DollarSign } from "lucide-react";
+import { ActionsMenu } from "./ActionsMenu";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -29,45 +21,7 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
     id: "actions",
     header: () => <span>Actions</span>,
     cell: (cell) => {
-      const transactionId = cell.row.original.id;
-      const transactionIdParam = String(transactionId);
-
-      const handleDelete = () => {
-        if (
-          window.confirm(
-            `Are you sure you want to delete transaction ${transactionId}?`
-          )
-        ) {
-          console.log(`Deleting transaction with id: ${transactionId}`);
-        }
-      };
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"outline"}>
-              <CircleEllipsis />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link
-                  className="text-primary"
-                  to={`/transactions/edit/$transactionId`}
-                  params={{ transactionId: transactionIdParam }}
-                  search={(prev) => prev}
-                >
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem variant="destructive" onClick={handleDelete}>
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ActionsMenu transactionId={cell.row.original.id} />;
     },
   }),
   {
