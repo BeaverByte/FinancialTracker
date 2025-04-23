@@ -41,14 +41,14 @@ export function Navbar() {
           <Button
             onClick={handleLogout}
             disabled={isPending}
-            className="bg-red-400 rounded"
+            className="select-none bg-red-400 rounded"
           >
             {isPending || isLoggingOut ? "Logging out..." : "Logout"}
           </Button>
         ) : null}
 
         {shouldShowLogin ? (
-          <Button variant="link" asChild>
+          <Button variant="link" className="select-none" asChild>
             <Link to="/login" className="bg-blue-500 rounded">
               Login
             </Link>

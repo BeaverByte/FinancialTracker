@@ -36,6 +36,7 @@ export function ActionsMenu({
           <DropdownMenuItem asChild>
             <Link
               className="text-primary"
+              resetScroll={false}
               to={`/transactions/edit/$transactionId`}
               params={{ transactionId: transactionIdParam }}
               search={(prev) => prev}

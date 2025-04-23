@@ -11,8 +11,11 @@ export function NavLinkButton(props: NavLinkButtonProps) {
       <Link
         {...props}
         activeProps={{
-          className: "focus:ring-primary underline cursor-default",
+          className: "cursor-none focus:ring-primary underline",
           onClick: (e) => e.preventDefault(),
+        }}
+        inactiveProps={{
+          className: "focus:ring-primary cursor-default",
         }}
       ></Link>
     </Button>

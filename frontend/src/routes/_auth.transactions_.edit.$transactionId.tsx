@@ -3,28 +3,17 @@ import { transactionQueryOptions } from "../transactionQueryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useUpdateTransaction } from "../hooks/useUpdateTransaction";
 import { Transaction } from "../types/Transaction";
-import { TransactionForm } from "../components/TransactionForm";
 import { TransactionFormSchema } from "../types/schemas/transactionSchema";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import { TransactionCard } from "../components/ui/transaction-card";
 
-export const Route = createFileRoute("/_auth/transactions/edit/$transactionId")(
-  {
-    loader: ({ context: { queryClient }, params: { transactionId } }) => {
-      return queryClient.ensureQueryData(
-        transactionQueryOptions(transactionId)
-      );
-    },
-    component: EditTransactionForm,
-  }
-);
+export const Route = createFileRoute(
+  "/_auth/transactions_/edit/$transactionId"
+)({
+  loader: ({ context: { queryClient }, params: { transactionId } }) => {
+    return queryClient.ensureQueryData(transactionQueryOptions(transactionId));
+  },
+  component: EditTransactionForm,
+});
 
 function EditTransactionForm() {
   const transactionId = Route.useParams().transactionId;

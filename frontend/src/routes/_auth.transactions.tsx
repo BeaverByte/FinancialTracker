@@ -7,7 +7,11 @@ import {
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
 import { TransactionFilters } from "../types/Transaction";
 import { useFilters } from "../hooks/useFilters";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import {
   fetchTransactions,
   QUERY_KEY_TRANSACTIONS,
@@ -26,11 +30,13 @@ import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
 import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions")({
+  component: TransactionsPage,
+  pendingComponent: () => <div>Loading...</div>,
   loader: async ({ context: { queryClient } }) => {
-    await queryClient.ensureQueryData(transactionsQueryOptions);
+    // Using ensureQueryData here instead prefetchQuery to ignore staleTime
+    return queryClient.ensureQueryData(transactionsQueryOptions);
   },
   validateSearch: () => ({}) as TransactionFilters,
-  component: TransactionsPage,
 });
 
 function TransactionsPage() {
@@ -88,7 +94,7 @@ function TransactionsPage() {
   return (
     <div className="max-w-7x1 mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="py-4">Transactions</h1>
-      <Outlet />
+      {/* <Outlet /> */}
 
       {matchesTransactionsRoute && (
         <Button variant={"outline"} className="w-2/3 justify-center " asChild>
