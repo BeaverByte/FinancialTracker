@@ -1,6 +1,7 @@
 import { ColumnDef, createColumnHelper, RowData } from "@tanstack/react-table";
 import { Transaction } from "../../types/Transaction";
-import { Link } from "@tanstack/react-router";
+import { DollarSign } from "lucide-react";
+import { ActionsMenu } from "./ActionsMenu";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,38 +21,8 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
     id: "actions",
     header: () => <span>Actions</span>,
     cell: (cell) => {
-      const transactionId = cell.row.original.id;
-      const transactionIdParam = String(transactionId);
-
-      const handleDelete = () => {
-        if (
-          window.confirm(
-            `Are you sure you want to delete transaction ${transactionId}?`
-          )
-        ) {
-          console.log(`Deleting transaction with id: ${transactionId}`);
-        }
-      };
-
-      return (
-        <>
-          <Link
-            to={`/transactions/edit/$transactionId`}
-            params={{ transactionId: transactionIdParam }}
-            search={(prev) => prev}
-          >
-            Edit
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="text-red-600 hover:text-red-800 focus:outline-none"
-          >
-            Delete
-          </button>
-        </>
-      );
+      return <ActionsMenu transactionId={cell.row.original.id} />;
     },
-    // enableSorting: false,
   }),
   {
     accessorKey: "id",
@@ -80,8 +51,22 @@ export const getTransactionColumns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "amount",
-    header: () => "Amount",
+    header: () => (
+      <>
+        <DollarSign />
+        Amount
+      </>
+    ),
     meta: { filterKey: "amount" },
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("amount"));
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+
+      return <div className="text-right">{formatted}</div>;
+    },
   },
   {
     accessorKey: "note",

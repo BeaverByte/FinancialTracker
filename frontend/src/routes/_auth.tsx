@@ -2,9 +2,7 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context, location }) => {
-    console.log(`Context error from auth route is ${context.auth.error}`);
     if (context.auth.hasConnectionError) {
-      console.log("Connection issues...");
       throw new Error("Network Issues detected, please try again.");
     }
 

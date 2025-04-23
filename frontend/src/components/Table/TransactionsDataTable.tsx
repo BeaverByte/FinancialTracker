@@ -1,21 +1,39 @@
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   OnChangeFn,
   PaginationOptions,
   PaginationState,
+  SortDirection,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { DebouncedInput } from "../DebouncedInput";
 import { Filters } from "../../types/api/types";
-import { MoveDown, MoveUp } from "lucide-react";
+import { ArrowDownUp, EyeOff, Menu, MoveDown, MoveUp } from "lucide-react";
 import { Button } from "../ui/button";
-import { Select } from "../ui/select";
 import { TransactionsDataTableSelect } from "./TransactionsDataTableSelect";
 import { Input } from "../ui/input";
 import { PageInfo } from "./PageInfo";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { DataTableViewOptions } from "./DataTableViewOptions";
+import { fuzzyFilter } from "./fuzzyFilter";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 10;
@@ -42,53 +60,61 @@ export default function TransactionsDataTable<
   onFilterChange,
   sorting,
   onSortingChange,
-}: Readonly<Props<T>>) {
-  const table = useReactTable({
+}: Props<T>) {
+  const table = useReactTable<T>({
     data,
     columns,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
     state: { pagination, sorting },
     onSortingChange,
-    enableMultiSort: true,
-    // Necessary in order for Tanstack sorting behavior to work with null fields
-    sortDescFirst: true,
+    sortDescFirst: true, // Starting with Desc Tanstack sorting behavior to work with null fields
     ...paginationOptions,
     manualFiltering: true,
     enableColumnFilters: false,
     manualSorting: true,
     manualPagination: true,
     enableSortingRemoval: true,
+
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+
     // debugTable: true,
   });
 
   return (
     <div>
-      <table>
-        <thead>
+      <div className="py-2">
+        <DataTableViewOptions table={table}></DataTableViewOptions>
+      </div>
+      <Table>
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 const fieldMeta = header.column.columnDef.meta;
+
+                const canSort = header.column.getCanSort();
+                const nextSortOrder = header.column.getNextSortingOrder();
+
+                const shouldHaveFilterInput =
+                  header.column.getCanFilter() &&
+                  fieldMeta?.filterKey !== undefined;
+
                 return (
-                  <th key={header.id} colSpan={header.colSpan}>
+                  <TableHead key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder ? null : (
                       <>
                         <Button
-                          {...{
-                            className: header.column.getCanSort()
+                          className={
+                            header.column.getCanSort()
                               ? "cursor-pointer select-none"
-                              : "",
-                            // Handler will toggle column sorting state
-                            onClick: header.column.getToggleSortingHandler(),
-                            // onClick: header.column.getToggleSortingHandler(),
-                            title: header.column.getCanSort()
-                              ? header.column.getNextSortingOrder() === "asc"
-                                ? "Sort ascending"
-                                : header.column.getNextSortingOrder() === "desc"
-                                  ? "Sort descending"
-                                  : "Clear sort"
-                              : undefined,
-                          }}
+                              : ""
+                          }
+                          // Handler will toggle column sorting state
+                          onClick={header.column.getToggleSortingHandler()}
+                          title={getSortTitle(canSort, nextSortOrder)}
                         >
                           {
                             //  Necessary to flexRender since using cell: () => JSX column definition options
@@ -101,15 +127,35 @@ export default function TransactionsDataTable<
                             {
                               asc: <MoveUp size={20} />,
                               desc: <MoveDown size={20} />,
-                              // false: " 🔃",
+                              false: <ArrowDownUp />,
                             }[header.column.getIsSorted() as string]) ??
                             null}
                         </Button>
-                        {header.column.getCanFilter() &&
-                        fieldMeta?.filterKey !== undefined ? (
+                        {header.column.id !== "actions" && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant={"ghost"} size={"sm"}>
+                                <Menu />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  header.column.toggleVisibility(false)
+                                }
+                              >
+                                <EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                Hide
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+
+                        {shouldHaveFilterInput ? (
                           <DebouncedInput
-                            className="w-36 border shadow rounded"
+                            className="flex w-24 px-1 py-1 border shadow rounded"
                             onChange={(value) => {
+                              header.column.setFilterValue(value);
                               onFilterChange({
                                 [fieldMeta.filterKey as keyof T]: value,
                               } as Partial<T>);
@@ -120,37 +166,43 @@ export default function TransactionsDataTable<
                                 ? "number"
                                 : "text"
                             }
-                            value={filters[fieldMeta.filterKey] ?? ""}
+                            value={
+                              filters?.[fieldMeta.filterKey as keyof T] ?? ""
+                            }
                           />
                         ) : null}
                       </>
                     )}
-                  </th>
+                  </TableHead>
                 );
               })}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => {
-            return (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="flex items-center gap-2 my-2">
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           className="cursor-pointer select-none"
           onClick={() => table.setPageIndex(0)}
@@ -205,4 +257,18 @@ export default function TransactionsDataTable<
       </div>
     </div>
   );
+}
+
+function getSortTitle(canSort: boolean, nextSortOrder: SortDirection | false) {
+  if (!canSort) {
+    return undefined;
+  }
+
+  if (nextSortOrder === "asc") {
+    return "Sort ascending";
+  } else if (nextSortOrder === "desc") {
+    return "Sort descending";
+  } else {
+    return "Clear sort";
+  }
 }

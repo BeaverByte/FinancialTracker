@@ -53,12 +53,12 @@ function NotFound() {
 
 function RootComponent() {
   return (
-    <>
+    <div>
       <MainLayout />
       <main>
         <Outlet />
         <ReactQueryDevtools initialIsOpen={false} />
       </main>
-    </>
+    </div>
   );
 }

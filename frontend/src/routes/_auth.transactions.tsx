@@ -7,7 +7,11 @@ import {
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
 import { TransactionFilters } from "../types/Transaction";
 import { useFilters } from "../hooks/useFilters";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import {
   fetchTransactions,
   QUERY_KEY_TRANSACTIONS,
@@ -23,12 +27,16 @@ import TransactionsDataTable, {
   DEFAULT_PAGE_SIZE,
 } from "../components/Table/TransactionsDataTable";
 import { PaginationState, SortingState, Updater } from "@tanstack/react-table";
+import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/_auth/transactions")({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.ensureQueryData(transactionsQueryOptions),
-  validateSearch: () => ({}) as TransactionFilters,
   component: TransactionsPage,
+  pendingComponent: () => <div>Loading...</div>,
+  loader: async ({ context: { queryClient } }) => {
+    // Using ensureQueryData here instead prefetchQuery to ignore staleTime
+    return queryClient.ensureQueryData(transactionsQueryOptions);
+  },
+  validateSearch: () => ({}) as TransactionFilters,
 });
 
 function TransactionsPage() {
@@ -84,46 +92,50 @@ function TransactionsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-2 p-2">
-      {/* <div> */}
-      <h1 className="text-2xl font-semibold mb-1">Transactions</h1>
-      <Outlet />
+    <div className="max-w-7x1 mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="py-4">Transactions</h1>
+      {/* <Outlet /> */}
 
       {matchesTransactionsRoute && (
-        <Link
-          to="/transactions/create"
-          search={(prev) => prev}
-          className="inline-block px-6 py-3 text-white font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none"
-        >
-          Add Transaction
-        </Link>
+        <Button variant={"outline"} className="w-2/3 justify-center " asChild>
+          <Link
+            to="/transactions/create"
+            search={(prev) => prev}
+            className="inline-block px-6 py-3 text-black font-semibold text-sm rounded-lg shadow-md transition-all duration-300 hover:scale-102 focus:outline-none"
+          >
+            + Transaction
+          </Link>
+        </Button>
       )}
 
-      {/* Transactions Table */}
-      <TransactionsDataTable
-        data={transactions ?? []}
-        columns={transactionsColumns}
-        pagination={paginationState}
-        paginationOptions={{
-          onPaginationChange: handlePaginationChange,
-          rowCount: totalElements,
-        }}
-        filters={filters}
-        onFilterChange={(filters) => setFilters(filters)}
-        sorting={sortingState}
-        onSortingChange={handleSortingChange}
-      />
+      <div className="mt-6">
+        <TransactionsDataTable
+          data={transactions ?? []}
+          columns={transactionsColumns}
+          pagination={paginationState}
+          paginationOptions={{
+            onPaginationChange: handlePaginationChange,
+            rowCount: totalElements,
+          }}
+          filters={filters}
+          onFilterChange={(filters) => setFilters(filters)}
+          sorting={sortingState}
+          onSortingChange={handleSortingChange}
+        />
+      </div>
+
       <div>
         {totalElements} transactions found
-        <button
-          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed"
+        <Button
+          className="border rounded p-1 disabled:text-gray-500 disabled:cursor-not-allowed transition-all duration-300 hover:scale-102 focus:outline-none"
+          variant="secondary"
           onClick={resetFilters}
           disabled={Object.keys(filters).length === 1}
         >
           Reset Filters
-        </button>
+        </Button>
       </div>
-      {/* <pre>{JSON.stringify(filters, null, 2)}</pre> */}
+      <pre>{JSON.stringify(filters, null, 2)}</pre>
     </div>
   );
 }

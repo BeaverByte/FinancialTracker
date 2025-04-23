@@ -2,7 +2,6 @@ import {
   createFileRoute,
   redirect,
   useNavigate,
-  useRouter,
   useRouterState,
 } from "@tanstack/react-router";
 import { useState } from "react";
@@ -13,11 +12,13 @@ import {
   LoginFormValidationSchema,
 } from "../types/schemas/loginSchema";
 import { useAuth } from "../hooks/useAuth";
+import { router } from "../router";
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const fallback = "/" as const;
 
 export const Route = createFileRoute("/login")({
+  component: LoginComponent,
   validateSearch: z.object({
     redirect: z.string().optional().catch(""),
   }),
@@ -27,12 +28,10 @@ export const Route = createFileRoute("/login")({
       throw redirect({ to: search.redirect ?? fallback });
     }
   },
-  component: LoginComponent,
 });
 
 function LoginComponent() {
   const [error, setError] = useState<string | undefined>(undefined);
-  const router = useRouter();
 
   const isLoading = useRouterState({ select: (s) => s.isLoading });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,10 +58,10 @@ function LoginComponent() {
     try {
       await auth.login(username, password);
       await router.invalidate();
-
       await navigate({ to: search.redirect ?? fallback });
     } catch (err) {
-      setError(`${err}`);
+      setError(`${err}. Please try logging in again`);
+    } finally {
       setIsSubmitting(false);
     }
   };

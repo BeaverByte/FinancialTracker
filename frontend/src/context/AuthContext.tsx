@@ -3,7 +3,7 @@ import { createContext } from "react";
 export interface AuthContextType {
   isAuthenticated: boolean;
   hasConnectionError: boolean;
-  isLoading: boolean;
+  isPending: boolean;
   login: (username: string, password: string) => Promise<string>;
   logout: () => Promise<void>;
   error: Error | null;

@@ -18,7 +18,7 @@ export const loginUser = async (username: string, password: string) => {
     if (error instanceof UnauthorizedError) {
       throw error;
     }
-    throw new Error("Unexpected error during login");
+    throw new Error(`Unexpected error in login: ${error}`);
   }
 };
 

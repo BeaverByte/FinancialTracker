@@ -1,41 +1,59 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "../hooks/useAuth";
+import { Button } from "./ui/button";
+import { useState } from "react";
+import { NavLinkButton } from "./NavLinkButton";
 
 export function Navbar() {
-  const auth = useAuth();
+  const { logout, isPending, isAuthenticated } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const router = useRouter();
 
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      auth.logout().then(() => {
-        router.invalidate().finally(() => {
-          router.navigate({ to: "/" });
-        });
-      });
+  const matchRoute = useMatchRoute();
+  const isLoginRoute = matchRoute({ to: "/login" });
+
+  const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to logout?")) return;
+
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      await router.invalidate();
+      router.navigate({ to: "/" });
+    } catch (error) {
+      console.error("Logout failed", error);
+      throw new Error(`Logout failed. ${error}`);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
+
+  const shouldShowLogin = !isAuthenticated && !isLoginRoute;
 
   return (
     <nav className="flex justify-between p-4">
       <div className="flex gap-4">
-        <Link to="/" className="text-white no-underline hover:text-gray-300">
-          Home
-        </Link>
-        <Link to="/transactions">Transactions</Link>
+        <NavLinkButton to="/">Home</NavLinkButton>
+        <NavLinkButton to="/transactions">Transactions</NavLinkButton>
       </div>
       <div>
-        {auth.isAuthenticated ? (
-          <button
+        {isAuthenticated ? (
+          <Button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 rounded"
+            disabled={isPending}
+            className="select-none bg-red-400 rounded"
           >
-            Logout
-          </button>
-        ) : (
-          <Link to="/login" className="px-4 py-2 bg-blue-500 rounded">
-            Login
-          </Link>
-        )}
+            {isPending || isLoggingOut ? "Logging out..." : "Logout"}
+          </Button>
+        ) : null}
+
+        {shouldShowLogin ? (
+          <Button variant="link" className="select-none" asChild>
+            <Link to="/login" className="bg-blue-500 rounded">
+              Login
+            </Link>
+          </Button>
+        ) : null}
       </div>
     </nav>
   );
