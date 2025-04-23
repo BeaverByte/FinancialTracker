@@ -7,7 +7,6 @@ import { Transaction } from "../types/Transaction";
 import { useNavigate } from "@tanstack/react-router";
 
 export function useUpdateTransaction() {
-  console.log("useUpdateTransaction hook activated");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 

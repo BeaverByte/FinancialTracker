@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Link } from "@tanstack/react-router";
+import { useDeleteTransaction } from "@/hooks/useDeleteTransaction";
 
 export function ActionsMenu({
   transactionId,
@@ -15,6 +16,9 @@ export function ActionsMenu({
   transactionId: number | string;
 }) {
   const transactionIdParam = String(transactionId);
+
+  const deleteTransactionMutation = useDeleteTransaction();
+
   const handleDelete = () => {
     if (
       window.confirm(
@@ -22,6 +26,7 @@ export function ActionsMenu({
       )
     ) {
       console.log(`Deleting transaction with id: ${transactionId}`);
+      deleteTransactionMutation.mutate(transactionId);
     }
   };
   return (
