@@ -111,7 +111,7 @@ export const updateTransaction = async ({
   return await fetchData<Transaction>(url, options);
 };
 
-export const deleteTransaction = async (id: number) => {
+export const deleteTransaction = async (id: number | string) => {
   const url = `${API_ROUTES.TRANSACTIONS.DELETE_TRANSACTION}/${id}`;
   await fetchData<void>(url, { method: "DELETE" });
 };
