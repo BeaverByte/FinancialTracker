@@ -1,9 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect } from "vitest"; // For mocking
-
-import { test } from "../../src/mocks/test-extend";
-import { useAddTransaction } from "../../src/hooks/useAddTransaction";
-import { createTestQueryWrapper } from "./utility/TestQueryWrapper";
+import { test } from "@/mocks/test-extend";
+import { useAddTransaction } from "@/hooks/useAddTransaction";
+import { createTestQueryWrapper } from "../utility/TestQueryWrapper";
 
 describe("useAddTransaction", () => {
   test("Should succeed to give response", async () => {
