@@ -1,17 +1,8 @@
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  useMatchRoute,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useMatchRoute } from "@tanstack/react-router";
 import { transactionsQueryOptions } from "../transactionsQueryOptions";
 import { TransactionFilters } from "../types/Transaction";
 import { useFilters } from "../hooks/useFilters";
-import {
-  keepPreviousData,
-  useQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   fetchTransactions,
   QUERY_KEY_TRANSACTIONS,

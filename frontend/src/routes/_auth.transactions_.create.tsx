@@ -26,7 +26,7 @@ function AddTransactionForm() {
     }
 
     transactions.mutate(transaction, {
-      onSuccess: () =>
+      onSettled: () =>
         navigate({ to: "/transactions", search: (prev) => prev }),
     });
   };

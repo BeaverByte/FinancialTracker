@@ -47,10 +47,16 @@ function EditTransactionForm() {
       `Saving transaction, ${JSON.stringify(updatedTransaction)}, to id, ${id}`
     );
 
-    editTransactionMutation.mutate({
-      id,
-      transaction: updatedTransaction,
-    });
+    editTransactionMutation.mutate(
+      {
+        id,
+        transaction: updatedTransaction,
+      },
+      {
+        onSettled: () =>
+          navigate({ to: "/transactions", search: (prev) => prev }),
+      }
+    );
   };
 
   if (isLoading) return <p>Loading transaction...</p>;
