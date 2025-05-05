@@ -13,7 +13,13 @@ import com.beaverbyte.financial_tracker_application.dto.request.TransactionReque
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
+import com.beaverbyte.financial_tracker_application.model.Account;
+import com.beaverbyte.financial_tracker_application.model.Category;
+import com.beaverbyte.financial_tracker_application.model.Merchant;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
+import com.beaverbyte.financial_tracker_application.repository.AccountRepository;
+import com.beaverbyte.financial_tracker_application.repository.CategoryRepository;
+import com.beaverbyte.financial_tracker_application.repository.MerchantRepository;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
 
 /**
@@ -25,10 +31,18 @@ public class TransactionService {
 	private static final Logger log = LoggerFactory.getLogger(TransactionService.class);
 
 	private final TransactionRepository transactionRepository;
+	private final MerchantRepository merchantRepository;
+	private final AccountRepository accountRepository;
+	private final CategoryRepository categoryRepository;
 	private final TransactionMapper transactionMapper;
 
-	public TransactionService(TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
+	public TransactionService(TransactionRepository transactionRepository, MerchantRepository merchantRepository,
+			AccountRepository accountRepository, CategoryRepository categoryRepository,
+			TransactionMapper transactionMapper) {
 		this.transactionRepository = transactionRepository;
+		this.merchantRepository = merchantRepository;
+		this.accountRepository = accountRepository;
+		this.categoryRepository = categoryRepository;
 		this.transactionMapper = transactionMapper;
 	}
 
@@ -71,7 +85,20 @@ public class TransactionService {
 	}
 
 	public TransactionDTO add(TransactionRequest transactionRequest) {
+		Category category = categoryRepository.findByName(transactionRequest.category())
+				.orElseThrow(() -> new RuntimeException("Category not found: " + transactionRequest.category()));
+
+		Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
+				.orElseThrow(() -> new RuntimeException("Merchant not found: " + transactionRequest.merchant()));
+
+		Account account = accountRepository.findByName(transactionRequest.account())
+				.orElseThrow(() -> new RuntimeException("Account not found: " + transactionRequest.account()));
+
 		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
+
+		transaction.setCategory(category);
+		transaction.setMerchant(merchant);
+		transaction.setAccount(account);
 
 		// Set id to 0 in case id is passed through JSON to force save of item instead
 		// update

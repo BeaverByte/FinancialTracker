@@ -2,6 +2,9 @@ package com.beaverbyte.financial_tracker_application.mapper;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
+import com.beaverbyte.financial_tracker_application.model.Account;
+import com.beaverbyte.financial_tracker_application.model.Category;
+import com.beaverbyte.financial_tracker_application.model.Merchant;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-04-29T09:32:26-0500",
+    date = "2025-05-05T16:09:11-0500",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.0.z20250331-1358, environment: Java 21.0.6 (Eclipse Adoptium)"
 )
 @Component
@@ -28,9 +31,6 @@ public class TransactionMapperImpl implements TransactionMapper {
             transaction.setId( transactionRequest.id() );
         }
         transaction.setDate( transactionRequest.date() );
-        transaction.setMerchant( transactionRequest.merchant() );
-        transaction.setAccount( transactionRequest.account() );
-        transaction.setCategory( transactionRequest.category() );
         transaction.setAmount( transactionRequest.amount() );
         transaction.setNote( transactionRequest.note() );
 
@@ -45,9 +45,9 @@ public class TransactionMapperImpl implements TransactionMapper {
 
         Long id = null;
         LocalDate date = null;
-        String merchant = null;
-        String account = null;
-        String category = null;
+        Merchant merchant = null;
+        Account account = null;
+        Category category = null;
         BigDecimal amount = null;
         String note = null;
 
