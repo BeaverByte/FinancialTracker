@@ -5,12 +5,11 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
 
-public record TransactionRequest(
-		Long id,
+public record TransactionAddRequest(
 		LocalDate date,
-		Long accountId,
-		Long categoryId,
-		Long merchantId,
+		@NotNull Long accountId,
+		@NotNull Long categoryId,
+		@NotNull Long merchantId,
 		@NotNull BigDecimal amount,
 		String note) {
 }

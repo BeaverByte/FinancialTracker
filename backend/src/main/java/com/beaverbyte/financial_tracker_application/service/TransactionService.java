@@ -9,9 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.beaverbyte.financial_tracker_application.dto.request.TransactionAddRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
-import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoundException;
+import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Account;
 import com.beaverbyte.financial_tracker_application.model.Category;
@@ -80,21 +81,26 @@ public class TransactionService {
 
 	public TransactionDTO findById(long id) {
 		Transaction transaction = transactionRepository.findById(id).orElseThrow(
-				() -> new TransactionNotFoundException("Transaction does not exist with id " + id));
+				() -> new EntityNotFoundException("Transaction does not exist with id " + id));
 		return transactionMapper.transactionToTransactionDTO(transaction);
 	}
 
-	public TransactionDTO add(TransactionRequest transactionRequest) {
-		Category category = categoryRepository.findByName(transactionRequest.category())
-				.orElseThrow(() -> new RuntimeException("Category not found: " + transactionRequest.category()));
+	public TransactionDTO add(TransactionAddRequest transactionAddRequest) {
+		Category category = categoryRepository.findById(transactionAddRequest.categoryId())
+				.orElseThrow(
+						() -> new EntityNotFoundException(
+								"Category not found: " + transactionAddRequest.categoryId()));
 
-		Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
-				.orElseThrow(() -> new RuntimeException("Merchant not found: " + transactionRequest.merchant()));
+		Merchant merchant = merchantRepository.findById(transactionAddRequest.merchantId())
+				.orElseThrow(
+						() -> new EntityNotFoundException(
+								"Merchant not found: " + transactionAddRequest.merchantId()));
 
-		Account account = accountRepository.findByName(transactionRequest.account())
-				.orElseThrow(() -> new RuntimeException("Account not found: " + transactionRequest.account()));
+		Account account = accountRepository.findById(transactionAddRequest.accountId())
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Account not found: " + transactionAddRequest.accountId()));
 
-		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
+		Transaction transaction = transactionMapper.transactionAddRequestToTransaction(transactionAddRequest);
 
 		transaction.setCategory(category);
 		transaction.setMerchant(merchant);
@@ -114,14 +120,34 @@ public class TransactionService {
 	public TransactionDTO update(TransactionRequest transactionRequest, long id) {
 		log.info("update() called with ID: {}", id);
 
-		if (!transactionRepository.findById(id).isPresent()) {
-			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
+		Transaction transaction = transactionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Transaction does not exist with id " + id));
+
+		transactionMapper.transactionRequestToTransaction(transactionRequest, transaction);
+
+		if (transactionRequest.categoryId() != null) {
+			Category category = categoryRepository.findById(transactionRequest.categoryId())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Category not found: " + transactionRequest.categoryId()));
+			transaction.setCategory(category);
 		}
 
-		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
+		if (transactionRequest.merchantId() != null) {
+			Merchant merchant = merchantRepository.findById(transactionRequest.merchantId())
+					.orElseThrow(
+							() -> new EntityNotFoundException(
+									"Merchant not found: " + transactionRequest.merchantId()));
+			transaction.setMerchant(merchant);
+		}
+
+		if (transactionRequest.accountId() != null) {
+			Account account = accountRepository.findById(transactionRequest.accountId())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Account not found: " + transactionRequest.accountId()));
+			transaction.setAccount(account);
+		}
 
 		// If id sent in body, set it to url ID to prevent incorrect update
-
 		log.info("Transaction id, {}, setting to {}", transaction.getId(), id);
 		transaction.setId(id);
 
@@ -133,7 +159,7 @@ public class TransactionService {
 
 	public void deleteById(long id) {
 		if (!transactionRepository.findById(id).isPresent()) {
-			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
+			throw new EntityNotFoundException("Transaction does not exist with id " + id);
 		}
 
 		log.info("Transaction, {}, deleted from database with id of ", id);

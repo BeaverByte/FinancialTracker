@@ -27,7 +27,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
-import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoundException;
+import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
@@ -162,7 +162,7 @@ class TransactionServiceTest {
 	void shouldErrorOnNonExistentIDWhenUpdateTransaction() {
 		TransactionRequest transactionRequest = createRandomTransactionRequest();
 
-		assertThrows(TransactionNotFoundException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> transactionService.update(transactionRequest, -1));
 	}
 
@@ -179,7 +179,7 @@ class TransactionServiceTest {
 
 	@Test
 	void shouldErrorOnNonExistentIDWhenDeleteTransaction() {
-		assertThrows(TransactionNotFoundException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> transactionService.deleteById(-1));
 	}
 

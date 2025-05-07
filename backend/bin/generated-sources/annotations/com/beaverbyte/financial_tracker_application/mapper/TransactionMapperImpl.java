@@ -1,5 +1,6 @@
 package com.beaverbyte.financial_tracker_application.mapper;
 
+import com.beaverbyte.financial_tracker_application.dto.request.TransactionAddRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.model.Account;
@@ -13,26 +14,45 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-05T16:09:11-0500",
+    date = "2025-05-07T13:53:36-0500",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.0.z20250331-1358, environment: Java 21.0.6 (Eclipse Adoptium)"
 )
 @Component
 public class TransactionMapperImpl implements TransactionMapper {
 
     @Override
-    public Transaction transactionRequestToTransaction(TransactionRequest transactionRequest) {
+    public Transaction transactionRequestToTransaction(TransactionRequest transactionRequest, Transaction transaction) {
         if ( transactionRequest == null ) {
+            return transaction;
+        }
+
+        if ( transactionRequest.amount() != null ) {
+            transaction.setAmount( transactionRequest.amount() );
+        }
+        if ( transactionRequest.date() != null ) {
+            transaction.setDate( transactionRequest.date() );
+        }
+        if ( transactionRequest.id() != null ) {
+            transaction.setId( transactionRequest.id() );
+        }
+        if ( transactionRequest.note() != null ) {
+            transaction.setNote( transactionRequest.note() );
+        }
+
+        return transaction;
+    }
+
+    @Override
+    public Transaction transactionAddRequestToTransaction(TransactionAddRequest transactionAddRequest) {
+        if ( transactionAddRequest == null ) {
             return null;
         }
 
         Transaction transaction = new Transaction();
 
-        if ( transactionRequest.id() != null ) {
-            transaction.setId( transactionRequest.id() );
-        }
-        transaction.setDate( transactionRequest.date() );
-        transaction.setAmount( transactionRequest.amount() );
-        transaction.setNote( transactionRequest.note() );
+        transaction.setAmount( transactionAddRequest.amount() );
+        transaction.setDate( transactionAddRequest.date() );
+        transaction.setNote( transactionAddRequest.note() );
 
         return transaction;
     }
@@ -43,24 +63,48 @@ public class TransactionMapperImpl implements TransactionMapper {
             return null;
         }
 
+        String merchant = null;
+        String account = null;
+        String category = null;
         Long id = null;
         LocalDate date = null;
-        Merchant merchant = null;
-        Account account = null;
-        Category category = null;
         BigDecimal amount = null;
         String note = null;
 
+        merchant = transactionMerchantName( transaction );
+        account = transactionAccountName( transaction );
+        category = transactionCategoryName( transaction );
         id = transaction.getId();
         date = transaction.getDate();
-        merchant = transaction.getMerchant();
-        account = transaction.getAccount();
-        category = transaction.getCategory();
         amount = transaction.getAmount();
         note = transaction.getNote();
 
         TransactionDTO transactionDTO = new TransactionDTO( id, date, merchant, account, category, amount, note );
 
         return transactionDTO;
+    }
+
+    private String transactionMerchantName(Transaction transaction) {
+        Merchant merchant = transaction.getMerchant();
+        if ( merchant == null ) {
+            return null;
+        }
+        return merchant.getName();
+    }
+
+    private String transactionAccountName(Transaction transaction) {
+        Account account = transaction.getAccount();
+        if ( account == null ) {
+            return null;
+        }
+        return account.getName();
+    }
+
+    private String transactionCategoryName(Transaction transaction) {
+        Category category = transaction.getCategory();
+        if ( category == null ) {
+            return null;
+        }
+        return category.getName();
     }
 }

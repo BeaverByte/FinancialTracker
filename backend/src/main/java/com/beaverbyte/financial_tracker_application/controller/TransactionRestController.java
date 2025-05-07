@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.beaverbyte.financial_tracker_application.dto.request.TransactionAddRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.service.TransactionService;
@@ -59,8 +60,8 @@ public class TransactionRestController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@Operation(summary = "Create a transaction")
 	public TransactionDTO addTransaction(
-			@Valid @RequestBody TransactionRequest transactionRequest) {
-		return transactionService.add(transactionRequest);
+			@Valid @RequestBody TransactionAddRequest createTransactionRequest) {
+		return transactionService.add(createTransactionRequest);
 	}
 
 	@PutMapping("/transactions/{id}")
