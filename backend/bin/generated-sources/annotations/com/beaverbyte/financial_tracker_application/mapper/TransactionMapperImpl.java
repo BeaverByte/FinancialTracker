@@ -1,6 +1,5 @@
 package com.beaverbyte.financial_tracker_application.mapper;
 
-import com.beaverbyte.financial_tracker_application.dto.request.TransactionAddRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.model.Account;
@@ -10,15 +9,23 @@ import com.beaverbyte.financial_tracker_application.model.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-07T13:53:36-0500",
+    date = "2025-05-14T08:09:14-0500",
     comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.42.0.z20250331-1358, environment: Java 21.0.6 (Eclipse Adoptium)"
 )
 @Component
 public class TransactionMapperImpl implements TransactionMapper {
+
+    @Autowired
+    private MerchantMapper merchantMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Override
     public Transaction transactionRequestToTransaction(TransactionRequest transactionRequest, Transaction transaction) {
@@ -26,14 +33,23 @@ public class TransactionMapperImpl implements TransactionMapper {
             return transaction;
         }
 
-        if ( transactionRequest.amount() != null ) {
-            transaction.setAmount( transactionRequest.amount() );
+        if ( transactionRequest.id() != null ) {
+            transaction.setId( transactionRequest.id() );
         }
         if ( transactionRequest.date() != null ) {
             transaction.setDate( transactionRequest.date() );
         }
-        if ( transactionRequest.id() != null ) {
-            transaction.setId( transactionRequest.id() );
+        if ( transactionRequest.merchant() != null ) {
+            transaction.setMerchant( merchantMapper.stringToMerchant( transactionRequest.merchant() ) );
+        }
+        if ( transactionRequest.account() != null ) {
+            transaction.setAccount( accountMapper.stringToAccount( transactionRequest.account() ) );
+        }
+        if ( transactionRequest.category() != null ) {
+            transaction.setCategory( categoryMapper.stringToCategory( transactionRequest.category() ) );
+        }
+        if ( transactionRequest.amount() != null ) {
+            transaction.setAmount( transactionRequest.amount() );
         }
         if ( transactionRequest.note() != null ) {
             transaction.setNote( transactionRequest.note() );
@@ -43,16 +59,22 @@ public class TransactionMapperImpl implements TransactionMapper {
     }
 
     @Override
-    public Transaction transactionAddRequestToTransaction(TransactionAddRequest transactionAddRequest) {
-        if ( transactionAddRequest == null ) {
+    public Transaction transactionRequestToTransaction(TransactionRequest transactionRequest) {
+        if ( transactionRequest == null ) {
             return null;
         }
 
         Transaction transaction = new Transaction();
 
-        transaction.setAmount( transactionAddRequest.amount() );
-        transaction.setDate( transactionAddRequest.date() );
-        transaction.setNote( transactionAddRequest.note() );
+        transaction.setMerchant( merchantMapper.stringToMerchant( transactionRequest.merchant() ) );
+        transaction.setAccount( accountMapper.stringToAccount( transactionRequest.account() ) );
+        transaction.setCategory( categoryMapper.stringToCategory( transactionRequest.category() ) );
+        if ( transactionRequest.id() != null ) {
+            transaction.setId( transactionRequest.id() );
+        }
+        transaction.setDate( transactionRequest.date() );
+        transaction.setAmount( transactionRequest.amount() );
+        transaction.setNote( transactionRequest.note() );
 
         return transaction;
     }

@@ -8,9 +8,9 @@ import jakarta.validation.constraints.NotNull;
 public record TransactionRequest(
 		Long id,
 		LocalDate date,
-		Long accountId,
-		Long categoryId,
-		Long merchantId,
+		String account,
+		String category,
+		String merchant,
 		@NotNull BigDecimal amount,
 		String note) {
 }

@@ -57,7 +57,8 @@ dependencies {
     testImplementation(libs.org.junit.jupiter.junit.jupiter)
     testImplementation(libs.org.testcontainers.testcontainers)
     testImplementation(libs.org.testcontainers.junit.jupiter)
-    testImplementation(libs.org.testcontainers.postgresql)
+    // testImplementation(libs.org.testcontainers.postgresql)
+    testImplementation("org.testcontainers:postgresql:1.21.0")
     testImplementation(libs.org.mockito.mockito.core)
 }
 

@@ -12,4 +12,9 @@ public interface AccountMapper {
 
 	AccountDTO accountToDTO(Account account);
 
+	default Account stringToAccount(String name) {
+		Account account = new Account();
+		account.setName(name);
+		return account;
+	}
 }

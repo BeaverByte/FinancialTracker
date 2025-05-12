@@ -12,4 +12,9 @@ public interface CategoryMapper {
 
 	CategoryDTO categoryToDTO(Category category);
 
+	default Category stringToCategory(String name) {
+		Category category = new Category();
+		category.setName(name);
+		return category;
+	}
 }

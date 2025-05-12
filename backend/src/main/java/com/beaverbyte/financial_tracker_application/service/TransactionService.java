@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.beaverbyte.financial_tracker_application.dto.request.TransactionAddRequest;
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
@@ -85,26 +84,31 @@ public class TransactionService {
 		return transactionMapper.transactionToTransactionDTO(transaction);
 	}
 
-	public TransactionDTO add(TransactionAddRequest transactionAddRequest) {
-		Category category = categoryRepository.findById(transactionAddRequest.categoryId())
-				.orElseThrow(
-						() -> new EntityNotFoundException(
-								"Category not found: " + transactionAddRequest.categoryId()));
+	public TransactionDTO add(TransactionRequest transactionRequest) {
 
-		Merchant merchant = merchantRepository.findById(transactionAddRequest.merchantId())
-				.orElseThrow(
-						() -> new EntityNotFoundException(
-								"Merchant not found: " + transactionAddRequest.merchantId()));
+		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
 
-		Account account = accountRepository.findById(transactionAddRequest.accountId())
-				.orElseThrow(() -> new EntityNotFoundException(
-						"Account not found: " + transactionAddRequest.accountId()));
+		if (transactionRequest.category() != null) {
+			Category category = categoryRepository.findByName(transactionRequest.category())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Category not found: " + transactionRequest.category()));
+			transaction.setCategory(category);
+		}
 
-		Transaction transaction = transactionMapper.transactionAddRequestToTransaction(transactionAddRequest);
+		if (transactionRequest.merchant() != null) {
+			Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
+					.orElseThrow(
+							() -> new EntityNotFoundException(
+									"Merchant not found: " + transactionRequest.merchant()));
+			transaction.setMerchant(merchant);
+		}
 
-		transaction.setCategory(category);
-		transaction.setMerchant(merchant);
-		transaction.setAccount(account);
+		if (transactionRequest.account() != null) {
+			Account account = accountRepository.findByName(transactionRequest.account())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Account not found: " + transactionRequest.account()));
+			transaction.setAccount(account);
+		}
 
 		// Set id to 0 in case id is passed through JSON to force save of item instead
 		// update
@@ -125,25 +129,25 @@ public class TransactionService {
 
 		transactionMapper.transactionRequestToTransaction(transactionRequest, transaction);
 
-		if (transactionRequest.categoryId() != null) {
-			Category category = categoryRepository.findById(transactionRequest.categoryId())
+		if (transactionRequest.category() != null) {
+			Category category = categoryRepository.findByName(transactionRequest.category())
 					.orElseThrow(() -> new EntityNotFoundException(
-							"Category not found: " + transactionRequest.categoryId()));
+							"Category not found: " + transactionRequest.category()));
 			transaction.setCategory(category);
 		}
 
-		if (transactionRequest.merchantId() != null) {
-			Merchant merchant = merchantRepository.findById(transactionRequest.merchantId())
+		if (transactionRequest.merchant() != null) {
+			Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
 					.orElseThrow(
 							() -> new EntityNotFoundException(
-									"Merchant not found: " + transactionRequest.merchantId()));
+									"Merchant not found: " + transactionRequest.merchant()));
 			transaction.setMerchant(merchant);
 		}
 
-		if (transactionRequest.accountId() != null) {
-			Account account = accountRepository.findById(transactionRequest.accountId())
+		if (transactionRequest.account() != null) {
+			Account account = accountRepository.findByName(transactionRequest.account())
 					.orElseThrow(() -> new EntityNotFoundException(
-							"Account not found: " + transactionRequest.accountId()));
+							"Account not found: " + transactionRequest.account()));
 			transaction.setAccount(account);
 		}
 
