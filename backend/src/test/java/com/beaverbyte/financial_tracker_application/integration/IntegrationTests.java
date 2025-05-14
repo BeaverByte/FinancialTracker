@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,7 @@ import io.restassured.response.Response;
 import jakarta.servlet.http.HttpServletResponse;
 import net.datafaker.Faker;
 
+@EntityScan(basePackages = "com.beaverbyte.financial_tracker_application.model")
 class IntegrationTests extends AbstractIntegrationTest {
 
 	@LocalServerPort

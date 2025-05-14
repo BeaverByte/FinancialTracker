@@ -46,7 +46,7 @@ dependencies {
     implementation(libs.org.springdoc.springdoc.openapi.starter.webmvc.ui)
     implementation("org.webjars:webjars-locator-lite:1.0.1")
     implementation("net.datafaker:datafaker:2.4.2")
-    implementation("org.liquibase:liquibase-core:4.22.0")
+    // implementation("org.liquibase:liquibase-core:4.22.0")
     annotationProcessor(libs.org.mapstruct.mapstruct.processor)
     runtimeOnly(libs.org.springframework.boot.spring.boot.devtools)
     runtimeOnly(libs.org.postgresql.postgresql)
@@ -57,8 +57,7 @@ dependencies {
     testImplementation(libs.org.junit.jupiter.junit.jupiter)
     testImplementation(libs.org.testcontainers.testcontainers)
     testImplementation(libs.org.testcontainers.junit.jupiter)
-    // testImplementation(libs.org.testcontainers.postgresql)
-    testImplementation("org.testcontainers:postgresql:1.21.0")
+    testImplementation(libs.org.testcontainers.postgresql)
     testImplementation(libs.org.mockito.mockito.core)
 }
 
