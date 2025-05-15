@@ -4,11 +4,9 @@ import {
   QUERY_KEY_TRANSACTIONS,
 } from "../services/transactions";
 import { Transaction } from "../types/Transaction";
-import { useNavigate } from "@tanstack/react-router";
 
 export function useAddTransaction() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: addTransaction,
@@ -50,8 +48,6 @@ export function useAddTransaction() {
     onSettled: () => {
       console.log("Add query settled");
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY_TRANSACTIONS] });
-
-      navigate({ to: "/transactions", search: (prev) => prev });
     },
   });
 }

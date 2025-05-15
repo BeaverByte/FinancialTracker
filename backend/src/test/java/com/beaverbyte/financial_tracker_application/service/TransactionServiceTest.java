@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
@@ -27,7 +26,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
-import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoundException;
+import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
@@ -39,10 +38,13 @@ import net.datafaker.Faker;
 class TransactionServiceTest {
 	@Mock
 	private TransactionRepository transactionRepository;
+
 	@Mock
 	private TransactionMapper transactionMapper;
+
 	@InjectMocks
 	private TransactionService transactionService;
+
 	@Captor
 	ArgumentCaptor<Transaction> argumentCaptor;
 
@@ -75,15 +77,16 @@ class TransactionServiceTest {
 
 	@Test
 	void shouldAddTransaction() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction transaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
+		TransactionRequest transactionRequest = new TransactionRequest(null, null, null, null, null, null, null);
+
+		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
+
+		TransactionDTO transactionDTO = new TransactionDTO(0L, null, null, null, null, null, null);
 
 		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
 				.thenReturn(transaction);
 
 		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
-
-		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
 
 		Mockito.when(transactionMapper.transactionToTransactionDTO(transaction)).thenReturn(transactionDTO);
 
@@ -95,8 +98,8 @@ class TransactionServiceTest {
 
 	@Test
 	void shouldOverwriteIDWhenAddTransaction() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction transaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
+		TransactionRequest transactionRequest = new TransactionRequest(null, null, null, null, null, null, null);
+		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
 
 		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
 				.thenReturn(transaction);
@@ -110,19 +113,19 @@ class TransactionServiceTest {
 
 	@Test
 	void shouldUpdateTransaction() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction transaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
-		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
+		TransactionRequest transactionRequest = new TransactionRequest(null, null, null, null, null, null, null);
+		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
 
 		long requestedTransactionID = faker.number().randomNumber();
 
-		Mockito.when(transactionRepository.findById(requestedTransactionID)).thenReturn(Optional.of(transaction));
+		TransactionDTO transactionDTO = new TransactionDTO(requestedTransactionID, null, null, null, null, null, null);
 
-		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
+		Mockito.when(transactionRepository.findById(requestedTransactionID))
+				.thenReturn(Optional.of(transaction));
+		Mockito.when(transactionMapper.transactionRequestToTransaction(Mockito.any(TransactionRequest.class),
+				Mockito.any(Transaction.class)))
 				.thenReturn(transaction);
-
 		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
-
 		Mockito.when(transactionMapper.transactionToTransactionDTO(Mockito.any(Transaction.class)))
 				.thenReturn(transactionDTO);
 
@@ -134,21 +137,20 @@ class TransactionServiceTest {
 
 	@Test
 	void shouldUpdateTransactionIDToParamIDWhenUpdateTransaction() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction transaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
-		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(transaction);
+		TransactionRequest transactionRequest = new TransactionRequest(null, null, null, null, null, null, null);
+		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
 
 		long initialTransactionID = transaction.getId();
 		long requestedTransactionID = faker.number().randomNumber();
 
-		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
-				.thenReturn(transaction);
-
-		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
+		TransactionDTO transactionDTO = new TransactionDTO(requestedTransactionID, null, null, null, null, null, null);
 
 		Mockito.when(transactionRepository.findById(requestedTransactionID))
 				.thenReturn(Optional.of(transaction));
-
+		Mockito.when(transactionMapper.transactionRequestToTransaction(Mockito.any(TransactionRequest.class),
+				Mockito.any(Transaction.class)))
+				.thenReturn(transaction);
+		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
 		Mockito.when(transactionMapper.transactionToTransactionDTO(Mockito.any(Transaction.class)))
 				.thenReturn(transactionDTO);
 
@@ -162,61 +164,69 @@ class TransactionServiceTest {
 	void shouldErrorOnNonExistentIDWhenUpdateTransaction() {
 		TransactionRequest transactionRequest = createRandomTransactionRequest();
 
-		assertThrows(TransactionNotFoundException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> transactionService.update(transactionRequest, -1));
 	}
 
 	@Test
 	void shouldDeleteTransaction() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction mappedTransaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
+		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
 
-		long randomId = faker.random().nextLong();
-		Mockito.when(transactionRepository.findById(randomId)).thenReturn(Optional.of(mappedTransaction));
-		transactionService.deleteById(randomId);
-		verify(transactionRepository).deleteById(randomId);
+		long requestId = faker.random().nextLong();
+		Mockito.when(transactionRepository.findById(requestId)).thenReturn(Optional.of(transaction));
+		transactionService.deleteById(requestId);
+		verify(transactionRepository).deleteById(requestId);
 	}
 
 	@Test
 	void shouldErrorOnNonExistentIDWhenDeleteTransaction() {
-		assertThrows(TransactionNotFoundException.class,
+		assertThrows(EntityNotFoundException.class,
 				() -> transactionService.deleteById(-1));
 	}
 
 	@Test
 	void shouldGetAllTransactions() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction mappedTransaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
+		Transaction transaction1 = new Transaction(1, null, null, null, null, null, null);
+		Transaction transaction2 = new Transaction(2, null, null, null, null, null, null);
 
-		int page = 1;
-		int size = 5;
+		int requestedPage = 1;
+		int requestedSize = 5;
 
-		List<Transaction> transactions = List.of(mappedTransaction, mappedTransaction);
+		List<Transaction> transactions = List.of(transaction1, transaction2);
 
 		Page<Transaction> transactionPage = new PageImpl<>(transactions);
-		Pageable pageable = PageRequest.of(page - 1, size);
+		Pageable pageable = PageRequest.of(requestedPage - 1, requestedSize);
 
 		Mockito.when(transactionRepository.findAll(pageable)).thenReturn(transactionPage);
 
-		List<TransactionDTO> result = transactionService.findAll(page, size);
+		List<TransactionDTO> result = transactionService.findAll(requestedPage, requestedSize);
 
 		assertNotNull(result);
 	}
 
 	@Test
 	void shouldFindById() {
-		TransactionRequest transactionRequest = createRandomTransactionRequest();
-		Transaction mappedTransaction = TransactionMapper.INSTANCE.transactionRequestToTransaction(transactionRequest);
-		TransactionDTO transactionDTO = TransactionMapper.INSTANCE.transactionToTransactionDTO(mappedTransaction);
-
 		long id = faker.number().randomNumber();
 
-		Mockito.when(transactionRepository.findById(id)).thenReturn(Optional.of(mappedTransaction));
-		Mockito.when(transactionMapper.transactionToTransactionDTO(mappedTransaction)).thenReturn(transactionDTO);
+		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
+		transaction.setId(id);
 
-		TransactionDTO transaction = transactionService.findById(id);
+		TransactionDTO expectedDTO = new TransactionDTO(id, null, null, null, null, null, null);
 
-		assertNotNull(transaction);
+		Mockito.when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));
+		Mockito.when(transactionMapper.transactionToTransactionDTO(transaction)).thenReturn(expectedDTO);
+
+		TransactionDTO result = transactionService.findById(id);
+
+		assertNotNull(result);
+	}
+
+	@Test
+	void shouldErrorOnNonExistentIDWhenFindById() {
+		Long id = faker.number().randomNumber();
+
+		assertThrows(EntityNotFoundException.class,
+				() -> transactionService.findById(id));
 	}
 
 }

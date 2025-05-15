@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import AutoImport from "unplugin-auto-import/vite";
+import path from "path";
 
 // This has higher priority and will override vite.config.ts, anything from vite.config will be ignored
 export default defineConfig({
@@ -21,6 +22,11 @@ export default defineConfig({
       enabled: true,
       provider: "playwright",
       instances: [{ browser: "chromium" }],
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });

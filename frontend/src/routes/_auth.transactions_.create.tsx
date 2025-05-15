@@ -25,7 +25,10 @@ function AddTransactionForm() {
       console.log("Zod Error: " + result.error);
     }
 
-    transactions.mutate(transaction);
+    transactions.mutate(transaction, {
+      onSettled: () =>
+        navigate({ to: "/transactions", search: (prev) => prev }),
+    });
   };
 
   return (

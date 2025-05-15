@@ -11,9 +11,15 @@ import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
-import com.beaverbyte.financial_tracker_application.exception.TransactionNotFoundException;
+import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
+import com.beaverbyte.financial_tracker_application.model.Account;
+import com.beaverbyte.financial_tracker_application.model.Category;
+import com.beaverbyte.financial_tracker_application.model.Merchant;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
+import com.beaverbyte.financial_tracker_application.repository.AccountRepository;
+import com.beaverbyte.financial_tracker_application.repository.CategoryRepository;
+import com.beaverbyte.financial_tracker_application.repository.MerchantRepository;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
 
 /**
@@ -25,10 +31,18 @@ public class TransactionService {
 	private static final Logger log = LoggerFactory.getLogger(TransactionService.class);
 
 	private final TransactionRepository transactionRepository;
+	private final MerchantRepository merchantRepository;
+	private final AccountRepository accountRepository;
+	private final CategoryRepository categoryRepository;
 	private final TransactionMapper transactionMapper;
 
-	public TransactionService(TransactionRepository transactionRepository, TransactionMapper transactionMapper) {
+	public TransactionService(TransactionRepository transactionRepository, MerchantRepository merchantRepository,
+			AccountRepository accountRepository, CategoryRepository categoryRepository,
+			TransactionMapper transactionMapper) {
 		this.transactionRepository = transactionRepository;
+		this.merchantRepository = merchantRepository;
+		this.accountRepository = accountRepository;
+		this.categoryRepository = categoryRepository;
 		this.transactionMapper = transactionMapper;
 	}
 
@@ -66,12 +80,35 @@ public class TransactionService {
 
 	public TransactionDTO findById(long id) {
 		Transaction transaction = transactionRepository.findById(id).orElseThrow(
-				() -> new TransactionNotFoundException("Transaction does not exist with id " + id));
+				() -> new EntityNotFoundException("Transaction does not exist with id " + id));
 		return transactionMapper.transactionToTransactionDTO(transaction);
 	}
 
 	public TransactionDTO add(TransactionRequest transactionRequest) {
+
 		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
+
+		if (transactionRequest.category() != null) {
+			Category category = categoryRepository.findByName(transactionRequest.category())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Category not found: " + transactionRequest.category()));
+			transaction.setCategory(category);
+		}
+
+		if (transactionRequest.merchant() != null) {
+			Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
+					.orElseThrow(
+							() -> new EntityNotFoundException(
+									"Merchant not found: " + transactionRequest.merchant()));
+			transaction.setMerchant(merchant);
+		}
+
+		if (transactionRequest.account() != null) {
+			Account account = accountRepository.findByName(transactionRequest.account())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Account not found: " + transactionRequest.account()));
+			transaction.setAccount(account);
+		}
 
 		// Set id to 0 in case id is passed through JSON to force save of item instead
 		// update
@@ -87,14 +124,34 @@ public class TransactionService {
 	public TransactionDTO update(TransactionRequest transactionRequest, long id) {
 		log.info("update() called with ID: {}", id);
 
-		if (!transactionRepository.findById(id).isPresent()) {
-			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
+		Transaction transaction = transactionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Transaction does not exist with id " + id));
+
+		transactionMapper.transactionRequestToTransaction(transactionRequest, transaction);
+
+		if (transactionRequest.category() != null) {
+			Category category = categoryRepository.findByName(transactionRequest.category())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Category not found: " + transactionRequest.category()));
+			transaction.setCategory(category);
 		}
 
-		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
+		if (transactionRequest.merchant() != null) {
+			Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
+					.orElseThrow(
+							() -> new EntityNotFoundException(
+									"Merchant not found: " + transactionRequest.merchant()));
+			transaction.setMerchant(merchant);
+		}
+
+		if (transactionRequest.account() != null) {
+			Account account = accountRepository.findByName(transactionRequest.account())
+					.orElseThrow(() -> new EntityNotFoundException(
+							"Account not found: " + transactionRequest.account()));
+			transaction.setAccount(account);
+		}
 
 		// If id sent in body, set it to url ID to prevent incorrect update
-
 		log.info("Transaction id, {}, setting to {}", transaction.getId(), id);
 		transaction.setId(id);
 
@@ -106,7 +163,7 @@ public class TransactionService {
 
 	public void deleteById(long id) {
 		if (!transactionRepository.findById(id).isPresent()) {
-			throw new TransactionNotFoundException("Transaction does not exist with id " + id);
+			throw new EntityNotFoundException("Transaction does not exist with id " + id);
 		}
 
 		log.info("Transaction, {}, deleted from database with id of ", id);

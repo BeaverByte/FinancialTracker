@@ -84,9 +84,9 @@ public class GlobalExceptionHandler {
 				errors);
 	}
 
-	@ExceptionHandler(TransactionNotFoundException.class)
+	@ExceptionHandler(EntityNotFoundException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public CustomProblemDetail handleTransactionNotFoundException(TransactionNotFoundException exception,
+	public CustomProblemDetail handleTransactionNotFoundException(EntityNotFoundException exception,
 			WebRequest request) {
 		return new CustomProblemDetail(
 				HttpStatus.BAD_REQUEST.toString(),

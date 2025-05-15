@@ -18,16 +18,19 @@ public class Transaction {
 	private LocalDate date;
 
 	// Merchant name (like mcdonald's, Spotify, etc.)
-	@Column(name = "merchant")
-	private String merchant;
+	@ManyToOne
+	@JoinColumn(name = "merchant_id")
+	private Merchant merchant;
 
 	// Account (user generated)
-	@Column(name = "account")
-	private String account;
+	@ManyToOne
+	@JoinColumn(name = "account_id")
+	private Account account;
 
 	// Category (like Shopping, Income, Mortgage)
-	@Column(name = "category")
-	private String category;
+	@ManyToOne
+	@JoinColumn(name = "category_id")
+	private Category category;
 
 	// Amount (using Postgresql numeric(19,4))
 	// Most major currencies only require 2 decimal places, but some require 4
@@ -38,11 +41,8 @@ public class Transaction {
 	@Column(name = "note")
 	private String note;
 
-	public Transaction() {
-	}
-
-	public Transaction(long id, LocalDate date, String merchant, String account, String category, BigDecimal amount,
-			String note) {
+	public Transaction(long id, LocalDate date, Merchant merchant, Account account, Category category,
+			BigDecimal amount, String note) {
 		this.id = id;
 		this.date = date;
 		this.merchant = merchant;
@@ -50,6 +50,9 @@ public class Transaction {
 		this.category = category;
 		this.amount = amount;
 		this.note = note;
+	}
+
+	public Transaction() {
 	}
 
 	public long getId() {
@@ -68,27 +71,27 @@ public class Transaction {
 		this.date = date;
 	}
 
-	public String getMerchant() {
+	public Merchant getMerchant() {
 		return merchant;
 	}
 
-	public void setMerchant(String merchant) {
+	public void setMerchant(Merchant merchant) {
 		this.merchant = merchant;
 	}
 
-	public String getAccount() {
+	public Account getAccount() {
 		return account;
 	}
 
-	public void setAccount(String account) {
+	public void setAccount(Account account) {
 		this.account = account;
 	}
 
-	public String getCategory() {
+	public Category getCategory() {
 		return category;
 	}
 
-	public void setCategory(String category) {
+	public void setCategory(Category category) {
 		this.category = category;
 	}
 
