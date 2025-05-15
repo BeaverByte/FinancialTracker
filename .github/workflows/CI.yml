@@ -18,7 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    env:
+      JWT_COOKIE_NAME: ${{ secrets.JWT_COOKIE_NAME }}
+      JWT_REFRESH_COOKIE_NAME: ${{ secrets.JWT_REFRESH_COOKIE_NAME }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRATION_MS: ${{ secrets.JWT_EXPIRATION_MS }}
+      JWT_REFRESH_EXPIRATION_MS: ${{ secrets.JWT_REFRESH_EXPIRATION_MS }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
