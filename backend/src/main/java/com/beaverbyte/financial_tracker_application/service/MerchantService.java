@@ -4,11 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.beaverbyte.financial_tracker_application.dto.response.CategoryDTO;
 import com.beaverbyte.financial_tracker_application.dto.response.MerchantDTO;
-import com.beaverbyte.financial_tracker_application.mapper.CategoryMapper;
 import com.beaverbyte.financial_tracker_application.mapper.MerchantMapper;
-import com.beaverbyte.financial_tracker_application.repository.CategoryRepository;
 import com.beaverbyte.financial_tracker_application.repository.MerchantRepository;
 
 @Service
