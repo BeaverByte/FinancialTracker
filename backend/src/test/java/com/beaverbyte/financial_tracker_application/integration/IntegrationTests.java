@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
@@ -37,7 +36,6 @@ import com.beaverbyte.financial_tracker_application.repository.RoleRepository;
 import com.beaverbyte.financial_tracker_application.repository.UserRepository;
 import com.beaverbyte.financial_tracker_application.security.CustomUserDetailsService;
 import com.beaverbyte.financial_tracker_application.security.jwt.AuthenticationUtils;
-import com.beaverbyte.financial_tracker_application.security.jwt.JwtUtils;
 import com.beaverbyte.financial_tracker_application.service.RefreshTokenService;
 import com.beaverbyte.financial_tracker_application.service.RoleService;
 import com.beaverbyte.financial_tracker_application.utils.HttpTestUtils;
@@ -49,7 +47,7 @@ import io.restassured.response.Response;
 import jakarta.servlet.http.HttpServletResponse;
 import net.datafaker.Faker;
 
-@EntityScan(basePackages = "com.beaverbyte.financial_tracker_application.model")
+// @EntityScan(basePackages = "com.beaverbyte.financial_tracker_application.model")
 class IntegrationTests extends AbstractIntegrationTest {
 
 	@LocalServerPort
