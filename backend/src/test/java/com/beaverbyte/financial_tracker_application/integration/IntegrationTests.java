@@ -47,7 +47,6 @@ import io.restassured.response.Response;
 import jakarta.servlet.http.HttpServletResponse;
 import net.datafaker.Faker;
 
-// @EntityScan(basePackages = "com.beaverbyte.financial_tracker_application.model")
 class IntegrationTests extends AbstractIntegrationTest {
 
 	@LocalServerPort
