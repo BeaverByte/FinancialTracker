@@ -1,10 +1,10 @@
 package com.beaverbyte.financial_tracker_application.constants;
 
 public class ApiEndpoints {
-	public static final String BASE = "/api";
+	public static final String BASE_PATH = "/api";
 	public static final String FRONTEND_URL = "http://localhost:5173";
 
-	public static final String AUTH = BASE + "/auth";
+	public static final String AUTH = BASE_PATH + "/auth";
 	public static final String SIGN_IN = "/signin";
 	public static final String AUTH_SIGN_IN_URL = AUTH + SIGN_IN;
 
@@ -17,7 +17,7 @@ public class ApiEndpoints {
 	public static final String REFRESH_TOKEN = "/refreshtoken";
 	public static final String AUTH_REFRESH_TOKEN_URL = AUTH + REFRESH_TOKEN;
 
-	public static final String TEST = BASE + "/test";
+	public static final String TEST = BASE_PATH + "/test";
 	public static final String PUBLIC = "/all";
 	public static final String TEST_PUBLIC_URL = TEST + PUBLIC;
 
@@ -29,5 +29,7 @@ public class ApiEndpoints {
 
 	public static final String ADMIN = "/admin";
 	public static final String TEST_ADMIN_URL = TEST + ADMIN;
+
+	public static final String TRANSACTIONS_URL = BASE_PATH + "/transactions";
 
 }

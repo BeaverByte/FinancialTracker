@@ -1,11 +1,8 @@
 package com.beaverbyte.financial_tracker_application.service;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -44,25 +41,6 @@ public class TransactionService {
 		this.accountRepository = accountRepository;
 		this.categoryRepository = categoryRepository;
 		this.transactionMapper = transactionMapper;
-	}
-
-	public List<TransactionDTO> findAll(int page, int size) {
-		List<Transaction> transactions;
-
-		if (size == 0) {
-			transactions = transactionRepository.findAll();
-			return transactions.stream()
-					.map(transactionMapper::transactionToTransactionDTO)
-					.toList();
-		}
-
-		Pageable pageable = PageRequest.of(page - 1, size);
-		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
-		transactions = transactionPage.stream().toList();
-
-		return transactions.stream()
-				.map(transactionMapper::transactionToTransactionDTO)
-				.toList();
 	}
 
 	public Page<TransactionDTO> findByFilter(Pageable pageable) {

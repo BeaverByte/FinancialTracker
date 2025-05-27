@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
@@ -182,26 +176,6 @@ class TransactionServiceTest {
 	void shouldErrorOnNonExistentIDWhenDeleteTransaction() {
 		assertThrows(EntityNotFoundException.class,
 				() -> transactionService.deleteById(-1));
-	}
-
-	@Test
-	void shouldGetAllTransactions() {
-		Transaction transaction1 = new Transaction(1, null, null, null, null, null, null);
-		Transaction transaction2 = new Transaction(2, null, null, null, null, null, null);
-
-		int requestedPage = 1;
-		int requestedSize = 5;
-
-		List<Transaction> transactions = List.of(transaction1, transaction2);
-
-		Page<Transaction> transactionPage = new PageImpl<>(transactions);
-		Pageable pageable = PageRequest.of(requestedPage - 1, requestedSize);
-
-		Mockito.when(transactionRepository.findAll(pageable)).thenReturn(transactionPage);
-
-		List<TransactionDTO> result = transactionService.findAll(requestedPage, requestedSize);
-
-		assertNotNull(result);
 	}
 
 	@Test

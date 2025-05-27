@@ -47,7 +47,7 @@ import io.restassured.response.Response;
 import jakarta.servlet.http.HttpServletResponse;
 import net.datafaker.Faker;
 
-class IntegrationTests extends AbstractIntegrationTest {
+class UserIntegrationTest extends AbstractIntegrationTest {
 
 	@LocalServerPort
 	private Integer port;
