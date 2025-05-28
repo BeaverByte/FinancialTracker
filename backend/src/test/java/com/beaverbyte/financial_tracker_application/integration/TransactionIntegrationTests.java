@@ -55,9 +55,6 @@ class TransactionIntegrationTests extends AbstractIntegrationTest {
 	AuthenticationManager authenticationManager;
 
 	@Autowired
-	TestRestTemplate restTemplate;
-
-	@Autowired
 	UserRepository userRepository;
 
 	@Autowired

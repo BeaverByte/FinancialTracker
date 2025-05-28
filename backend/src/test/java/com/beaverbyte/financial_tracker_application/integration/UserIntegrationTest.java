@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,9 +53,6 @@ class UserIntegrationTest extends AbstractIntegrationTest {
 
 	@Autowired
 	AuthenticationManager authenticationManager;
-
-	@Autowired
-	TestRestTemplate restTemplate;
 
 	@Autowired
 	UserRepository userRepository;
@@ -117,7 +113,51 @@ class UserIntegrationTest extends AbstractIntegrationTest {
 	private Faker faker = new Faker();
 
 	@Test
-	void shouldAllowAuthorizedModeratorAccessToProtectedRoute() {
+	void shouldAllowAuthorizedUserAccessToProtectedRoute() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
+				RoleType.ROLE_USER);
+
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
+
+		Response response = HttpTestUtils.sendGETRequestWithHeaders(
+				ApiEndpoints.TEST_USER_URL,
+				Map.of("Cookie", sessionCookie));
+
+		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
+	}
+
+	@Test
+	void shouldNotAllowUnAuthorizedUserAccessToAdminRoute() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
+				RoleType.ROLE_USER);
+
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
+
+		Response response = HttpTestUtils.sendGETRequestWithHeaders(
+				ApiEndpoints.TEST_ADMIN_URL,
+				Map.of("Cookie", sessionCookie));
+
+		Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.statusCode());
+	}
+
+	@Test
+	void shouldAllowAuthorizedModeratorAccessToModeratorRoute() {
 		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
 				faker.internet().username(),
 				faker.internet().emailAddress(),
@@ -133,6 +173,50 @@ class UserIntegrationTest extends AbstractIntegrationTest {
 
 		Response response = HttpTestUtils.sendGETRequestWithHeaders(
 				ApiEndpoints.TEST_MOD_URL,
+				Map.of("Cookie", sessionCookie));
+
+		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
+	}
+
+	@Test
+	void shouldNotAllowUnAuthorizedModeratorAccessToAdminRoute() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
+				RoleType.ROLE_MODERATOR);
+
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
+
+		Response response = HttpTestUtils.sendGETRequestWithHeaders(
+				ApiEndpoints.TEST_ADMIN_URL,
+				Map.of("Cookie", sessionCookie));
+
+		Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), response.statusCode());
+	}
+
+	@Test
+	void shouldAllowAuthorizedAdminAccessToModeratorRoute() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
+				RoleType.ROLE_ADMIN);
+
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
+
+		Response response = HttpTestUtils.sendGETRequestWithHeaders(
+				ApiEndpoints.TEST_ADMIN_URL,
 				Map.of("Cookie", sessionCookie));
 
 		Assertions.assertEquals(HttpStatus.OK.value(), response.statusCode());
