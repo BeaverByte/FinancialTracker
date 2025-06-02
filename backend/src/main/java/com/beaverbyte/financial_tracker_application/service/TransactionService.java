@@ -1,9 +1,13 @@
 package com.beaverbyte.financial_tracker_application.service;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
@@ -47,13 +51,31 @@ public class TransactionService {
 		log.info("Initial pageable is {}", pageable);
 		log.info("Pageable sorts are {}", pageable.getSort());
 
-		Page<Transaction> requestedTransactions = transactionRepository.findAll(pageable);
+		Pageable parsedPageable = fixSorts(pageable);
+
+		Page<Transaction> requestedTransactions = transactionRepository.findAll(parsedPageable);
 		Page<TransactionDTO> transactions = requestedTransactions
 				.map(transactionMapper::transactionToTransactionDTO);
 
 		log.info("Page of TransactionsDTO are {}", transactions);
 
 		return transactions;
+	}
+
+	private static final Map<String, String> SORT_FIELDS = Map.of(
+			"merchant", "merchant.name",
+			"account", "account.name",
+			"category", "category.name");
+
+	private Pageable fixSorts(Pageable pageable) {
+		Sort fixedSort = Sort.by(
+				pageable.getSort().stream()
+						.map(order -> {
+							String mapped = SORT_FIELDS.getOrDefault(order.getProperty().toLowerCase(),
+									order.getProperty());
+							return new Sort.Order(order.getDirection(), mapped);
+						}).toList());
+		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), fixedSort);
 	}
 
 	public TransactionDTO findById(long id) {

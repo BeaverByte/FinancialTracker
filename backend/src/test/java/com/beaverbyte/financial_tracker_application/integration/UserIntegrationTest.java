@@ -254,6 +254,27 @@ class UserIntegrationTest extends AbstractIntegrationTest {
 	}
 
 	@Test
+	void shouldPreventUserRefreshTokenWhenMissingRefreshJWT() {
+		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
+				faker.internet().username(),
+				faker.internet().emailAddress(),
+				faker.internet().password(),
+				RoleType.ROLE_MODERATOR);
+		HttpTestUtils.signUp(signUpRequest, ApiEndpoints.AUTH_SIGN_UP_URL);
+
+		String sessionCookie = HttpTestUtils.signInAndGetSessionCookie(signUpRequest.getUsername(),
+				signUpRequest.getPassword(),
+				ApiEndpoints.AUTH_SIGN_IN_URL,
+				jwtCookieName);
+
+		Response refreshResponse = HttpTestUtils.sendPOSTRequestWithHeaders(
+				ApiEndpoints.AUTH_REFRESH_TOKEN_URL,
+				Map.of("Cookie", sessionCookie));
+
+		Assertions.assertEquals(403, refreshResponse.statusCode(), "Expecting Forbidden");
+	}
+
+	@Test
 	void shouldAllowUserSignOut() {
 		SignupRequest signUpRequest = HttpTestUtils.createSignupRequest(
 				faker.internet().username(),
