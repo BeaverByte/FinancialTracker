@@ -3,7 +3,6 @@ package com.beaverbyte.financial_tracker_application.integration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Metamodel;
 

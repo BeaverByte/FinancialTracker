@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.beaverbyte.financial_tracker_application.dto.response.CategoryDTO;
 import com.beaverbyte.financial_tracker_application.dto.response.MerchantDTO;
-import com.beaverbyte.financial_tracker_application.service.CategoryService;
 import com.beaverbyte.financial_tracker_application.service.MerchantService;
 
 import io.swagger.v3.oas.annotations.Operation;

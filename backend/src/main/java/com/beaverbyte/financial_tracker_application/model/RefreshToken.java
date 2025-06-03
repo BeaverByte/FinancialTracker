@@ -13,13 +13,13 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "refreshtoken")
+@Table(name = "refreshtokens")
 public class RefreshToken {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private User user;
 

@@ -38,7 +38,7 @@ public class JwtUtils {
 
 	public ResponseCookie generateJwtCookie(UserBase user) {
 		String jwt = generateTokenFromUsername(user.getUsername());
-		return generateCookie(cookieName, jwt, ApiEndpoints.BASE);
+		return generateCookie(cookieName, jwt, ApiEndpoints.BASE_PATH);
 	}
 
 	public ResponseCookie generateRefreshJwtCookie(String refreshTokenValue) {
@@ -54,7 +54,7 @@ public class JwtUtils {
 	}
 
 	public ResponseCookie getCleanJwtCookie() {
-		return ResponseCookie.from(cookieName).path(ApiEndpoints.BASE).build();
+		return ResponseCookie.from(cookieName).path(ApiEndpoints.BASE_PATH).build();
 	}
 
 	public ResponseCookie getCleanJwtRefreshCookie() {

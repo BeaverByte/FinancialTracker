@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.org.springdoc.springdoc.openapi.starter.webmvc.ui)
     implementation("org.webjars:webjars-locator-lite:1.0.1")
     implementation("net.datafaker:datafaker:2.4.2")
+    // implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
     // implementation("org.liquibase:liquibase-core:4.22.0")
     annotationProcessor(libs.org.mapstruct.mapstruct.processor)
     runtimeOnly(libs.org.springframework.boot.spring.boot.devtools)

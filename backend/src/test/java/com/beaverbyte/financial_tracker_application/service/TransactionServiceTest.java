@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,16 +19,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
 import com.beaverbyte.financial_tracker_application.dto.response.TransactionDTO;
 import com.beaverbyte.financial_tracker_application.exception.EntityNotFoundException;
 import com.beaverbyte.financial_tracker_application.mapper.TransactionMapper;
+import com.beaverbyte.financial_tracker_application.model.Account;
+import com.beaverbyte.financial_tracker_application.model.Category;
+import com.beaverbyte.financial_tracker_application.model.Merchant;
 import com.beaverbyte.financial_tracker_application.model.Transaction;
+import com.beaverbyte.financial_tracker_application.repository.AccountRepository;
+import com.beaverbyte.financial_tracker_application.repository.CategoryRepository;
+import com.beaverbyte.financial_tracker_application.repository.MerchantRepository;
 import com.beaverbyte.financial_tracker_application.repository.TransactionRepository;
 import com.beaverbyte.financial_tracker_application.utils.JpaTestUtils;
 
@@ -36,6 +37,16 @@ import net.datafaker.Faker;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
+
+	@Mock
+	private CategoryRepository categoryRepository;
+
+	@Mock
+	private MerchantRepository merchantRepository;
+
+	@Mock
+	private AccountRepository accountRepository;
+
 	@Mock
 	private TransactionRepository transactionRepository;
 
@@ -76,34 +87,130 @@ class TransactionServiceTest {
 	}
 
 	@Test
-	void shouldAddTransaction() {
-		TransactionRequest transactionRequest = new TransactionRequest(null, null, null, null, null, null, null);
+	void shouldErrorIfMissingFieldWhenAddTransaction() {
+		// Arrange
+		Category category = new Category(1L, "Test Category");
+		// Account account = new Account(1L, "Test Account");
+		Merchant merchant = new Merchant(1L, "Test Merchant");
+
+		TransactionRequest transactionRequest = new TransactionRequest(
+				null,
+				LocalDate.of(2025, 12, 15),
+				null,
+				category.getName(),
+				merchant.getName(),
+				new BigDecimal(100.00),
+				"Note");
 
 		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
 
-		TransactionDTO transactionDTO = new TransactionDTO(0L, null, null, null, null, null, null);
+		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest)).thenReturn(transaction);
 
-		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
-				.thenReturn(transaction);
+		assertThrows(EntityNotFoundException.class, () -> {
+			transactionService.add(transactionRequest);
+		});
+	}
 
+	@Test
+	void shouldAddTransactionWhenFieldsCorrect() {
+		// Arrange
+		Category category = new Category(1L, "Test Category");
+		Account account = new Account(1L, "Test Account");
+		Merchant merchant = new Merchant(1L, "Test Merchant");
+
+		TransactionRequest transactionRequest = new TransactionRequest(
+				null,
+				LocalDate.of(2025, 12, 15),
+				account.getName(),
+				category.getName(),
+				merchant.getName(),
+				new BigDecimal(100.00),
+				"Note");
+
+		Transaction transaction = new Transaction();
+
+		TransactionDTO expectedTransactionDTO = new TransactionDTO(1L,
+				LocalDate.of(2025, 12, 15),
+				merchant.getName(),
+				account.getName(),
+				category.getName(),
+				new BigDecimal(100.00),
+				"Note");
+
+		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest)).thenReturn(transaction);
+		Mockito.when(categoryRepository.findByName(Mockito.any())).thenReturn(Optional.of(category));
+		Mockito.when(accountRepository.findByName(Mockito.any())).thenReturn(Optional.of(account));
+		Mockito.when(merchantRepository.findByName(Mockito.any())).thenReturn(Optional.of(merchant));
 		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
+		Mockito.when(transactionMapper.transactionToTransactionDTO(transaction)).thenReturn(expectedTransactionDTO);
 
-		Mockito.when(transactionMapper.transactionToTransactionDTO(transaction)).thenReturn(transactionDTO);
-
+		// Act
 		TransactionDTO result = transactionService.add(transactionRequest);
 
 		assertNotNull(result);
-		assertEquals(result.account(), transactionRequest.account());
+		assertEquals(expectedTransactionDTO, result);
+	}
+
+	@Test
+	void shouldErrorOnNullishCategoryWhenAddTransaction() {
+		TransactionRequest request = new TransactionRequest(
+				null,
+				null,
+				"Test Account",
+				null,
+				"Test Merchant",
+				new BigDecimal("100.00"),
+				"Note");
+
+		Transaction transaction = new Transaction();
+		Mockito.when(transactionMapper.transactionRequestToTransaction(request)).thenReturn(transaction);
+
+		assertThrows(EntityNotFoundException.class, () -> {
+			transactionService.add(request);
+		});
+	}
+
+	@Test
+	void shouldErrorOnNullishAccountWhenAddTransaction() {
+		TransactionRequest request = new TransactionRequest(
+				null,
+				null,
+				null,
+				"Test Category",
+				"Test Merchant",
+				new BigDecimal("100.00"),
+				"Note");
+
+		Transaction transaction = new Transaction();
+		Mockito.when(transactionMapper.transactionRequestToTransaction(request)).thenReturn(transaction);
+
+		assertThrows(EntityNotFoundException.class, () -> {
+			transactionService.add(request);
+		});
 	}
 
 	@Test
 	void shouldOverwriteIDWhenAddTransaction() {
-		TransactionRequest transactionRequest = new TransactionRequest(null, null, null, null, null, null, null);
-		Transaction transaction = new Transaction(0, null, null, null, null, null, null);
+		// Arrange
+		Category category = new Category(1L, "Test Category");
+		Account account = new Account(1L, "Test Account");
+		Merchant merchant = new Merchant(1L, "Test Merchant");
 
-		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest))
-				.thenReturn(transaction);
+		TransactionRequest transactionRequest = new TransactionRequest(null,
+				null,
+				account.getName(),
+				category.getName(),
+				merchant.getName(),
+				null,
+				null);
+		Long transactionID = 7L;
+		Transaction transaction = new Transaction(transactionID, null, null, null, null, null, null);
 
+		Mockito.when(transactionMapper.transactionRequestToTransaction(transactionRequest)).thenReturn(transaction);
+		Mockito.when(categoryRepository.findByName(Mockito.any())).thenReturn(Optional.of(category));
+		Mockito.when(accountRepository.findByName(Mockito.any())).thenReturn(Optional.of(account));
+		Mockito.when(merchantRepository.findByName(Mockito.any())).thenReturn(Optional.of(merchant));
+		// Transaction ID should be set to 0 after validation
 		Mockito.when(transactionRepository.save(transaction)).thenReturn(transaction);
 
 		transactionService.add(transactionRequest);
@@ -182,26 +289,6 @@ class TransactionServiceTest {
 	void shouldErrorOnNonExistentIDWhenDeleteTransaction() {
 		assertThrows(EntityNotFoundException.class,
 				() -> transactionService.deleteById(-1));
-	}
-
-	@Test
-	void shouldGetAllTransactions() {
-		Transaction transaction1 = new Transaction(1, null, null, null, null, null, null);
-		Transaction transaction2 = new Transaction(2, null, null, null, null, null, null);
-
-		int requestedPage = 1;
-		int requestedSize = 5;
-
-		List<Transaction> transactions = List.of(transaction1, transaction2);
-
-		Page<Transaction> transactionPage = new PageImpl<>(transactions);
-		Pageable pageable = PageRequest.of(requestedPage - 1, requestedSize);
-
-		Mockito.when(transactionRepository.findAll(pageable)).thenReturn(transactionPage);
-
-		List<TransactionDTO> result = transactionService.findAll(requestedPage, requestedSize);
-
-		assertNotNull(result);
 	}
 
 	@Test

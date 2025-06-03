@@ -1,12 +1,13 @@
 package com.beaverbyte.financial_tracker_application.service;
 
-import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.beaverbyte.financial_tracker_application.dto.request.TransactionRequest;
@@ -46,36 +47,35 @@ public class TransactionService {
 		this.transactionMapper = transactionMapper;
 	}
 
-	public List<TransactionDTO> findAll(int page, int size) {
-		List<Transaction> transactions;
-
-		if (size == 0) {
-			transactions = transactionRepository.findAll();
-			return transactions.stream()
-					.map(transactionMapper::transactionToTransactionDTO)
-					.toList();
-		}
-
-		Pageable pageable = PageRequest.of(page - 1, size);
-		Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
-		transactions = transactionPage.stream().toList();
-
-		return transactions.stream()
-				.map(transactionMapper::transactionToTransactionDTO)
-				.toList();
-	}
-
 	public Page<TransactionDTO> findByFilter(Pageable pageable) {
 		log.info("Initial pageable is {}", pageable);
 		log.info("Pageable sorts are {}", pageable.getSort());
 
-		Page<Transaction> requestedTransactions = transactionRepository.findAll(pageable);
+		Pageable parsedPageable = fixSorts(pageable);
+
+		Page<Transaction> requestedTransactions = transactionRepository.findAll(parsedPageable);
 		Page<TransactionDTO> transactions = requestedTransactions
 				.map(transactionMapper::transactionToTransactionDTO);
 
 		log.info("Page of TransactionsDTO are {}", transactions);
 
 		return transactions;
+	}
+
+	private static final Map<String, String> SORT_FIELDS = Map.of(
+			"merchant", "merchant.name",
+			"account", "account.name",
+			"category", "category.name");
+
+	private Pageable fixSorts(Pageable pageable) {
+		Sort fixedSort = Sort.by(
+				pageable.getSort().stream()
+						.map(order -> {
+							String mapped = SORT_FIELDS.getOrDefault(order.getProperty().toLowerCase(),
+									order.getProperty());
+							return new Sort.Order(order.getDirection(), mapped);
+						}).toList());
+		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), fixedSort);
 	}
 
 	public TransactionDTO findById(long id) {
@@ -88,27 +88,21 @@ public class TransactionService {
 
 		Transaction transaction = transactionMapper.transactionRequestToTransaction(transactionRequest);
 
-		if (transactionRequest.category() != null) {
-			Category category = categoryRepository.findByName(transactionRequest.category())
-					.orElseThrow(() -> new EntityNotFoundException(
-							"Category not found: " + transactionRequest.category()));
-			transaction.setCategory(category);
-		}
+		Category category = categoryRepository.findByName(transactionRequest.category())
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Category not found: " + transactionRequest.category()));
+		transaction.setCategory(category);
 
-		if (transactionRequest.merchant() != null) {
-			Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
-					.orElseThrow(
-							() -> new EntityNotFoundException(
-									"Merchant not found: " + transactionRequest.merchant()));
-			transaction.setMerchant(merchant);
-		}
+		Merchant merchant = merchantRepository.findByName(transactionRequest.merchant())
+				.orElseThrow(
+						() -> new EntityNotFoundException(
+								"Merchant not found: " + transactionRequest.merchant()));
+		transaction.setMerchant(merchant);
 
-		if (transactionRequest.account() != null) {
-			Account account = accountRepository.findByName(transactionRequest.account())
-					.orElseThrow(() -> new EntityNotFoundException(
-							"Account not found: " + transactionRequest.account()));
-			transaction.setAccount(account);
-		}
+		Account account = accountRepository.findByName(transactionRequest.account())
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Account not found: " + transactionRequest.account()));
+		transaction.setAccount(account);
 
 		// Set id to 0 in case id is passed through JSON to force save of item instead
 		// update

@@ -42,7 +42,7 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: backend
 
-      - name: Build with Gradle Wrapper
+      - name: Build and Test with Gradle Wrapper
         run: ./gradlew build
         working-directory: backend
 
