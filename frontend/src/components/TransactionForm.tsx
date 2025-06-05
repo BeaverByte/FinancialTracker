@@ -67,6 +67,7 @@ function TransactionForm({
               <FormItem className="mb-4">
                 <FormLabel>{capitalizeFirstLetter(field.name)}</FormLabel>
                 <FormControl>
+                  {/* // Setup Input as Currency if key equals amount */}
                   {key === "amount" ? (
                     <CustomCurrencyInput
                       id="amount-input"
@@ -80,6 +81,7 @@ function TransactionForm({
                       step={1}
                     />
                   ) : (
+                    // Other Inputs are text
                     <Input type={inputTypes[key] ?? "text"} {...field} />
                   )}
                 </FormControl>

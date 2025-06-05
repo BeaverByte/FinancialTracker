@@ -15,6 +15,7 @@ function AddTransactionForm() {
   const transactions = useAddTransaction();
 
   const handleSave = (transaction: TransactionFormSchema) => {
+    // Transaction is validated
     const result = TransactionFormValidationSchema.safeParse(transaction);
 
     console.log(
@@ -25,6 +26,7 @@ function AddTransactionForm() {
       console.log("Zod Error: " + result.error);
     }
 
+    // Transaction added to cached transactions
     transactions.mutate(transaction, {
       onSettled: () =>
         navigate({ to: "/transactions", search: (prev) => prev }),
