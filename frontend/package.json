@@ -7,9 +7,9 @@
     "dev": "vite",
     "dev-test": "set VITE_ENABLE_MSW=true && vite --mode test",
     "dev-msw": "set VITE_ENABLE_MSW=true && vite --mode test",
-    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:backend": "cd ../backend && gradlew bootRun",
-    "testtttt": "vitest --ui --coverage",
+    "dev-all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev-backend": "cd ../backend && gradlew bootRun",
+    "test-ui": "vitest --ui --coverage",
     "test": "vitest --coverage",
     "coverage": "vitest --coverage.enabled=true --ui",
     "build": "tsc -b && vite build",
@@ -17,8 +17,7 @@
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:browserrr": "set VITE_ENABLE_MSW=true && vite --mode test && vitest --workspace=vitest.workspace.browser.ts",
-    "test:browser": "set VITE_ENABLE_MSW=true && vitest --ui --coverage"
+    "test-browser": "set VITE_ENABLE_MSW=true && vitest --ui --coverage"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
