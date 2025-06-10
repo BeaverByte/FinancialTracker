@@ -50,7 +50,7 @@ export const globalQueryClient = new QueryClient({
   }),
   mutationCache: new MutationCache({
     onError: (error, query) => {
-      const failureMessage = `Global Query Client caught error in MUTATION Query named "${query.queryKey}": 
+      const failureMessage = `Global Query Client caught error in MUTATION Query": 
       (${error})`;
 
       console.error(failureMessage, query);
