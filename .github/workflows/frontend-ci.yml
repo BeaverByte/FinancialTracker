@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend # Change if your frontend is in a different folder
+        working-directory: frontend
 
     steps:
       - name: Checkout code

@@ -72,7 +72,9 @@ export const getTransactions = async (): Promise<
 
 export class TransactionNotFoundError extends Error {}
 
-export const getTransactionById = async (id: string): Promise<Transaction> => {
+export const getTransactionById = async (
+  id: string | number
+): Promise<Transaction> => {
   const url = `${API_ROUTES.TRANSACTIONS.GET_TRANSACTIONS}/${id}`;
   const transaction = await fetchData<Transaction>(url, { method: "GET" });
   if (!transaction) {

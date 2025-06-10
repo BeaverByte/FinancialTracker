@@ -10,12 +10,11 @@ import {
 } from "../components/Table/TransactionsDataTable";
 
 // Hook to update params
-export function useFilters<
-  Type extends RouteIds<RegisteredRouter["routeTree"]>,
->(routeId: Type) {
+export function useFilters<T extends RouteIds<RegisteredRouter["routeTree"]>>(
+  routeId: T
+) {
   // Using getRouteApi for type safety of provided route
-  const routeApi = getRouteApi<Type>(routeId);
-
+  const routeApi = getRouteApi<T>(routeId);
   const navigate = useNavigate();
 
   // returns route's search query params
@@ -27,10 +26,13 @@ export function useFilters<
   // Params are updated unless Params are empty
   const setFilters = (partialFilters: Partial<typeof filters>) =>
     navigate({
+      // empty string needs passed in "to" property to avoid Type Errors with Router Filters
+      // See thread: https://github.com/TanStack/table/issues/5812#issuecomment-2511290620
+      to: "",
       search: (prev) => cleanEmptyParams({ ...prev, ...partialFilters }),
     });
 
-  const resetFilters = () => navigate({ search: {} });
+  const resetFilters = () => navigate({ to: "", search: {} });
 
   return { filters, setFilters, resetFilters };
 }
