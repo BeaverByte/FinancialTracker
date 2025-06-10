@@ -16,11 +16,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // resolve: {
-  //   conditions: ["browser", "node"],
-  // },
-
-  // optimizeDeps: {
-  //   include: ["@tanstack/react-query"],
-  // },
 });

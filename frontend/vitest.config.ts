@@ -14,6 +14,7 @@ export default defineConfig({
     name: "frontend tests",
     globals: true,
     environment: "jsdom",
+    reporters: ["html"],
     setupFiles: ["vitest-setup.ts"],
     coverage: {
       provider: "v8",
