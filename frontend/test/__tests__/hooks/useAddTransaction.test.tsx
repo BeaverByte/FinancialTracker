@@ -5,7 +5,7 @@ import { useAddTransaction } from "@/hooks/useAddTransaction";
 import { createTestQueryWrapper } from "../utility/TestQueryWrapper";
 
 describe("useAddTransaction", () => {
-  test("Should succeed to give response", async () => {
+  test("Should succeed with response", async () => {
     const { result } = renderHook(() => useAddTransaction(), {
       wrapper: createTestQueryWrapper(),
     });
