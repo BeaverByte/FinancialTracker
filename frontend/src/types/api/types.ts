@@ -6,5 +6,7 @@ export type PaginatedData<Type> = {
 };
 
 export type PaginationParams = PaginationState;
-export type SortParams = { sortBy: `${string}.${"asc" | "desc"}` };
+type SortDirection = "asc" | "desc";
+export type SortByString = `${string}.${SortDirection}`;
+export type SortParams = { sortBy: SortByString };
 export type Filters<T> = Partial<T & PaginationParams & SortParams>;

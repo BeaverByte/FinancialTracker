@@ -12,8 +12,6 @@ export const convertStateToSortByInURL = (
     return undefined;
   }
 
-  // Get first sort
-  // const sort = sorting[0];
   const sortParams = sorting
     .map((sort) => `${sort.id}.${sort.desc ? "desc" : "asc"}`)
     .join(",");
@@ -40,3 +38,12 @@ export const convertSortByInURLToState = (
     return { id, desc: desc === "desc" };
   });
 };
+
+export function isSortByPattern(
+  value: string | undefined
+): value is `${string}.asc` | `${string}.desc` {
+  return (
+    typeof value === "string" &&
+    (value.endsWith(".asc") || value.endsWith(".desc"))
+  );
+}
