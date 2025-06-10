@@ -10,6 +10,7 @@ import {
 import {
   convertSortByInURLToState,
   convertStateToSortByInURL,
+  isSortByPattern,
 } from "../components/Table/tableSortMapper";
 import { useMemo } from "react";
 import { getTransactionColumns } from "../components/Table/TransactionColumns";
@@ -66,11 +67,15 @@ function TransactionsPage() {
       typeof updaterOrValue === "function"
         ? updaterOrValue(sortingState)
         : updaterOrValue;
-    // Change to sorting will update Filter/URL Params
+
     const internalSortByParam = convertStateToSortByInURL(newSortingState);
     console.log(`Internal SortByParam is ${internalSortByParam}`);
-
-    return setFilters({ sortBy: internalSortByParam });
+    // Change to sorting will update Filter/URL Params
+    if (isSortByPattern(internalSortByParam)) {
+      return setFilters({ sortBy: internalSortByParam });
+    } else {
+      return setFilters({ sortBy: undefined });
+    }
   }
 
   function handlePaginationChange(pagination: Updater<PaginationState>) {

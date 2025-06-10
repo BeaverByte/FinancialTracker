@@ -11,7 +11,7 @@ export default defineConfig({
     }),
   ],
   test: {
-    name: "dumpyname",
+    name: "frontend tests",
     globals: true,
     environment: "jsdom",
     setupFiles: ["vitest-setup.ts"],
@@ -20,6 +20,7 @@ export default defineConfig({
     },
     browser: {
       enabled: true,
+      headless: true,
       provider: "playwright",
       instances: [{ browser: "chromium" }],
     },
